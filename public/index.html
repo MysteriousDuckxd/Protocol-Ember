@@ -400,7 +400,7 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
       <label>GRAPHICS QUALITY</label><div class="seg" id="sGfx"><button data-v="0">LOW</button><button data-v="1">MEDIUM</button><button data-v="2">HIGH</button></div>
       <label>RENDER RESOLUTION</label><div class="seg" id="sRs"><button data-v="auto">AUTO</button><button data-v="1">100%</button><button data-v="0.85">85%</button><button data-v="0.7">70%</button><button data-v="0.5">50%</button></div>
       <label>CROUCH KEY</label><div class="seg" id="sCrouch"><button data-v="both">CTRL + C</button><button data-v="c">C ONLY</button><button data-v="ctrl">CTRL ONLY</button></div>
-      <label>FULLSCREEN KEY LOCK</label><div class="seg" id="sFs"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
+      <label>FULLSCREEN + KEY LOCK (off = stay windowed)</label><div class="seg" id="sFs"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
       <label>TOUCH CONTROLS</label><div class="seg" id="sTouch"><button data-v="auto">AUTO</button><button data-v="on">ON</button><button data-v="off">OFF</button></div>
       <label>TOUCH LOOK SPEED</label><div><input type="range" id="sTsens" min="0.3" max="3" step="0.05"><span id="sTsensV"></span></div>
       <label>AIM ASSIST (TOUCH)</label><div class="seg" id="sAssist"><button data-v="0">OFF</button><button data-v="1">LIGHT</button></div>
@@ -503,8 +503,8 @@ function yawTo(dx,dz){return Math.atan2(-dx,-dz);}
 const V3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function hash(a,b){let h=(a*374761393+b*668265263)|0;h=(h^(h>>>13))*1274126177|0;return ((h^(h>>>16))>>>0)/4294967295;}
 
-const settings={sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',fs:1,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
-let firstRun=true;try{const sv=localStorage.getItem('pe2_settings');if(sv)firstRun=false;Object.assign(settings,JSON.parse(sv||'{}'));}catch(e){}
+const settings={sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',fs:0,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
+let firstRun=true;try{const sv=localStorage.getItem('pe2_settings');if(sv)firstRun=false;Object.assign(settings,JSON.parse(sv||'{}'));if(!localStorage.getItem('pe2_fsoff')){settings.fs=0;localStorage.setItem('pe2_fsoff','1');localStorage.setItem('pe2_settings',JSON.stringify(settings));}}catch(e){}
 const isTouchDevice=()=>(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||((navigator.maxTouchPoints||0)>1&&!(window.matchMedia&&matchMedia('(pointer: fine)').matches));
 if(firstRun&&isTouchDevice())settings.q=0;
 function saveSettings(){try{localStorage.setItem('pe2_settings',JSON.stringify(settings));}catch(e){}}
@@ -1991,7 +1991,7 @@ let locked=false,noLock=false;
 function lockKeys(){try{if(navigator.keyboard&&navigator.keyboard.lock&&document.fullscreenElement){const r=navigator.keyboard.lock();if(r&&r.catch)r.catch(()=>{});}}catch(e){}}
 function unlockKeys(){try{navigator.keyboard&&navigator.keyboard.unlock&&navigator.keyboard.unlock();}catch(e){}}
 function goFullscreen(){if(!settings.fs)return;try{if(document.fullscreenElement){lockKeys();return;}const el=document.documentElement;const r=el.requestFullscreen&&el.requestFullscreen({navigationUI:'hide'});if(r&&r.then)r.then(()=>{lockKeys();}).catch(()=>{});}catch(e){}}
-function lockPointer(){if(TOUCH.on||hackOpen)return;try{const r=cv.requestPointerLock&&cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{noLock=true;});}catch(e){noLock=true;}}
+function lockPointer(){if(TOUCH.on||hackOpen)return;if(state.mp&&state.phase==='lobby')return;try{const r=cv.requestPointerLock&&cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{noLock=true;});}catch(e){noLock=true;}}
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;if(locked)noLock=false;if(!locked&&state.running&&!buyOpen&&!hackOpen&&!state.paused&&!(state.mp&&state.phase==='lobby'))pause();});
 document.addEventListener('pointerlockerror',()=>{noLock=true;});
 function pause(){if(!state.running)return;$('quitBtn').textContent=state.mp?'LEAVE SERVER':'ABANDON MATCH';$('switchTeamBtn').classList.toggle('hidden',!state.mp);state.paused=true;unlockKeys();mouseDown=false;rmbDown=false;for(const k in keys)keys[k]=false;$('menu').classList.remove('hidden');showScreen('scrPause');}
@@ -2001,6 +2001,7 @@ document.addEventListener('mousemove',e=>{if(!state.running||state.paused||buyOp
   const k=.0022*settings.sens/z;player.yaw-=e.movementX*k;player.pitch-=e.movementY*k*(settings.inv?-1:1);player.pitch=clamp(player.pitch,-1.5,1.5);
   vm.swayX=clamp(vm.swayX-e.movementX*.00025,-.04,.04);vm.swayY=clamp(vm.swayY+e.movementY*.00025,-.04,.04);});
 cv.addEventListener('mousedown',e=>{initAudio();if(!state.running||state.paused)return;if(hackOpen){toggleHack();return;}
+  if(state.mp&&state.phase==='lobby')return;
   if(!locked&&!buyOpen){lockPointer();if(!noLock)return;}
   if(!player.alive){if(e.button===0){spectateIdx++;spectateT=0;}return;}
   if(e.button===0){mouseDown=true;firedThisPress=false;playerFire();}
