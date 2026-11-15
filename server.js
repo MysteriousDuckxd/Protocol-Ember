@@ -131,7 +131,7 @@ function makeRoom(o, persistent) {
     theme: ['day', 'dusk', 'overcast', 'night'].includes(o.theme) ? o.theme : 'day',
     max: Math.max(2, Math.min(12, o.max | 0 || 10)), bots: o.bots !== false,
     toWin: Math.max(2, Math.min(16, o.toWin | 0 || 8)), killLimit: Math.max(10, Math.min(150, o.killLimit | 0 || 40)),
-    persistent: !!persistent, players: new Map(), phase: 'warmup', timer: 0, round: 0, score: { T: 0, CT: 0 },
+    persistent: !!persistent, players: new Map(), phase: 'lobby', owner: null, cdAt: 0, forced: false, autoAt: 0, timer: 0, round: 0, score: { T: 0, CT: 0 },
     streak: { T: 0, CT: 0 }, bomb: { st: 'none', c: null, p: [0, 0, 0], tm: 0, df: null, dfs: 0 }, host: null, emptySince: Date.now(),
     m: MAPDATA[map], overT: 0,
   };
@@ -151,7 +151,7 @@ function meData(p) { return { money: p.money, inv: p.inv, nades: p.nades, ar: p.
 function newPlayer(o) {
   return { id: o.id, name: o.name, conn: o.conn || null, bot: !!o.bot, team: o.team, outfit: o.outfit || null, hp: 100, armor: 0, helmet: false, alive: false,
     money: 800, inv: freshInv(), nades: { he: 0, flash: 0 }, pos: [0, 0, 0], yaw: 0, pitch: 0, crouch: 0, w: 'glock', kills: 0, deaths: 0,
-    dmgWin: 0, dmgT: 0, respawnAt: 0, lastSeen: Date.now(), streak: 0 };
+    dmgWin: 0, dmgT: 0, respawnAt: 0, lastSeen: Date.now(), streak: 0, ready: false };
 }
 
 function spawnPoint(r, team, used) {
@@ -179,7 +179,7 @@ function balanceBots(r) {
       const name = 'BOT ' + (BOT_NAMES.find(n => !used.has('BOT ' + n)) || ('Unit' + nextId));
       const b = newPlayer({ id: newId('b'), name, bot: true, team: t });
       r.players.set(b.id, b); bots.push(b);
-      if (r.mode === 'tdm' || r.phase === 'warmup') { b.respawnAt = Date.now() + 1000; }
+      if (r.mode === 'tdm' && r.phase === 'live') { b.respawnAt = Date.now() + 1000; }
       bcast(r, { t: 'pj', p: pubP(b) });
     }
   }
@@ -194,9 +194,23 @@ function removePlayer(r, p, quiet) {
   if (r.bomb.c === p.id && r.bomb.st === 'carried') { r.bomb.st = 'dropped'; r.bomb.c = null; r.bomb.p = [p.pos[0], 0, p.pos[2]]; bcast(r, { t: 'b', ...r.bomb }); }
   if (r.bomb.df === p.id) r.bomb.df = null;
   bcast(r, { t: 'pl', i: p.id });
-  if (!quiet) { balanceBots(r); pickHost(r); checkRoundEnd(r); if (!humans(r).length) r.emptySince = Date.now(); }
+  if (!quiet) { balanceBots(r); pickHost(r); pickOwner(r); checkRoundEnd(r); if (!humans(r).length) { r.emptySince = Date.now(); if (r.phase !== 'lobby') { r.phase = 'lobby'; r.cdAt = 0; r.autoAt = 0; resetMatch(r); } } else if (r.phase !== 'lobby' && r.phase !== 'over' && !canStart(r)) toLobby(r); else sendLobby(r); }
 }
 
+// ----- lobby -----
+function lobbyState(r) {
+  const now = Date.now();
+  return { owner: r.owner, cd: r.cdAt ? Math.max(0, r.cdAt - now) : 0, auto: (!r.cdAt && r.autoAt) ? Math.max(0, r.autoAt - now) : 0, canStart: canStart(r),
+    players: [...r.players.values()].map(p => ({ i: p.id, n: p.name, tm: p.team, bot: p.bot, ready: !!p.ready })) };
+}
+function sendLobby(r) { if (r.phase === 'lobby') bcast(r, { t: 'lb', ...lobbyState(r) }); }
+function pickOwner(r) { if (!r.owner || !r.players.has(r.owner) || r.players.get(r.owner).bot) { const h = humans(r)[0]; r.owner = h ? h.id : null; } }
+function toLobby(r) {
+  r.phase = 'lobby'; r.timer = 0; r.cdAt = 0; r.forced = false; r.autoAt = r.persistent && humans(r).length ? Date.now() + 45000 : 0;
+  r.bomb = { st: 'none', c: null, p: [0, 0, 0], tm: 0, df: null, dfs: 0 };
+  for (const p of r.players.values()) { p.alive = false; p.ready = false; p.respawnAt = 0; }
+  bcast(r, { t: 'ph', ph: 'lobby', tm: 0 }); sendLobby(r);
+}
 // ----- match flow -----
 function setPhase(r, ph, tm) { r.phase = ph; r.timer = tm; bcast(r, { t: 'ph', ph, tm }); }
 function canStart(r) { return teamOf(r, 'T').length > 0 && teamOf(r, 'CT').length > 0; }
@@ -249,7 +263,7 @@ function killPlayer(r, v, att, w, head) {
   if (r.mode === 'tdm') {
     if (att && att !== v && att.team !== v.team) { r.score[att.team]++; bcast(r, { t: 'sc', sc: r.score }); if (r.score[att.team] >= r.killLimit) { r.phase = 'over'; r.timer = 10; bcast(r, { t: 'o', w: att.team, sc: r.score, tm: 10 }); } }
     v.respawnAt = Date.now() + 3000;
-  } else if (r.phase === 'warmup') v.respawnAt = Date.now() + 2000;
+  }
   checkRoundEnd(r);
 }
 function respawn(r, p) {
@@ -264,12 +278,15 @@ function tick(r) {
   if (!humans(r).length) return;
   r.timer = Math.max(0, r.timer - dt);
   // respawns (TDM / warmup)
-  if (r.mode === 'tdm' || r.phase === 'warmup') for (const p of r.players.values()) if (!p.alive && p.respawnAt && now >= p.respawnAt && r.phase !== 'over') respawn(r, p);
+  if (r.mode === 'tdm' && r.phase === 'live') for (const p of r.players.values()) if (!p.alive && p.respawnAt && now >= p.respawnAt) respawn(r, p);
   switch (r.phase) {
-    case 'warmup':
-      if (canStart(r)) { if (!r.warmT) r.warmT = now + 4000; else if (now >= r.warmT) { r.warmT = 0; resetMatch(r); startRound(r); } }
-      else r.warmT = 0;
+    case 'lobby': {
+      const hs = humans(r), allReady = hs.length > 0 && hs.every(p => p.ready), auto = r.autoAt && now >= r.autoAt;
+      if (!r.cdAt) { if ((allReady || auto) && canStart(r)) { r.cdAt = now + 5000; sendLobby(r); } }
+      else if (!canStart(r) || (!r.forced && !allReady && !auto)) { r.cdAt = 0; sendLobby(r); }
+      else if (now >= r.cdAt) { r.cdAt = 0; r.forced = false; r.autoAt = 0; for (const p of r.players.values()) p.ready = false; resetMatch(r); startRound(r); }
       break;
+    }
     case 'buy': if (r.timer <= 0) setPhase(r, 'live', ROUND_TIME); break;
     case 'live':
       if (r.mode === 'tdm') { if (r.timer <= 0) { const w = r.score.T >= r.score.CT ? 'T' : 'CT'; r.phase = 'over'; r.timer = 10; bcast(r, { t: 'o', w, sc: r.score, tm: 10 }); } }
@@ -283,8 +300,8 @@ function tick(r) {
         endRound(r, 'T', 'Target destroyed');
       }
       break;
-    case 'end': if (r.timer <= 0) { if (!canStart(r)) { setPhase(r, 'warmup', 0); break; } startRound(r); } break;
-    case 'over': if (r.timer <= 0) { resetMatch(r); if (canStart(r)) startRound(r); else setPhase(r, 'warmup', 0); } break;
+    case 'end': if (r.timer <= 0) { if (!canStart(r)) { toLobby(r); break; } startRound(r); } break;
+    case 'over': if (r.timer <= 0) { resetMatch(r); toLobby(r); } break;
   }
 }
 function snapshot(r) {
@@ -308,7 +325,7 @@ function handle(c, msg) {
     case 'pi': c.send({ t: 'po', c: m.c }); return;
     case 'create': {
       if (rooms.size >= MAX_ROOMS) { c.send({ t: 'err', msg: 'Server is full of rooms — join an existing one.' }); return; }
-      const nr = makeRoom(m); joinRoom(c, nr); return;
+      const nr = makeRoom(m); joinRoom(c, nr); if (c.player) { nr.owner = c.player.id; sendLobby(nr); } return;
     }
     case 'join': { const nr = rooms.get(m.room); if (!nr) { c.send({ t: 'err', msg: 'That server no longer exists.' }); return; } joinRoom(c, nr); return; }
     case 'leave': leaveRoom(c); return;
@@ -339,7 +356,7 @@ function handle(c, msg) {
       break;
     }
     case 'buy': {
-      const inBuy = r.mode === 'bomb' ? (r.phase === 'buy' || r.phase === 'warmup') : Date.now() < (p.buyUntil || 0);
+      const inBuy = r.mode === 'bomb' ? r.phase === 'buy' : (r.phase === 'live' && Date.now() < (p.buyUntil || 0));
       if (!inBuy || !p.alive) break;
       const it = m.item;
       if (W[it] && it !== 'knife' && it !== 'he') {
@@ -349,7 +366,6 @@ function handle(c, msg) {
       else if (it === 'helmet') { if (p.armor >= 100 && p.helmet) break; const cst = p.armor >= 100 ? 350 : 1000; if (p.money < cst) break; p.money -= cst; p.armor = 100; p.helmet = true; }
       else if (it === 'nhe' || it === 'nflash') { const k = it.slice(1), cst = k === 'he' ? 300 : 200, mx = k === 'he' ? 1 : 2; if (p.nades[k] >= mx || p.money < cst) break; p.money -= cst; p.nades[k]++; }
       else break;
-      if (r.phase === 'warmup' || r.mode === 'tdm') p.money = Math.max(p.money, r.mode === 'tdm' ? p.money : 800);
       c.send({ t: 'inv', ...meData(p) });
       bcast(r, { t: 'lo', i: p.id, w: p.inv[1] || p.inv[2] }, p);
       break;
@@ -386,11 +402,13 @@ function handle(c, msg) {
     }
     case 'team': {
       if (m.team !== 'T' && m.team !== 'CT' || p.team === m.team) break;
-      if (p.alive && !['warmup', 'buy'].includes(r.phase) && r.mode === 'bomb') killPlayer(r, p, null, 'switch', false);
-      p.team = m.team; bcast(r, { t: 'tm', i: p.id, tm: p.team }); balanceBots(r);
-      if (r.mode === 'tdm' || r.phase === 'warmup') p.respawnAt = Date.now() + 1500;
+      if (p.alive && !['lobby', 'buy'].includes(r.phase) && r.mode === 'bomb') killPlayer(r, p, null, 'switch', false);
+      p.team = m.team; bcast(r, { t: 'tm', i: p.id, tm: p.team }); balanceBots(r); sendLobby(r);
+      if (r.mode === 'tdm' && r.phase === 'live') p.respawnAt = Date.now() + 1500;
       break;
     }
+    case 'ready': if (r.phase === 'lobby') { p.ready = !!m.on; sendLobby(r); } break;
+    case 'start': pickOwner(r); if (r.phase === 'lobby' && r.owner === p.id && canStart(r)) { r.forced = true; r.cdAt = Date.now() + 5000; sendLobby(r); } break;
     case 'chat': { const txt = clean(m.msg, 120); if (txt) bcast(r, { t: 'chat', i: p.id, n: p.name, msg: txt, tm: p.team }); break; }
   }
 }
@@ -405,10 +423,12 @@ function joinRoom(c, r) {
   let base = p.name, n = 2; while ([...r.players.values()].some(q => q.name === p.name)) p.name = base + ' ' + (n++);
   r.players.set(p.id, p); c.player = p; c.room = r;
   bcast(r, { t: 'pj', p: pubP(p) }, p);
-  balanceBots(r); pickHost(r);
-  const spawnNow = r.mode === 'tdm' || r.phase === 'warmup';
+  balanceBots(r); pickHost(r); pickOwner(r);
+  if (r.phase === 'lobby' && r.persistent && !r.autoAt) r.autoAt = Date.now() + 45000;
+  const spawnNow = r.mode === 'tdm' && r.phase === 'live';
   c.send({ t: 'j', you: p.id, team: p.team, room: { id: r.id, name: r.name, map: r.map, theme: r.theme, mode: r.mode, toWin: r.toWin, killLimit: r.killLimit },
-    ps: [...r.players.values()].map(pubP), host: r.host, ph: r.phase, tm: r.timer, sc: r.score, bomb: r.bomb, round: r.round, me: meData(p) });
+    ps: [...r.players.values()].map(pubP), host: r.host, ph: r.phase, tm: r.timer, sc: r.score, bomb: r.bomb, round: r.round, me: meData(p), lobby: lobbyState(r) });
+  sendLobby(r);
   if (spawnNow) respawn(r, p);
   for (const b of r.players.values()) if (b.bot && !b.alive && spawnNow) b.respawnAt = Date.now() + 500;
   console.log(`[join] ${p.name} -> ${r.name} (${humans(r).length} players)`);
