@@ -1,0 +1,462 @@
+// =====================================================================
+//  PROTOCOL: EMBER — dedicated game server
+//  Zero dependencies: plain Node.js (v18+). Serves the game page and
+//  runs online rooms over WebSockets.
+//    node server.js            → http://localhost:8080
+// =====================================================================
+'use strict';
+const http = require('http');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+const PORT = process.env.PORT || 8080;
+const MAX_ROOMS = 30;
+const TICK_MS = 100;          // game logic tick
+const SNAP_MS = 50;           // position snapshots (20/s)
+
+// ---------------------------------------------------------------------
+//  Map data (same layouts as the client)
+// ---------------------------------------------------------------------
+const MAPS = {"dustline": {"name": "Dustline", "rows": ["########################################", "#BBBBBBBBB#####dddddddddd#####AAAAAAAAA#", "#BBBcBBBBB#####dddddddddd..^..AAAAAAcAA#", "#BCBBBBBBB.^...dddddddddd..^..AAACAAAAA#", "#BBBBBoBBB.^...dddddddddd#####AAAAAAAoA#", "#BBBBBBBBB####.........o..####AcAAAAAAA#", "#BBBBCBBBB####...c........####AAoAAACAA#", "#BBcBBBBBB...#............####AAAAAAAAA#", "##########uuu#####....########..##....##", "##########uuu#####.o............##....##", "##########uuu#####.......c......##..C.##", "##########uuu#####....############....##", "##########uuu######^^#############....##", "##########uuu#####....^....#######.o..##", "##########uuu#####......c...^.........##", "##########uuu#####.c.......#######....##", "##########uuu#####....#############^^###", "###...........####....############....##", "###..c........####....#######.........##", "###......C....####....#######...c.....##", "###...........####....#######.........##", "###.....c......C......................##", "###.....................o.....c.......##", "#############..............#############", "#############aaaaaaaaaaaaaa#############", "#############aaaaaaaaaaaCaa#############", "#############aacaaaaaaaaaaa#############", "#############aaaaaaaaaaaaaa#############", "#############aaaaaaaaaaaaaa#############", "########################################"]}, "foundry": {"name": "Warehouse", "rows": ["###################################", "###########ddddddddddddd###########", "###########ddddddddddddd###########", "###.............................###", "###..c......###.....###......c..###", "###.........###..C..###.........###", "###.....#####...........#####...###", "#..AAAAA#####.....c.....#####BBBBB#", "#..AAcAA.......................BcB#", "#..AAAAA......C.......C......BBBBB#", "#..AACAA#####.....o.....#####BBCBB#", "#..AAAAA#####...........#####BBBBB#", "###.........###.......###.......###", "###..c......###...C...###.....o.###", "###.............................###", "###########aaaaaaaaaaaaa###########", "###########aaaaaaaaaaaaa###########", "###################################"]}, "harbor": {"name": "Harbor", "rows": ["#####################################", "#dddd.......#############.......cc###", "#dddd.......#############........####", "#dddd..c....#############..C.....####", "#dddd............................####", "#dddd.......####.....####........####", "###.....C...####..o..####...######.##", "###.........####.....####...######.##", "#######.#######.......######.......##", "#AAAAAA.........C.................BB#", "#AAcAAA.............c.........BBBBBB#", "#AAAAAA...######.....######...BBBoBB#", "#AAACAA...######.....######...BBBBBB#", "#######...######.....######.......###", "###.......................C.......###", "###..c.......#####aaaa#####...o...###", "###..........#####aaaa#####.......###", "##################aaaa###############", "#####################################"]}};
+const S = 3;
+function prepMap(key) {
+  const src = MAPS[key].rows, H = src.length, W = Math.max(...src.map(r => r.length));
+  const grid = src.map((r, y) => r.padEnd(W, '#').split('').map((ch, x) => (y === 0 || x === 0 || y === H - 1 || x === W - 1) ? '#' : ch));
+  const spawns = { T: [], CT: [] };
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) { const ch = grid[r][c]; if (ch === 'a') spawns.T.push([c, r]); if (ch === 'd') spawns.CT.push([c, r]); }
+  const cen = l => { let x = 0, z = 0; l.forEach(([c, r]) => { x += c * S + S / 2; z += r * S + S / 2; }); return [x / l.length, z / l.length]; };
+  return { key, W, H, grid, spawns, spawnC: { T: cen(spawns.T), CT: cen(spawns.CT) } };
+}
+const MAPDATA = {}; for (const k in MAPS) MAPDATA[k] = prepMap(k);
+function cellChar(m, x, z) { const c = Math.floor(x / S), r = Math.floor(z / S); if (c < 0 || r < 0 || c >= m.W || r >= m.H) return '#'; return m.grid[r][c]; }
+
+// ---------------------------------------------------------------------
+//  Rules data (kept in sync with the client)
+// ---------------------------------------------------------------------
+const W = {
+  knife: { dmg: 180, cost: 0, slot: 3, pen: .85, rate: 2.2 },
+  glock: { dmg: 30, head: 4, pen: .47, rate: 6.5, cost: 0, slot: 2 },
+  mpistol: { dmg: 22, head: 4, pen: .5, rate: 15, cost: 500, slot: 2 },
+  deagle: { dmg: 63, head: 3.9, pen: .93, rate: 3.2, cost: 700, slot: 2 },
+  mp5: { dmg: 27, head: 4, pen: .62, rate: 13.3, cost: 1500, slot: 1 },
+  shotgun: { dmg: 20, head: 2.5, pen: .5, rate: 1.15, cost: 1200, slot: 1, pellets: 9 },
+  ak: { dmg: 36, head: 4, pen: .78, rate: 10, cost: 2700, slot: 1 },
+  sniper: { dmg: 115, head: 4, pen: .98, rate: .68, cost: 4750, slot: 1 },
+  he: { dmg: 100, pen: .57 },
+};
+const KILL_REWARD = { knife: 1500, shotgun: 900, mp5: 600, mpistol: 600 };
+const BUY_TIME = 15, ROUND_TIME = 115, BOMB_TIME = 40, END_TIME = 5, DEFUSE_TIME = 7;
+const BOT_NAMES = ['Ash', 'Grim', 'Shade', 'Brand', 'Cinder', 'Wraith', 'Soot', 'Hawk', 'Reyes', 'Kovac', 'Nash', 'Ortiz', 'Volk', 'Rook', 'Juno', 'Atlas'];
+const PATS = ['solid', 'woodland', 'digital', 'desert', 'urban', 'arctic', 'tiger', 'carbon'];
+
+const clean = (s, n) => String(s || '').replace(/[<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
+function cleanOutfit(o) {
+  const out = {}; if (!o || typeof o !== 'object') return null;
+  for (const side of ['ct', 't']) {
+    const src = o[side] || {}, d = {};
+    for (const k of ['top', 'pants', 'vest', 'head', 'gloves', 'boots']) d[k] = /^#[0-9a-f]{6}$/i.test(src[k]) ? src[k] : null;
+    for (const k of ['topPat', 'pantsPat']) d[k] = PATS.includes(src[k]) ? src[k] : 'solid';
+    if (Object.values(d).some(v => v === null)) return null;
+    out[side] = d;
+  }
+  return out;
+}
+const r1 = v => Math.round(v * 100) / 100;
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+// ---------------------------------------------------------------------
+//  Minimal WebSocket implementation (RFC 6455)
+// ---------------------------------------------------------------------
+class Conn {
+  constructor(sock) {
+    this.sock = sock; this.buf = Buffer.alloc(0); this.frag = null; this.closed = false;
+    this.msgCount = 0; this.msgWindow = Date.now();
+    sock.on('data', d => this.onData(d));
+    sock.on('close', () => this._closed());
+    sock.on('error', () => this._closed());
+  }
+  onData(d) {
+    this.buf = Buffer.concat([this.buf, d]);
+    while (this.buf.length >= 2) {
+      const b0 = this.buf[0], b1 = this.buf[1], fin = b0 & 0x80, op = b0 & 0x0f, masked = b1 & 0x80;
+      let len = b1 & 0x7f, off = 2;
+      if (len === 126) { if (this.buf.length < 4) return; len = this.buf.readUInt16BE(2); off = 4; }
+      else if (len === 127) { if (this.buf.length < 10) return; len = Number(this.buf.readBigUInt64BE(2)); off = 10; }
+      if (len > 64 * 1024) { this.close(); return; }
+      const mOff = off; if (masked) off += 4;
+      if (this.buf.length < off + len) return;
+      let payload = Buffer.from(this.buf.subarray(off, off + len));
+      if (masked) { const m = this.buf.subarray(mOff, mOff + 4); for (let i = 0; i < payload.length; i++) payload[i] ^= m[i & 3]; }
+      this.buf = this.buf.subarray(off + len);
+      if (op === 0x8) { this.close(); return; }
+      if (op === 0x9) { this.frame(0xA, payload); continue; }
+      if (op === 0xA) continue;
+      if (op === 0x1 || op === 0x2) { if (fin) this.deliver(payload); else this.frag = [payload]; }
+      else if (op === 0x0 && this.frag) { this.frag.push(payload); if (fin) { const p = Buffer.concat(this.frag); this.frag = null; this.deliver(p); } }
+    }
+  }
+  deliver(p) {
+    const now = Date.now(); if (now - this.msgWindow > 1000) { this.msgWindow = now; this.msgCount = 0; }
+    if (++this.msgCount > 120) return;           // flood protection
+    if (this.onmessage) { try { this.onmessage(p.toString('utf8')); } catch (e) { console.error('msg error', e); } }
+  }
+  frame(op, data) {
+    if (this.closed || this.sock.destroyed) return;
+    if (this.sock.writableLength > 1 << 20) return;  // slow client: drop
+    const len = data.length; let h;
+    if (len < 126) h = Buffer.from([0x80 | op, len]);
+    else if (len < 65536) { h = Buffer.alloc(4); h[0] = 0x80 | op; h[1] = 126; h.writeUInt16BE(len, 2); }
+    else { h = Buffer.alloc(10); h[0] = 0x80 | op; h[1] = 127; h.writeBigUInt64BE(BigInt(len), 2); }
+    this.sock.write(Buffer.concat([h, data]));
+  }
+  send(obj) { this.frame(0x1, Buffer.from(typeof obj === 'string' ? obj : JSON.stringify(obj))); }
+  close() { if (this.closed) return; try { this.frame(0x8, Buffer.alloc(0)); } catch (e) { } this.sock.end(); this._closed(); }
+  _closed() { if (this.closed) return; this.closed = true; if (this.onclose) this.onclose(); }
+}
+
+// ---------------------------------------------------------------------
+//  Rooms
+// ---------------------------------------------------------------------
+const rooms = new Map();
+let nextId = 1;
+const newId = p => p + (nextId++).toString(36);
+
+function makeRoom(o, persistent) {
+  const map = MAPS[o.map] ? o.map : 'dustline';
+  const mode = o.mode === 'tdm' ? 'tdm' : 'bomb';
+  const r = {
+    id: newId('r'), name: clean(o.name, 32) || 'Server', map, mode,
+    theme: ['day', 'dusk', 'overcast', 'night'].includes(o.theme) ? o.theme : 'day',
+    max: Math.max(2, Math.min(12, o.max | 0 || 10)), bots: o.bots !== false,
+    toWin: Math.max(2, Math.min(16, o.toWin | 0 || 8)), killLimit: Math.max(10, Math.min(150, o.killLimit | 0 || 40)),
+    persistent: !!persistent, players: new Map(), phase: 'warmup', timer: 0, round: 0, score: { T: 0, CT: 0 },
+    streak: { T: 0, CT: 0 }, bomb: { st: 'none', c: null, p: [0, 0, 0], tm: 0, df: null, dfs: 0 }, host: null, emptySince: Date.now(),
+    m: MAPDATA[map], overT: 0,
+  };
+  rooms.set(r.id, r); return r;
+}
+const humans = r => [...r.players.values()].filter(p => !p.bot);
+const teamOf = (r, t) => [...r.players.values()].filter(p => p.team === t);
+const freshInv = () => ({ 1: null, 2: 'glock' });
+
+function roomInfo(r) {
+  return { id: r.id, name: r.name, map: r.map, mapName: MAPS[r.map].name, mode: r.mode, theme: r.theme, n: humans(r).length, b: r.players.size - humans(r).length, max: r.max, ph: r.phase, sc: r.score, rd: r.round, persistent: r.persistent };
+}
+function bcast(r, msg, except) { const s = JSON.stringify(msg); for (const p of r.players.values()) if (p.conn && p !== except) p.conn.send(s); }
+function pubP(p) { return { i: p.id, n: p.name, tm: p.team, bot: p.bot, al: p.alive, hp: p.hp, x: r1(p.pos[0]), z: r1(p.pos[2]), yaw: r1(p.yaw), w: p.inv[1] || p.inv[2], out: p.outfit, k: p.kills, d: p.deaths }; }
+function meData(p) { return { money: p.money, inv: p.inv, nades: p.nades, ar: p.armor, hl: p.helmet }; }
+
+function newPlayer(o) {
+  return { id: o.id, name: o.name, conn: o.conn || null, bot: !!o.bot, team: o.team, outfit: o.outfit || null, hp: 100, armor: 0, helmet: false, alive: false,
+    money: 800, inv: freshInv(), nades: { he: 0, flash: 0 }, pos: [0, 0, 0], yaw: 0, pitch: 0, crouch: 0, w: 'glock', kills: 0, deaths: 0,
+    dmgWin: 0, dmgT: 0, respawnAt: 0, lastSeen: Date.now(), streak: 0 };
+}
+
+function spawnPoint(r, team, used) {
+  const list = r.m.spawns[team]; let cell;
+  for (let i = 0; i < 40; i++) { cell = pick(list); if (!used || !used.has(cell + '')) break; }
+  if (used) used.add(cell + '');
+  const x = cell[0] * S + S / 2 + rand(-.6, .6), z = cell[1] * S + S / 2 + rand(-.6, .6);
+  const o = r.m.spawnC[team === 'T' ? 'CT' : 'T'];
+  return { x, z, yaw: Math.atan2(-(o[0] - x), -(o[1] - z)) };
+}
+
+// keep teams filled with bots
+function balanceBots(r) {
+  const hs = humans(r);
+  if (!hs.length) { for (const p of [...r.players.values()]) if (p.bot) removePlayer(r, p, true); return; }
+  const target = r.bots ? r.max : 0;
+  const per = { T: Math.ceil(target / 2), CT: Math.floor(target / 2) };
+  for (const t of ['T', 'CT']) {
+    let team = teamOf(r, t), h = team.filter(p => !p.bot).length;
+    let want = Math.max(0, per[t] - h);
+    let bots = team.filter(p => p.bot);
+    while (bots.length > want) { removePlayer(r, bots.pop(), true); }
+    while (bots.length < want && r.players.size < Math.max(r.max, hs.length)) {
+      const used = new Set([...r.players.values()].map(p => p.name));
+      const name = 'BOT ' + (BOT_NAMES.find(n => !used.has('BOT ' + n)) || ('Unit' + nextId));
+      const b = newPlayer({ id: newId('b'), name, bot: true, team: t });
+      r.players.set(b.id, b); bots.push(b);
+      if (r.mode === 'tdm' || r.phase === 'warmup') { b.respawnAt = Date.now() + 1000; }
+      bcast(r, { t: 'pj', p: pubP(b) });
+    }
+  }
+}
+function pickHost(r) {
+  const hs = humans(r); const old = r.host;
+  if (!hs.length) r.host = null; else if (!r.host || !r.players.has(r.host) || r.players.get(r.host).bot) r.host = hs[0].id;
+  if (r.host !== old) bcast(r, { t: 'h', i: r.host });
+}
+function removePlayer(r, p, quiet) {
+  r.players.delete(p.id);
+  if (r.bomb.c === p.id && r.bomb.st === 'carried') { r.bomb.st = 'dropped'; r.bomb.c = null; r.bomb.p = [p.pos[0], 0, p.pos[2]]; bcast(r, { t: 'b', ...r.bomb }); }
+  if (r.bomb.df === p.id) r.bomb.df = null;
+  bcast(r, { t: 'pl', i: p.id });
+  if (!quiet) { balanceBots(r); pickHost(r); checkRoundEnd(r); if (!humans(r).length) r.emptySince = Date.now(); }
+}
+
+// ----- match flow -----
+function setPhase(r, ph, tm) { r.phase = ph; r.timer = tm; bcast(r, { t: 'ph', ph, tm }); }
+function canStart(r) { return teamOf(r, 'T').length > 0 && teamOf(r, 'CT').length > 0; }
+function resetMatch(r) {
+  r.round = 0; r.score = { T: 0, CT: 0 }; r.streak = { T: 0, CT: 0 };
+  for (const p of r.players.values()) { p.money = r.mode === 'tdm' ? 16000 : 800; p.inv = freshInv(); p.armor = 0; p.helmet = false; p.nades = { he: 0, flash: 0 }; p.kills = 0; p.deaths = 0; p.alive = false; }
+}
+function startRound(r) {
+  r.round++;
+  const used = { T: new Set(), CT: new Set() };
+  const ts = teamOf(r, 'T');
+  for (const p of r.players.values()) {
+    if (!p.alive) { p.inv = freshInv(); p.armor = 0; p.helmet = false; p.nades = { he: 0, flash: 0 }; }
+    p.alive = true; p.hp = 100; const sp = spawnPoint(r, p.team, used[p.team]); p.pos = [sp.x, 0, sp.z]; p.yaw = sp.yaw;
+  }
+  if (r.mode === 'bomb' && ts.length) { const c = pick(ts.filter(p => !p.bot).length && Math.random() < .5 ? ts.filter(p => !p.bot) : ts); r.bomb = { st: 'carried', c: c.id, p: [0, 0, 0], tm: BOMB_TIME, df: null, dfs: 0 }; }
+  else r.bomb = { st: 'none', c: null, p: [0, 0, 0], tm: 0, df: null, dfs: 0 };
+  r.phase = r.mode === 'tdm' ? 'live' : 'buy'; r.timer = r.mode === 'tdm' ? 600 : BUY_TIME;
+  const ps = [...r.players.values()].map(pubP);
+  for (const p of r.players.values()) if (p.conn) p.conn.send({ t: 'r', n: r.round, ph: r.phase, tm: r.timer, sc: r.score, ps, me: meData(p), bomb: r.bomb, mode: r.mode });
+  if (r.mode === 'tdm') for (const p of r.players.values()) p.buyUntil = Date.now() + 10000;
+}
+function endRound(r, winner, reason) {
+  if (r.phase === 'end' || r.phase === 'over') return;
+  r.score[winner]++;
+  for (const p of r.players.values()) {
+    if (p.team === winner) { p.money += 3250; }
+    else { p.money += 1400 + Math.min(4, r.streak[p.team]) * 500; }
+    p.money = Math.min(16000, p.money);
+  }
+  r.streak[winner] = 0; r.streak[winner === 'T' ? 'CT' : 'T']++;
+  r.bomb.df = null;
+  bcast(r, { t: 'e', w: winner, r: reason, sc: r.score });
+  if (r.score[winner] >= r.toWin) { r.phase = 'over'; r.timer = 10; bcast(r, { t: 'o', w: winner, sc: r.score, tm: 10 }); }
+  else setPhase(r, 'end', END_TIME);
+}
+function checkRoundEnd(r) {
+  if (r.mode !== 'bomb' || !['live', 'planted'].includes(r.phase)) return;
+  const tA = teamOf(r, 'T').some(p => p.alive), ctA = teamOf(r, 'CT').some(p => p.alive);
+  if (r.phase === 'live') { if (!tA) endRound(r, 'CT', 'Terrorists eliminated'); else if (!ctA) endRound(r, 'T', 'Soldiers eliminated'); }
+  else if (!ctA) endRound(r, 'T', 'Soldiers eliminated');
+}
+function killPlayer(r, v, att, w, head) {
+  if (!v.alive) return;
+  v.alive = false; v.hp = 0; v.deaths++;
+  if (att && att !== v && att.team !== v.team) { att.kills++; att.money = Math.min(16000, att.money + (KILL_REWARD[w] || 300)); }
+  bcast(r, { t: 'k', k: att ? att.id : null, v: v.id, w, h: !!head });
+  if (r.bomb.c === v.id && r.bomb.st === 'carried') { r.bomb.st = 'dropped'; r.bomb.c = null; r.bomb.p = [r1(v.pos[0]), 0, r1(v.pos[2])]; bcast(r, { t: 'b', ...r.bomb }); }
+  if (r.bomb.df === v.id) { r.bomb.df = null; bcast(r, { t: 'b', ...r.bomb }); }
+  if (r.mode === 'tdm') {
+    if (att && att !== v && att.team !== v.team) { r.score[att.team]++; bcast(r, { t: 'sc', sc: r.score }); if (r.score[att.team] >= r.killLimit) { r.phase = 'over'; r.timer = 10; bcast(r, { t: 'o', w: att.team, sc: r.score, tm: 10 }); } }
+    v.respawnAt = Date.now() + 3000;
+  } else if (r.phase === 'warmup') v.respawnAt = Date.now() + 2000;
+  checkRoundEnd(r);
+}
+function respawn(r, p) {
+  const sp = spawnPoint(r, p.team); p.alive = true; p.hp = 100; p.pos = [sp.x, 0, sp.z]; p.yaw = sp.yaw; p.respawnAt = 0;
+  if (r.mode === 'tdm') { p.money = 16000; p.buyUntil = Date.now() + 10000; }
+  const msg = { t: 'rs', i: p.id, x: r1(sp.x), z: r1(sp.z), yaw: r1(sp.yaw), w: p.inv[1] || p.inv[2] };
+  for (const q of r.players.values()) if (q.conn) q.conn.send(q === p ? { ...msg, me: meData(p) } : msg);
+}
+
+function tick(r) {
+  const now = Date.now(), dt = TICK_MS / 1000;
+  if (!humans(r).length) return;
+  r.timer = Math.max(0, r.timer - dt);
+  // respawns (TDM / warmup)
+  if (r.mode === 'tdm' || r.phase === 'warmup') for (const p of r.players.values()) if (!p.alive && p.respawnAt && now >= p.respawnAt && r.phase !== 'over') respawn(r, p);
+  switch (r.phase) {
+    case 'warmup':
+      if (canStart(r)) { if (!r.warmT) r.warmT = now + 4000; else if (now >= r.warmT) { r.warmT = 0; resetMatch(r); startRound(r); } }
+      else r.warmT = 0;
+      break;
+    case 'buy': if (r.timer <= 0) setPhase(r, 'live', ROUND_TIME); break;
+    case 'live':
+      if (r.mode === 'tdm') { if (r.timer <= 0) { const w = r.score.T >= r.score.CT ? 'T' : 'CT'; r.phase = 'over'; r.timer = 10; bcast(r, { t: 'o', w, sc: r.score, tm: 10 }); } }
+      else if (r.timer <= 0) endRound(r, 'CT', 'Time ran out — no plant');
+      break;
+    case 'planted':
+      r.bomb.tm = Math.max(0, r.bomb.tm - dt);
+      if (r.bomb.tm <= 0) {
+        r.bomb.st = 'exploded'; bcast(r, { t: 'b', ...r.bomb });
+        for (const p of r.players.values()) if (p.alive && Math.hypot(p.pos[0] - r.bomb.p[0], p.pos[2] - r.bomb.p[2]) < 16) killPlayer(r, p, null, 'bomb', false);
+        endRound(r, 'T', 'Target destroyed');
+      }
+      break;
+    case 'end': if (r.timer <= 0) { if (!canStart(r)) { setPhase(r, 'warmup', 0); break; } startRound(r); } break;
+    case 'over': if (r.timer <= 0) { resetMatch(r); if (canStart(r)) startRound(r); else setPhase(r, 'warmup', 0); } break;
+  }
+}
+function snapshot(r) {
+  if (!humans(r).length) return;
+  const l = []; for (const p of r.players.values()) l.push([p.id, r1(p.pos[0]), r1(p.pos[1]), r1(p.pos[2]), r1(p.yaw), r1(p.pitch), p.crouch, p.w]);
+  bcast(r, { t: 'S', l });
+}
+
+// ----- messages from a client -----
+function actor(r, p, as) { // who is this action for? (host may act for bots)
+  if (!as || as === p.id) return p;
+  const a = r.players.get(as); if (a && a.bot && r.host === p.id) return a; return null;
+}
+function handle(c, msg) {
+  let m; try { m = JSON.parse(msg); } catch (e) { return; }
+  if (!m || typeof m.t !== 'string') return;
+  const p = c.player, r = c.room;
+  switch (m.t) {
+    case 'hello': c.name = clean(m.name, 16) || 'Player'; c.outfit = cleanOutfit(m.outfit); c.send({ t: 'welcome', rooms: [...rooms.values()].map(roomInfo) }); return;
+    case 'list': c.send({ t: 'L', rooms: [...rooms.values()].map(roomInfo) }); return;
+    case 'pi': c.send({ t: 'po', c: m.c }); return;
+    case 'create': {
+      if (rooms.size >= MAX_ROOMS) { c.send({ t: 'err', msg: 'Server is full of rooms — join an existing one.' }); return; }
+      const nr = makeRoom(m); joinRoom(c, nr); return;
+    }
+    case 'join': { const nr = rooms.get(m.room); if (!nr) { c.send({ t: 'err', msg: 'That server no longer exists.' }); return; } joinRoom(c, nr); return; }
+    case 'leave': leaveRoom(c); return;
+  }
+  if (!p || !r) return;
+  p.lastSeen = Date.now();
+  switch (m.t) {
+    case 's': if (Array.isArray(m.p) && m.p.length === 3 && m.p.every(Number.isFinite)) { p.pos = m.p; p.yaw = +m.y || 0; p.pitch = +m.pi || 0; p.crouch = m.c ? 1 : 0; if (W[m.w]) p.w = m.w; } break;
+    case 'bs': if (r.host === p.id && Array.isArray(m.b)) for (const e of m.b) { const b = r.players.get(e[0]); if (b && b.bot && [e[1], e[2], e[3]].every(Number.isFinite)) { b.pos = [e[1], e[2], e[3]]; b.yaw = +e[4] || 0; b.pitch = +e[6] || 0; if (W[e[5]]) b.w = e[5]; } } break;
+    case 'bl': if (r.host === p.id && Array.isArray(m.b)) for (const e of m.b) { const b = r.players.get(e[0]); if (b && b.bot) { b.armor = Math.min(100, +e[1] || 0); b.helmet = !!e[2]; } } break;
+    case 'f': { const a = actor(r, p, m.as); if (a && a.alive) bcast(r, { t: 'f', i: a.id, w: m.w, a: m.a, b: m.b }, p); break; }
+    case 'hit': {
+      const a = actor(r, p, m.as), v = r.players.get(m.v); const w = W[m.w];
+      if (!a || !v || !w || !v.alive) break;
+      if (!a.alive && m.w !== 'he') break;
+      if (a.team === v.team && a !== v) break;
+      if (r.phase === 'buy' || r.phase === 'end' || r.phase === 'over') break;
+      if (m.w !== 'he' && Math.hypot(a.pos[0] - v.pos[0], a.pos[2] - v.pos[2]) > (m.w === 'knife' ? 6 : 170)) break;
+      const now = Date.now(); if (now - a.dmgT > 1000) { a.dmgT = now; a.dmgWin = 0; }
+      const maxShot = w.dmg * (w.head || 1) * (w.pellets || 1);
+      let d = Math.max(0, Math.min(+m.d || 0, maxShot));
+      a.dmgWin += d; if (m.w !== 'he' && a.dmgWin > maxShot * (w.rate || 2) * 1.6 + 200) break;   // too much damage per second
+      const head = !!m.h;
+      if (v.armor > 0 && (!head || v.helmet)) { const hpD = d * w.pen; v.armor = Math.max(0, v.armor - (d - hpD) * .5); d = hpD; }
+      v.hp -= d;
+      bcast(r, { t: 'd', v: v.id, hp: Math.max(0, Math.round(v.hp)), ar: Math.round(v.armor), a: a.id, h: head });
+      if (v.hp <= 0) killPlayer(r, v, a, m.w, head);
+      break;
+    }
+    case 'buy': {
+      const inBuy = r.mode === 'bomb' ? (r.phase === 'buy' || r.phase === 'warmup') : Date.now() < (p.buyUntil || 0);
+      if (!inBuy || !p.alive) break;
+      const it = m.item;
+      if (W[it] && it !== 'knife' && it !== 'he') {
+        const w = W[it]; if (p.inv[w.slot] === it) break;
+        if (p.money < w.cost) break; p.money -= w.cost; p.inv[w.slot] = it;
+      } else if (it === 'vest') { if (p.armor >= 100 || p.money < 650) break; p.money -= 650; p.armor = 100; }
+      else if (it === 'helmet') { if (p.armor >= 100 && p.helmet) break; const cst = p.armor >= 100 ? 350 : 1000; if (p.money < cst) break; p.money -= cst; p.armor = 100; p.helmet = true; }
+      else if (it === 'nhe' || it === 'nflash') { const k = it.slice(1), cst = k === 'he' ? 300 : 200, mx = k === 'he' ? 1 : 2; if (p.nades[k] >= mx || p.money < cst) break; p.money -= cst; p.nades[k]++; }
+      else break;
+      if (r.phase === 'warmup' || r.mode === 'tdm') p.money = Math.max(p.money, r.mode === 'tdm' ? p.money : 800);
+      c.send({ t: 'inv', ...meData(p) });
+      bcast(r, { t: 'lo', i: p.id, w: p.inv[1] || p.inv[2] }, p);
+      break;
+    }
+    case 'nade': {
+      const a = actor(r, p, m.as); if (!a || !a.alive || !['he', 'flash'].includes(m.k)) break;
+      if (!a.bot) { if (a.nades[m.k] <= 0) break; a.nades[m.k]--; }
+      bcast(r, { t: 'n', i: a.id, k: m.k, p: m.p, v: m.v }, p); break;
+    }
+    case 'pickup': {
+      const a = actor(r, p, m.as); if (!a || !a.alive || a.team !== 'T' || r.bomb.st !== 'dropped') break;
+      if (Math.hypot(a.pos[0] - r.bomb.p[0], a.pos[2] - r.bomb.p[2]) > 2.5) break;
+      r.bomb.st = 'carried'; r.bomb.c = a.id; bcast(r, { t: 'b', ...r.bomb }); break;
+    }
+    case 'plant': {
+      const a = actor(r, p, m.as); if (!a || !a.alive || r.phase !== 'live' || r.bomb.st !== 'carried' || r.bomb.c !== a.id) break;
+      const ch = cellChar(r.m, a.pos[0], a.pos[2]); if (ch !== 'A' && ch !== 'B') break;
+      r.bomb = { st: 'planted', c: null, p: [r1(a.pos[0]), r1(a.pos[1]), r1(a.pos[2])], tm: BOMB_TIME, df: null, dfs: 0, site: ch };
+      a.money = Math.min(16000, a.money + 300);
+      r.phase = 'planted'; r.timer = BOMB_TIME; bcast(r, { t: 'b', ...r.bomb, by: a.id }); bcast(r, { t: 'ph', ph: 'planted', tm: BOMB_TIME });
+      break;
+    }
+    case 'dfz': {
+      const a = actor(r, p, m.as); if (!a || r.phase !== 'planted') break;
+      if (m.on) { if (!a.alive || a.team !== 'CT' || Math.hypot(a.pos[0] - r.bomb.p[0], a.pos[2] - r.bomb.p[2]) > 3.2) break; if (r.bomb.df === a.id) { a.conn && a.conn.send({ t: 'b', ...r.bomb, dfe: (Date.now() - r.bomb.dfs) / 1000 }); break; } if (r.bomb.df && r.bomb.df !== a.id) break; r.bomb.df = a.id; r.bomb.dfs = Date.now(); }
+      else if (r.bomb.df === a.id) r.bomb.df = null;
+      bcast(r, { t: 'b', ...r.bomb, dfe: r.bomb.df ? (Date.now() - r.bomb.dfs) / 1000 : 0 }); break;
+    }
+    case 'defused': {
+      const a = actor(r, p, m.as); if (!a || !a.alive || r.phase !== 'planted' || r.bomb.df !== a.id) break;
+      if (Date.now() - r.bomb.dfs < (DEFUSE_TIME - .6) * 1000) break;
+      r.bomb.st = 'defused'; bcast(r, { t: 'b', ...r.bomb, by: a.id }); a.money = Math.min(16000, a.money + 300);
+      endRound(r, 'CT', 'Bomb defused'); break;
+    }
+    case 'team': {
+      if (m.team !== 'T' && m.team !== 'CT' || p.team === m.team) break;
+      if (p.alive && !['warmup', 'buy'].includes(r.phase) && r.mode === 'bomb') killPlayer(r, p, null, 'switch', false);
+      p.team = m.team; bcast(r, { t: 'tm', i: p.id, tm: p.team }); balanceBots(r);
+      if (r.mode === 'tdm' || r.phase === 'warmup') p.respawnAt = Date.now() + 1500;
+      break;
+    }
+    case 'chat': { const txt = clean(m.msg, 120); if (txt) bcast(r, { t: 'chat', i: p.id, n: p.name, msg: txt, tm: p.team }); break; }
+  }
+}
+function joinRoom(c, r) {
+  if (c.room) leaveRoom(c);
+  if (humans(r).length >= r.max) { c.send({ t: 'err', msg: 'That server is full.' }); return; }
+  const tc = humans(r).filter(p => p.team === 'T').length, cc = humans(r).filter(p => p.team === 'CT').length;
+  const team = tc <= cc ? 'T' : 'CT';
+  const p = newPlayer({ id: newId('p'), name: c.name || 'Player', conn: c, team, outfit: c.outfit });
+  if (r.mode === 'tdm') p.money = 16000;
+  // make the name unique in the room
+  let base = p.name, n = 2; while ([...r.players.values()].some(q => q.name === p.name)) p.name = base + ' ' + (n++);
+  r.players.set(p.id, p); c.player = p; c.room = r;
+  bcast(r, { t: 'pj', p: pubP(p) }, p);
+  balanceBots(r); pickHost(r);
+  const spawnNow = r.mode === 'tdm' || r.phase === 'warmup';
+  c.send({ t: 'j', you: p.id, team: p.team, room: { id: r.id, name: r.name, map: r.map, theme: r.theme, mode: r.mode, toWin: r.toWin, killLimit: r.killLimit },
+    ps: [...r.players.values()].map(pubP), host: r.host, ph: r.phase, tm: r.timer, sc: r.score, bomb: r.bomb, round: r.round, me: meData(p) });
+  if (spawnNow) respawn(r, p);
+  for (const b of r.players.values()) if (b.bot && !b.alive && spawnNow) b.respawnAt = Date.now() + 500;
+  console.log(`[join] ${p.name} -> ${r.name} (${humans(r).length} players)`);
+}
+function leaveRoom(c) {
+  const r = c.room, p = c.player; if (!r || !p) return;
+  c.room = null; c.player = null; removePlayer(r, p);
+  if (!r.persistent && !humans(r).length) { rooms.delete(r.id); }
+  console.log(`[leave] ${p.name} <- ${r.name}`);
+}
+
+// ---------------------------------------------------------------------
+//  HTTP + upgrade
+// ---------------------------------------------------------------------
+const PUBLIC = path.join(__dirname, 'public');
+const server = http.createServer((req, res) => {
+  const url = req.url.split('?')[0];
+  if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); res.end('ok'); return; }
+  if (url === '/rooms') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify([...rooms.values()].map(roomInfo))); return; }
+  const file = url === '/' ? 'index.html' : url.replace(/^\/+/, '');
+  const fp = path.join(PUBLIC, path.normalize(file).replace(/^(\.\.[\/\\])+/, ''));
+  if (!fp.startsWith(PUBLIC)) { res.writeHead(403); res.end(); return; }
+  fs.readFile(fp, (err, data) => {
+    if (err) { res.writeHead(404); res.end('not found'); return; }
+    const type = fp.endsWith('.html') ? 'text/html; charset=utf-8' : fp.endsWith('.js') ? 'text/javascript' : 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-cache' }); res.end(data);
+  });
+});
+server.on('upgrade', (req, sock) => {
+  const key = req.headers['sec-websocket-key'];
+  if (!key || String(req.headers.upgrade).toLowerCase() !== 'websocket') { sock.destroy(); return; }
+  const acc = crypto.createHash('sha1').update(key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64');
+  sock.write('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ' + acc + '\r\n\r\n');
+  sock.setNoDelay(true);
+  const c = new Conn(sock);
+  c.onmessage = msg => handle(c, msg);
+  c.onclose = () => leaveRoom(c);
+});
+
+// default public servers that are always listed
+makeRoom({ name: 'Dustline · Bomb Defusal 24/7', map: 'dustline', mode: 'bomb', theme: 'day', max: 10, bots: true, toWin: 8 }, true);
+makeRoom({ name: 'Warehouse · Team Deathmatch', map: 'foundry', mode: 'tdm', theme: 'dusk', max: 10, bots: true, killLimit: 40 }, true);
+makeRoom({ name: 'Harbor Nights · Bomb Defusal', map: 'harbor', mode: 'bomb', theme: 'night', max: 8, bots: true, toWin: 6 }, true);
+
+setInterval(() => { for (const r of rooms.values()) tick(r); }, TICK_MS);
+setInterval(() => { for (const r of rooms.values()) snapshot(r); }, SNAP_MS);
+setInterval(() => { // keep-alive pings + cleanup of empty custom rooms
+  for (const r of [...rooms.values()]) if (!r.persistent && !humans(r).length && Date.now() - r.emptySince > 30000) rooms.delete(r.id);
+}, 10000);
+
+server.listen(PORT, () => console.log(`PROTOCOL: EMBER server running on port ${PORT}`));
