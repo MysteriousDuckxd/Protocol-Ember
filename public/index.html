@@ -400,6 +400,7 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
       <label>GRAPHICS QUALITY</label><div class="seg" id="sGfx"><button data-v="0">LOW</button><button data-v="1">MEDIUM</button><button data-v="2">HIGH</button></div>
       <label>RENDER RESOLUTION</label><div class="seg" id="sRs"><button data-v="auto">AUTO</button><button data-v="1">100%</button><button data-v="0.85">85%</button><button data-v="0.7">70%</button><button data-v="0.5">50%</button></div>
       <label>CROUCH KEY</label><div class="seg" id="sCrouch"><button data-v="both">CTRL + C</button><button data-v="c">C ONLY</button><button data-v="ctrl">CTRL ONLY</button></div>
+      <label>ANNOUNCER VOICE LINES</label><div class="seg" id="sVoice"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
       <label>FULLSCREEN + KEY LOCK (off = stay windowed)</label><div class="seg" id="sFs"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
       <label>TOUCH CONTROLS</label><div class="seg" id="sTouch"><button data-v="auto">AUTO</button><button data-v="on">ON</button><button data-v="off">OFF</button></div>
       <label>TOUCH LOOK SPEED</label><div><input type="range" id="sTsens" min="0.3" max="3" step="0.05"><span id="sTsensV"></span></div>
@@ -503,7 +504,7 @@ function yawTo(dx,dz){return Math.atan2(-dx,-dz);}
 const V3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function hash(a,b){let h=(a*374761393+b*668265263)|0;h=(h^(h>>>13))*1274126177|0;return ((h^(h>>>16))>>>0)/4294967295;}
 
-const settings={sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',fs:0,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
+const settings={sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',voice:1,fs:0,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
 let firstRun=true;try{const sv=localStorage.getItem('pe2_settings');if(sv)firstRun=false;Object.assign(settings,JSON.parse(sv||'{}'));if(!localStorage.getItem('pe2_fsoff')){settings.fs=0;localStorage.setItem('pe2_fsoff','1');localStorage.setItem('pe2_settings',JSON.stringify(settings));}}catch(e){}
 const isTouchDevice=()=>(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||((navigator.maxTouchPoints||0)>1&&!(window.matchMedia&&matchMedia('(pointer: fine)').matches));
 if(firstRun&&isTouchDevice())settings.q=0;
@@ -1035,12 +1036,12 @@ const sfx={
   flash(pos){const sp=spatial(pos);sNoise({dur:.35,vol:Math.max(.15,sp.vol),f:5000,fEnd:600,pan:sp.pan});},
   ring(dur){sTone({f:3100,dur:Math.min(4,dur),vol:.07,type:'sine'});},
   beep(pos){const sp=spatial(pos);sTone({f:1650,dur:.08,vol:Math.max(.08,.35*sp.vol),type:'square',pan:sp.pan});},
-  plant(){sTone({f:400,fEnd:900,dur:.4,vol:.25,type:'sawtooth'});},
-  defused(){[600,800,1000].forEach((f,i)=>sTone({f,dur:.2,vol:.2,type:'triangle',delay:i*.1}));},
+  plant(){say('The bomb has been planted.');sTone({f:400,fEnd:900,dur:.4,vol:.25,type:'sawtooth'});},
+  defused(){say('The bomb has been defused.');[600,800,1000].forEach((f,i)=>sTone({f,dur:.2,vol:.2,type:'triangle',delay:i*.1}));},
   rocket(pos){const sp=spatial(pos);const v=Math.min(1.6,Math.max(.5,sp.vol*1.9));sNoise({dur:2,vol:v,f:2600,fEnd:55,pan:sp.pan});sNoise({dur:.18,vol:v*.9,f:4200,q:.6,type:'bandpass',pan:sp.pan});sTone({f:58,fEnd:16,dur:1.6,vol:Math.min(1.5,v),pan:sp.pan});sTone({f:110,fEnd:30,dur:.6,vol:v*.5,type:'triangle',pan:sp.pan});sNoise({dur:1.4,vol:v*.35,f:700,fEnd:70,pan:-sp.pan*.5,delay:.32});sNoise({dur:1.2,vol:v*.18,f:500,fEnd:60,pan:sp.pan*.5,delay:.7});},
   boom(){sNoise({dur:2.4,vol:1,f:900,fEnd:50});sTone({f:60,fEnd:20,dur:1.8,vol:.8});},
-  win(){[523,659,784,1046].forEach((f,i)=>sTone({f,dur:.35,vol:.15,type:'triangle',delay:i*.11}));},
-  lose(){[392,330,262].forEach((f,i)=>sTone({f,dur:.4,vol:.15,type:'sawtooth',delay:i*.15}));},
+  win(){say('Round won.',{prio:1});[523,659,784,1046].forEach((f,i)=>sTone({f,dur:.35,vol:.15,type:'triangle',delay:i*.11}));},
+  lose(){say('Round lost.',{prio:1});[392,330,262].forEach((f,i)=>sTone({f,dur:.4,vol:.15,type:'sawtooth',delay:i*.15}));},
   radio(){sNoise({dur:.06,vol:.1,f:3000,type:'bandpass',q:3});},
 };
 
@@ -1560,6 +1561,8 @@ function damage(v,dmg,att,wid,head,fromPos,pen=.5,quiet){
 function kill(v,att,wid,head){
   if(v.jailed)jailEnd(v,att);
   if(att&&att!==v&&att.team!==v.team&&wid!=='nuke')att.ks=(att.ks|0)+1;v.ks=0;
+  if(att===player&&v!==player&&att.team!==v.team){player.mk=T-(player.mkT||-9)<4?(player.mk|0)+1:1;player.mkT=T;const ml={2:'Double kill!',3:'Triple kill!',4:'Quad kill!',5:'Rampage!'}[Math.min(5,player.mk)];if(ml&&wid!=='nuke')say(ml,{rate:1.05});
+    if(state.cfg&&state.cfg.chaos&&(player.ks|0)===NUKE_KILLS)setTimeout(()=>say('Tactical nuke ready. Press N.',{prio:1}),700);}
   v.alive=false;v.hp=0;v.deaths++;v.planting=0;v.deadT=0;
   if(att&&att!==v&&att.team!==v.team){att.kills++;att.credits=Math.min(16000,att.credits+(wid==='knife'?1500:wid==='shotgun'?900:wid==='mp5'||wid==='mpistol'?600:300));if(head)att.hsK++;}
   if(att&&att.isPlayer&&att!==v){state.stats.kills++;if(head)state.stats.hs++;if(att.team!==v.team)state.coinsEarned+=15+(head?5:0);}
@@ -2065,12 +2068,12 @@ document.querySelectorAll('#scrQuick .seg').forEach(seg=>seg.addEventListener('c
 $('quickStart').onclick=()=>{const n=+quick.size,es=quick.side==='atk'?'def':'atk';
   setupMatch({map:quick.map,theme:quick.theme,side:quick.side,retake:quick.mode==='retake',chaos:quick.mode==='chaos',killLimit:({3:20,5:30,8:45,13:70})[quick.toWin]||30,allies:ALLY_NAMES[quick.side].slice(0,n-1),allyDiff:quick.diff==='hard'?'hard':'normal',enemies:n,enemyNames:ENEMY_NAMES[es].slice().sort(()=>Math.random()-.5),diff:quick.diff,toWin:+quick.toWin,credits:quick.mode==='chaos'?10000:quick.mode==='retake'?3500:800,swap:quick.mode!=='chaos'&&quick.swap==='1'&&+quick.toWin>2});};
 function syncSettings(){$('sTsens').value=settings.tsens;$('sTsensV').textContent=' '+(+settings.tsens).toFixed(2);$('sSens').value=settings.sens;$('sSensV').textContent=' '+(+settings.sens).toFixed(2);$('sFov').value=settings.fov;$('sFovV').textContent=' '+settings.fov+'°';$('sVol').value=settings.vol;$('sVolV').textContent=' '+Math.round(settings.vol*100)+'%';
-  [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number]].forEach(([id,k,f])=>document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',f(b.dataset.v)===settings[k])));}
+  [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sVoice','voice',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number]].forEach(([id,k,f])=>document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',f(b.dataset.v)===settings[k])));}
 $('sTsens').oninput=e=>{settings.tsens=+e.target.value;saveSettings();syncSettings();};
 $('sSens').oninput=e=>{settings.sens=+e.target.value;saveSettings();syncSettings();};
 $('sFov').oninput=e=>{settings.fov=+e.target.value;camera.fov=settings.fov;camera.updateProjectionMatrix();saveSettings();syncSettings();};
 $('sVol').oninput=e=>{settings.vol=+e.target.value;if(AU.master)AU.master.gain.value=settings.vol;saveSettings();syncSettings();};
-for(const [id,k,f] of [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number]])$(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;settings[k]=f(b.dataset.v);if(k==='xhair')applyCrosshair();if(k==='q'||k==='rs'){resScale=1;applyPR();}if(k==='touch')applyTouchMode();if(k==='fps'&&!settings.fps)$('fpsBox').textContent='';saveSettings();syncSettings();};
+for(const [id,k,f] of [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sVoice','voice',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number]])$(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;settings[k]=f(b.dataset.v);if(k==='xhair')applyCrosshair();if(k==='q'||k==='rs'){resScale=1;applyPR();}if(k==='touch')applyTouchMode();if(k==='fps'&&!settings.fps)$('fpsBox').textContent='';saveSettings();syncSettings();};
 // ----- profile & loadout -----
 function renderWho(){$('who').innerHTML=`OPERATOR <b>${profile.name.toUpperCase()}</b> · ◈ <b>${profile.coins}</b> COINS`;}
 let pSide='ct',prev=null;
@@ -2385,7 +2388,7 @@ function jailStart(a,name){if(JAIL.on&&JAIL.who===a)return;jailClear();
   JAIL.on=true;JAIL.pending=true;JAIL.tpAt=T+2.6;JAIL.who=a;JAIL.name=name||a.name;a.jailed=true;a.protectUntil=0;
   $('haName').textContent=JAIL.name;$('haSub').textContent=a===player?'YOU HAVE BEEN CAUGHT. ENJOY JAIL.':'SENDING THEM TO JAIL…';$('hackalert').classList.remove('hidden');
   if(a===player){hackOpen=false;$('hack').classList.add('hidden');closeBuy(true);for(const k in HACK)HACK[k]=0;}
-  jailSiren();radio('SYSTEM',`⚠ HACKER DETECTED: <b>${esc(JAIL.name)}</b> — everyone shoot them!`,true);}
+  jailSiren();say('Warning! Hacker detected in lobby. '+JAIL.name,{prio:1,rate:.9});radio('SYSTEM',`⚠ HACKER DETECTED: <b>${esc(JAIL.name)}</b> — everyone shoot them!`,true);}
 function jailSpot(){let best=null,bk=-1;
   for(let r=1;r<MAP.H-1;r++)for(let c=1;c<MAP.W-1;c++){if(!walkable(c,r)||cellChar(c,r)==='u')continue;let k=0;
     while(k<3){const n=k+1;let ok=true;for(let dr=-n;dr<=n&&ok;dr++)for(let dc=-n;dc<=n;dc++){if(Math.max(Math.abs(dr),Math.abs(dc))!==n)continue;if(!walkable(c+dc,r+dr)||cellChar(c+dc,r+dr)==='u'){ok=false;break;}}if(!ok)break;k++;}
@@ -2406,7 +2409,7 @@ function buildJail(c,name){const g=new THREE.Group();const metal=new THREE.MeshS
   for(let i=0;i<4;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(2.6,.65),sm);const ang=i*Math.PI/2;p.position.set(Math.sin(ang)*(H+.02),3.55,Math.cos(ang)*(H+.02));p.rotation.y=ang;g.add(p);}
   g.position.set(c.x,0,c.z);scene.add(g);return g;}
 function jailTeleport(){JAIL.pending=false;$('hackalert').classList.add('hidden');if(!JAIL.on||!JAIL.who||!JAIL.who.alive){jailClear();return;}
-  const J=jailSpot();JAIL.c=J.c;JAIL.ring=J.ring;JAIL.group=buildJail(J.c,JAIL.name);const who=JAIL.who;who.protectUntil=T+5;JAIL.immuneUntil=T+5;
+  const J=jailSpot();JAIL.c=J.c;JAIL.ring=J.ring;JAIL.group=buildJail(J.c,JAIL.name);const who=JAIL.who;who.protectUntil=T+5;JAIL.immuneUntil=T+5;JAIL.saidFire=false;scream(V3(J.c.x,1.6,J.c.z),1.6,who===player);
   JAIL.glow=new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,2.2,16,1,true),new THREE.MeshBasicMaterial({color:0xff1010,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));scene.add(JAIL.glow);
   if(ctrl(who)){who.pos.set(J.c.x,0,J.c.z);who.vel.set(0,0,0);}
   const others=agents.filter(a=>a.alive&&a!==who).sort((p,q)=>String(p.netId||p.name)<String(q.netId||q.name)?-1:1);const n=others.length,L=J.ring.length;
@@ -2414,7 +2417,7 @@ function jailTeleport(){JAIL.pending=false;$('hackalert').classList.add('hidden'
     a.pos.set(p.x,0,p.z);a.vel.set(0,0,0);a.yaw=Math.atan2(-(J.c.x-p.x),-(J.c.z-p.z));if(a.isPlayer){a.pitch=0;camYaw=a.yaw;}
     else{a.path=null;a.target=who;a.awareUntil=T+8;a.lastSeen=T;a.lastKnown&&a.lastKnown.copy(who.pos);a.reactT=.25;}});
   if(who===player){player.yaw=Math.atan2(0,1);}}
-function jailEnd(v,att){const nm=JAIL.name||v.name;v.jailed=false;JAIL.on=false;JAIL.pending=false;$('hackalert').classList.add('hidden');
+function jailEnd(v,att){const nm=JAIL.name||v.name;scream(V3(v.pos.x,1.6,v.pos.z),2.2,v===player,true);setTimeout(()=>say('Hacker eliminated.',{prio:1}),900);v.jailed=false;JAIL.on=false;JAIL.pending=false;$('hackalert').classList.add('hidden');
   radio('SYSTEM',`🔨 HACKER <b>${esc(nm)}</b> was executed${att&&att!==v?' by <b>'+esc(att.name)+'</b>':''}.`,true);const g=JAIL.group;JAIL.group=null;JAIL.who=null;
   if(g){scene.remove(g);if(JAIL.c){burst(V3(JAIL.c.x,1.5,JAIL.c.z),0xff4040,40,9,.8,4);burst(V3(JAIL.c.x,1.5,JAIL.c.z),0xcccccc,20,6,.6,2);sNoise({dur:.6,vol:.5,f:3000,fEnd:300});}}
   if(JAIL.glow){scene.remove(JAIL.glow);JAIL.glow=null;}JAIL.c=null;$('jailTimer').classList.add('hidden');$('jailVig').classList.add('hidden');}
@@ -2572,9 +2575,9 @@ function siren(len){if(!AU.ctx)return;const c=AU.ctx,t0=c.currentTime;const o=c.
   for(let i=0;i<n;i++){o.frequency.setValueAtTime(420,t0+i*.5);o.frequency.linearRampToValueAtTime(980,t0+i*.5+.25);o.frequency.linearRampToValueAtTime(420,t0+i*.5+.5);}
   g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(.25,t0+.05);g.gain.setValueAtTime(.25,t0+len-.2);g.gain.exponentialRampToValueAtTime(.0001,t0+len);o.connect(g);g.connect(AU.master);o.start(t0);o.stop(t0+len+.1);}
 function nukeStart(by,name){if(NUKE.on)return;NUKE.on=true;NUKE.at=T+5;NUKE.by=by;NUKE.team=by?by.team:null;NUKE.name=name||(by&&by.name)||'?';
-  $('nkName').textContent=NUKE.name;$('nkCount').textContent='5';$('nukewarn').classList.remove('hidden');siren(5);
+  $('nkName').textContent=NUKE.name;$('nkCount').textContent='5';$('nukewarn').classList.remove('hidden');siren(5);say('Tactical nuke incoming!',{prio:1,rate:.9,pitch:.5});NUKE.lastSaid=6;
   radio('SYSTEM',`☢ TACTICAL NUKE called in by <b>${esc(NUKE.name)}</b>!`,!by||by.team!==player.team);}
-function nukeTick(dt){if(NUKE.on){const left=NUKE.at-T;setT('nkCount',String(Math.max(0,Math.ceil(left))));if(left<=0)nukeBoom();}
+function nukeTick(dt){if(NUKE.on){const left=NUKE.at-T;{const n=Math.ceil(left);if(n<=3&&n>=1&&n<NUKE.lastSaid){NUKE.lastSaid=n;say(String(n),{rate:1.1});}}setT('nkCount',String(Math.max(0,Math.ceil(left))));if(left<=0)nukeBoom();}
   if(NUKE.fx){NUKE.fxT+=dt;const t=NUKE.fxT,k=1-Math.pow(1-Math.min(1,t/3.5),3);const [stem,cap,ring,mat]=NUKE.fx.userData.parts;
     stem.scale.set(1+k*.5,Math.max(.01,k*48),1+k*.5);stem.position.y=k*24;cap.position.y=k*52;cap.scale.set(4+k*18,3+k*10,4+k*18);ring.scale.setScalar(1+t*9);ring.material.opacity=Math.max(0,.8-t*.25);
     mat.opacity=t<4?.95:Math.max(0,.95-(t-4)/6);mat.color.setHex(t<1.5?0xfff4d0:t<4?0xff9a40:0xc06030);if(t>10){scene.remove(NUKE.fx);NUKE.fx=null;}}}
@@ -2589,8 +2592,29 @@ function nukeBoom(){NUKE.on=false;$('nukewarn').classList.add('hidden');const fl
 // ---------- jail extras: immunity + red glow ----------
 function jailTick(dt){if(!JAIL.who)return;const im=(JAIL.immuneUntil||0)-T;
   if(JAIL.glow){const w=JAIL.who;JAIL.glow.position.set(w.pos.x,w.pos.y+1.05*(w.scale||1),w.pos.z);JAIL.glow.material.opacity=(im>0?.55:.35)+Math.sin(T*9)*.15;JAIL.glow.visible=w.alive&&!(w===player);}
+  if(JAIL.c&&im<=0&&!JAIL.saidFire){JAIL.saidFire=true;say('Open fire!',{prio:1,rate:1.05});}
   const el=$('jailTimer');if(JAIL.c&&im>-1.5){el.classList.remove('hidden');el.textContent=im>0?(JAIL.who===player?'YOU ARE IMMUNE FOR ':'HACKER IMMUNE — ')+Math.ceil(im)+'s':(JAIL.who===player?'RUN… oh wait, you can\'t':'🔫 OPEN FIRE!');}else el.classList.add('hidden');
   $('jailVig').classList.toggle('hidden',!(JAIL.who===player&&JAIL.c&&player.alive));}
+// ---------- ANNOUNCER VOICE (browser speech) + SCREAMS ----------
+const VOX={v:null};
+function pickVoice(){try{const vs=speechSynthesis.getVoices();if(!vs.length)return;const en=vs.filter(v=>/^en/i.test(v.lang));
+  VOX.v=en.find(v=>/male|david|daniel|alex|fred|guy|george|ryan|mark|james/i.test(v.name)&&!/female/i.test(v.name))||en.find(v=>/en-(US|GB)/i.test(v.lang))||en[0]||vs[0];}catch(e){}}
+try{if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=pickVoice;pickVoice();}}catch(e){}
+function say(text,o={}){if(!settings.voice||settings.vol<=0||!('speechSynthesis' in window))return;try{if(o.prio)speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);if(!VOX.v)pickVoice();if(VOX.v)u.voice=VOX.v;u.pitch=o.pitch??.6;u.rate=o.rate??.95;u.volume=Math.min(1,settings.vol*1.5);speechSynthesis.speak(u);}catch(e){}}
+let screamNoise=null;
+function scream(pos,len=1.5,self=false,death=false){if(!AU.ctx)return;const c=AU.ctx,t=c.currentTime;const sp=self?{vol:1,pan:0}:spatial(pos);const vol=Math.max(.3,Math.min(1,sp.vol*1.4));
+  if(!screamNoise){screamNoise=c.createBuffer(1,c.sampleRate,c.sampleRate);const d=screamNoise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
+  const out=c.createGain();out.gain.setValueAtTime(.0001,t);out.gain.exponentialRampToValueAtTime(.55*vol,t+.07);out.gain.setValueAtTime(.55*vol,t+len*.7);out.gain.exponentialRampToValueAtTime(.0001,t+len);
+  const pan=c.createStereoPanner?c.createStereoPanner():null;if(pan){pan.pan.value=sp.pan||0;out.connect(pan);pan.connect(AU.master);}else out.connect(AU.master);
+  const base=death?340:280,peak=death?980:820;
+  for(const [mul,g0] of [[1,1],[1.006,.6]]){const o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(base*mul,t);o.frequency.exponentialRampToValueAtTime(peak*mul,t+.22);
+    o.frequency.setValueAtTime(peak*mul,t+.4);o.frequency.exponentialRampToValueAtTime((death?260:480)*mul,t+len);
+    const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=death?9:6.5;lg.gain.value=peak*.045;lfo.connect(lg);lg.connect(o.frequency);lfo.start(t);lfo.stop(t+len+.05);
+    const og=c.createGain();og.gain.value=g0;o.connect(og);
+    for(const [f,q,g] of [[850,5,1],[1300,7,.7],[2700,9,.35]]){const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=q;const fg=c.createGain();fg.gain.value=g*2.2;og.connect(bp);bp.connect(fg);fg.connect(out);}
+    o.start(t);o.stop(t+len+.05);}
+  const n=c.createBufferSource();n.buffer=screamNoise;n.loop=true;const nb=c.createBiquadFilter();nb.type='bandpass';nb.frequency.value=1700;nb.Q.value=1.2;const ng=c.createGain();ng.gain.value=.35;n.connect(nb);nb.connect(ng);ng.connect(out);n.start(t);n.stop(t+len+.05);}
 let afterReq=false;
 function flashHit(dur){afterReq=true;if(!AU.ctx)return;const ctx=AU.ctx,t=ctx.currentTime,g=AU.master.gain,len=Math.min(5,dur+.5);
   g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(settings.vol*.12,t+.04);g.linearRampToValueAtTime(settings.vol,t+len);
