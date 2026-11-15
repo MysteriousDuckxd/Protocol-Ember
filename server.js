@@ -48,9 +48,9 @@ const W = {
   minigun: { dmg: 15, head: 2.5, pen: .6, rate: 24, cost: 3000, slot: 1, chaos: 1 },
   railgun: { dmg: 95, head: 1.6, pen: 1, rate: .85, cost: 3200, slot: 1, chaos: 1, multi: 4 },
   plasma: { dmg: 44, pen: .8, rate: 7, cost: 2500, slot: 1, chaos: 1, multi: 3 },
-  katana: { dmg: 180, pen: .9, rate: 2, cost: 1500, slot: 2, chaos: 1 },
+  katana: { dmg: 180, pen: .9, rate: 2, cost: 1500, slot: 2 },
 };
-const ITEMS = { wall: { cost: 800, max: 1 }, medkit: { cost: 600, max: 2 }, stim: { cost: 400, max: 1 } };
+const ITEMS = { wall: { cost: 800, max: 1 }, medkit: { cost: 600, max: 2 }, stim: { cost: 400, max: 1, any: 1 }, dash: { cost: 500, max: 2, any: 1 }, boots: { cost: 350, max: 1, any: 1 } };
 const resp = r => r.mode !== 'bomb';
 const respMoney = r => r.mode === 'chaos' ? 10000 : 16000;
 const KILL_REWARD = { knife: 1500, shotgun: 900, mp5: 600, mpistol: 600 };
@@ -158,7 +158,7 @@ function meData(p) { return { money: p.money, inv: p.inv, nades: p.nades, ar: p.
 
 function newPlayer(o) {
   return { id: o.id, name: o.name, conn: o.conn || null, bot: !!o.bot, team: o.team, outfit: o.outfit || null, hp: 100, armor: 0, helmet: false, alive: false,
-    money: 800, inv: freshInv(), nades: { he: 0, flash: 0 }, items: { wall: 0, medkit: 0, stim: 0 }, oshield: 0, protectUntil: 0, pos: [0, 0, 0], yaw: 0, pitch: 0, crouch: 0, w: 'glock', kills: 0, deaths: 0,
+    money: 800, inv: freshInv(), nades: { he: 0, flash: 0 }, items: { wall: 0, medkit: 0, stim: 0, dash: 0, boots: 0 }, oshield: 0, protectUntil: 0, pos: [0, 0, 0], yaw: 0, pitch: 0, crouch: 0, w: 'glock', kills: 0, deaths: 0,
     dmgWin: 0, dmgT: 0, respawnAt: 0, lastSeen: Date.now(), streak: 0, ready: false };
 }
 
@@ -224,14 +224,14 @@ function setPhase(r, ph, tm) { r.phase = ph; r.timer = tm; bcast(r, { t: 'ph', p
 function canStart(r) { return teamOf(r, 'T').length > 0 && teamOf(r, 'CT').length > 0; }
 function resetMatch(r) {
   r.round = 0; r.score = { T: 0, CT: 0 }; r.streak = { T: 0, CT: 0 };
-  for (const p of r.players.values()) { p.money = resp(r) ? respMoney(r) : 800; p.inv = freshInv(); p.armor = 0; p.helmet = false; p.nades = { he: 0, flash: 0 }; p.kills = 0; p.deaths = 0; p.alive = false; }
+  for (const p of r.players.values()) { p.money = resp(r) ? respMoney(r) : 800; p.inv = freshInv(); p.armor = 0; p.helmet = false; p.nades = { he: 0, flash: 0 }; p.kills = 0; p.deaths = 0; p.alive = false; p.items = { wall: 0, medkit: 0, stim: 0, dash: 0, boots: 0 }; }
 }
 function startRound(r) {
   r.round++;
   const used = { T: new Set(), CT: new Set() };
   const ts = teamOf(r, 'T');
   for (const p of r.players.values()) {
-    if (!p.alive) { p.inv = freshInv(); p.armor = 0; p.helmet = false; p.nades = { he: 0, flash: 0 }; }
+    if (!p.alive) { p.inv = freshInv(); p.armor = 0; p.helmet = false; p.nades = { he: 0, flash: 0 }; p.items = { wall: 0, medkit: 0, stim: 0, dash: 0, boots: 0 }; }
     p.alive = true; p.hp = 100; p.protectUntil = Date.now() + (r.mode === 'chaos' ? 2000 : 0); p.oshield = 0; const sp = spawnPoint(r, p.team, used[p.team]); p.pos = [sp.x, 0, sp.z]; p.yaw = sp.yaw;
   }
   if (r.mode === 'bomb' && ts.length) { const c = pick(ts.filter(p => !p.bot).length && Math.random() < .5 ? ts.filter(p => !p.bot) : ts); r.bomb = { st: 'carried', c: c.id, p: [0, 0, 0], tm: BOMB_TIME, df: null, dfs: 0 }; }
@@ -276,7 +276,7 @@ function killPlayer(r, v, att, w, head) {
 }
 function respawn(r, p) {
   const sp = spawnPoint(r, p.team); p.alive = true; p.hp = 100; p.protectUntil = Date.now() + 2000; p.pos = [sp.x, 0, sp.z]; p.yaw = sp.yaw; p.respawnAt = 0;
-  if (resp(r)) { p.money = respMoney(r); p.buyUntil = Date.now() + 12000; p.items = { wall: 0, medkit: 0, stim: 0 }; p.oshield = 0; }
+  if (resp(r)) { p.money = respMoney(r); p.buyUntil = Date.now() + 12000; p.items = { wall: 0, medkit: 0, stim: 0, dash: 0, boots: 0 }; p.oshield = 0; }
   const msg = { t: 'rs', i: p.id, x: r1(sp.x), z: r1(sp.z), yaw: r1(sp.yaw), w: p.inv[1] || p.inv[2] };
   for (const q of r.players.values()) if (q.conn) q.conn.send(q === p ? { ...msg, me: meData(p) } : msg);
 }
@@ -376,7 +376,7 @@ function handle(c, msg) {
         if (p.money < w.cost) break; p.money -= w.cost; p.inv[w.slot] = it;
       } else if (it === 'vest') { if (p.armor >= 100 || p.money < 650) break; p.money -= 650; p.armor = 100; }
       else if (it === 'helmet') { if (p.armor >= 100 && p.helmet) break; const cst = p.armor >= 100 ? 350 : 1000; if (p.money < cst) break; p.money -= cst; p.armor = 100; p.helmet = true; }
-      else if (ITEMS[it]) { if (r.mode !== 'chaos' || p.items[it] >= ITEMS[it].max || p.money < ITEMS[it].cost) break; p.money -= ITEMS[it].cost; p.items[it]++; }
+      else if (ITEMS[it]) { if ((r.mode !== 'chaos' && !ITEMS[it].any) || (p.items[it] | 0) >= ITEMS[it].max || p.money < ITEMS[it].cost) break; p.money -= ITEMS[it].cost; p.items[it] = (p.items[it] | 0) + 1; }
       else if (it === 'oshield') { if (r.mode !== 'chaos' || p.oshield >= 50 || p.money < 1200) break; p.money -= 1200; p.oshield = 100; }
       else if (it === 'nhe' || it === 'nflash') { const k = it.slice(1), cst = k === 'he' ? 300 : 200, mx = k === 'he' ? 1 : 2; if (p.nades[k] >= mx || p.money < cst) break; p.money -= cst; p.nades[k]++; }
       else break;
@@ -424,7 +424,7 @@ function handle(c, msg) {
     case 'pr': { const a = actor(r, p, m.as); if (a && a.alive && r.mode === 'chaos') bcast(r, { t: 'pr', i: a.id, k: m.k === 'rocket' ? 'rocket' : 'plasma', w: m.w, p: m.p, v: m.v }, p); break; }
     case 'wall': { const a = actor(r, p, m.as); if (!a || !a.alive || r.mode !== 'chaos') break; if (!a.bot) { if (a.items.wall <= 0) break; a.items.wall--; } bcast(r, { t: 'w', i: a.id, p: m.p, y: +m.y || 0 }, p); break; }
     case 'heal': { const a = actor(r, p, m.as); if (!a || !a.alive || r.mode !== 'chaos') break; if (!a.bot) { if (a.items.medkit <= 0) break; a.items.medkit--; } a.hp = Math.min(100, a.hp + 60); bcast(r, { t: 'd', v: a.id, hp: Math.round(a.hp), ar: Math.round(a.armor), os: Math.round(a.oshield), a: a.id, h: false }); break; }
-    case 'item': { const a = actor(r, p, m.as); if (a && !a.bot && m.k === 'stim' && a.items.stim > 0) a.items.stim--; break; }
+    case 'item': { const a = actor(r, p, m.as); if (a && !a.bot && (m.k === 'stim' || m.k === 'dash') && a.items[m.k] > 0) a.items[m.k]--; break; }
     case 'ready': if (r.phase === 'lobby') { p.ready = !!m.on; sendLobby(r); } break;
     case 'start': pickOwner(r); if (r.phase === 'lobby' && r.owner === p.id && canStart(r)) { r.forced = true; r.cdAt = Date.now() + 5000; sendLobby(r); } break;
     case 'chat': { const txt = clean(m.msg, 120); if (txt) bcast(r, { t: 'chat', i: p.id, n: p.name, msg: txt, tm: p.team }); break; }
