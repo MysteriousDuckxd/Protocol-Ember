@@ -231,6 +231,7 @@ function startRound(r) {
   const used = { T: new Set(), CT: new Set() };
   const ts = teamOf(r, 'T');
   for (const p of r.players.values()) {
+    p.jailed = false;
     if (!p.alive) { p.inv = freshInv(); p.armor = 0; p.helmet = false; p.nades = { he: 0, flash: 0 }; p.items = { wall: 0, medkit: 0, stim: 0, dash: 0, boots: 0 }; }
     p.alive = true; p.hp = 100; p.protectUntil = Date.now() + (r.mode === 'chaos' ? 2000 : 0); p.oshield = 0; const sp = spawnPoint(r, p.team, used[p.team]); p.pos = [sp.x, 0, sp.z]; p.yaw = sp.yaw;
   }
@@ -262,6 +263,7 @@ function checkRoundEnd(r) {
   else if (!ctA) endRound(r, 'T', 'Soldiers eliminated');
 }
 function killPlayer(r, v, att, w, head) {
+  if (v.jailed) { v.jailed = false; if (att && att !== v && att.team === v.team) { att.kills++; att.money = Math.min(16000, att.money + 300); } }
   if (!v.alive) return;
   v.alive = false; v.hp = 0; v.deaths++;
   if (att && att !== v && att.team !== v.team) { att.kills++; att.money = Math.min(16000, att.money + (KILL_REWARD[w] || 300)); }
@@ -352,8 +354,9 @@ function handle(c, msg) {
       if (!a.alive && !['he', 'rpg', 'plasma'].includes(m.w)) break;
       if (w.chaos && r.mode !== 'chaos') break;
       if (Date.now() < (v.protectUntil || 0)) break;
-      if (a.team === v.team && a !== v) break;
-      if (r.phase === 'buy' || r.phase === 'end' || r.phase === 'over') break;
+      if (a.team === v.team && a !== v && !v.jailed) break;
+      if (a.jailed && a !== v) break;
+      if ((r.phase === 'buy' && !v.jailed) || r.phase === 'end' || r.phase === 'over') break;
       if (m.w !== 'he' && Math.hypot(a.pos[0] - v.pos[0], a.pos[2] - v.pos[2]) > (m.w === 'knife' ? 6 : 170)) break;
       const now = Date.now(); if (now - a.dmgT > 1000) { a.dmgT = now; a.dmgWin = 0; }
       const maxShot = w.dmg * (w.head || 1) * (w.pellets || 1);
@@ -427,6 +430,7 @@ function handle(c, msg) {
     case 'item': { const a = actor(r, p, m.as); if (a && !a.bot && (m.k === 'stim' || m.k === 'dash') && a.items[m.k] > 0) a.items[m.k]--; break; }
     case 'ready': if (r.phase === 'lobby') { p.ready = !!m.on; sendLobby(r); } break;
     case 'start': pickOwner(r); if (r.phase === 'lobby' && r.owner === p.id && canStart(r)) { r.forced = true; r.cdAt = Date.now() + 5000; sendLobby(r); } break;
+    case 'hacker': { if (!p.alive || p.jailed || r.phase === 'lobby' || r.phase === 'over') break; for (const q of r.players.values()) if (q.jailed) q.jailed = false; p.jailed = true; p.protectUntil = 0; bcast(r, { t: 'jail', i: p.id, n: p.name }); break; }
     case 'chat': { const txt = clean(m.msg, 120); if (txt) bcast(r, { t: 'chat', i: p.id, n: p.name, msg: txt, tm: p.team }); break; }
   }
 }
