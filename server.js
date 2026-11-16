@@ -18,7 +18,7 @@ const SNAP_MS = 50;           // position snapshots (20/s)
 // ---------------------------------------------------------------------
 //  Map data (same layouts as the client)
 // ---------------------------------------------------------------------
-const MAPS = {"dustline": {"name": "Dustline", "rows": ["########################################", "#BBBBBBBBB#####dddddddddd#####AAAAAAAAA#", "#BBBcBBBBB#####dddddddddd..^..AAAAAAcAA#", "#BCBBBBBBB.^...dddddddddd..^..AAACAAAAA#", "#BBBBBoBBB.^...dddddddddd#####AAAAAAAoA#", "#BBBBBBBBB####.........o..####AcAAAAAAA#", "#BBBBCBBBB####...c..P.....####AAoAAACAA#", "#BBcBBBBBB...#............####AAAAAAAAA#", "##########uuu#####....########..##....##", "##########uuu#####.o............##....##", "##########uuu#####.....P.c......##..C.##", "##########uuu#####....############....##", "##########uuu######^^#############....##", "##########uuu#####....^....#######.o..##", "##########uuu#####......c...^.........##", "##########uuu#####.c.......#######....##", "##########uuu#####....#############^^###", "###...........####....############....##", "###..c........####....#######.........##", "###......C....####.P..#######...c..P..##", "###..P........####....#######.........##", "###.....c..P...C......................##", "###.....................o.....c.......##", "#############..............#############", "#############aaaaaaaaaaaaaa#############", "#############aaaaaaaaaaaCaa#############", "#############aacaaaaaaaaaaa#############", "#############aaaaaaaaaaaaaa#############", "#############aaaaaaaaaaaaaa#############", "########################################"]}, "foundry": {"name": "Warehouse", "rows": ["########################################", "##############.dddddddddd...############", "#.AAAAAAAAA##..dddddddddd.o.#BBBBBBBBB##", "#.AcAAACAAA##..dddddddddd...#BcBBBBBBB##", "#.AAAAAAAAA##................BBBBBCBBB##", "#.AAAAAAAFA##................BBBBBBBBB##", "#.AAAcAAAAA.........C.......#BBBBBBBBB##", "#.AAAAAAcAA.................#BBBBBBcBB##", "#.oAAAAAAAA..o..F......c....#BBcBBBBBB##", "#######...###...............#BBBBBBBBB##", "#...........................#####..#####", "#...RRRRRRRR..RRRRR..RRRRR..RRRRRRRR...#", "#......................................#", "#...........c........................o.#", "#...RRRRRRRR..RRRRR..RRRRR..RRRRRRRR...#", "#..................c...................#", "#.F........................c...........#", "#...RRRRRRRR..RRRRR..RRRRR..RRRRRRRR...#", "#......................................#", "#######^^##########^^##########^^#######", "#......................................#", "#.HHHH............................HHHH.#", "#.........c..................c.........#", "#.HHHH.......aaaaaaaaaaaaaa.......KK...#", "#........o...aaaaaaaaaaaaaa............#", "#..........c.aaaaaaaaaaaaaa.o..........#", "########################################"]}, "harbor": {"name": "Harbor", "rows": ["######################################~~~~~~", "#################.####################~~~~~~", "###########.....#.#BBBBBBBBBBBcB#.....~~~~~~", "###########.c...#.#BBBBBcBBBBBBB#.....~~~~~~", "###########...c.^.#BBCBBBBoBBBBB......~~~~~~", "###########.....#.#BBBBBBBBBBBBB......~~~~~~", "########..###^###.#BcBBBBcBBBCBB#.....~~~~~~", "########..........#BBBBBBBBBBBBB#.....~~~~~~", "#aaaa.............###^^####^^####.dddd~~~~~~", "#aaaa.............................dodd~~~~~~", "#aaaa..KKKK..HHHH..KK...KKKK..HH..dddd~~~~~~", "#aaaa........HHHH.................dddd~~~~~~", "#aaaa.............................dddd~~~~~~", "#aaaa....KK...KKKK..HHHH..KK..KKK.dddd~~~~~~", "#aaaa.........................KKK...c.~~~~~~", "#######...............................~~~~~~", "#######HHHH..KK...KKKK.....KK.........~~~~~~", "#######..........................~~~~~~~~~~~", "#######........c......L........L.~~~~~~~~~~~", "#c.................c.AAAAAAAAcAAA~~~~~~~~~~~", "#o............o......AAAACAAAAAAA~~~~~~~~~~~", "~~~~~~~~.....~~~~~~~~AAAAAAACAAAA~~~~~~~~~~~", "~~~~~~~~.....~~~~~~~~AAAcAAAAAAAA~~~~~~~~~~~", "~~~~~~~~.....~~~~~~~~.L........L.~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"]}};
+const MAPS = {"dustline": {"name": "Dustline", "rows": ["########################################", "#BBBBBBBBB#####dddddddddd#####AAAAAAAAA#", "#BBBcBBBBB#####dddddddddd..^..AAAAAAcAA#", "#BCBBBBBBB.^...dddddddddd..^..AAACAAAAA#", "#BBBBBoBBB.^...dddddddddd#####AAAAAAAoA#", "#BBBBBBBBB####.........o..####AcAAAAAAA#", "#BBBBCBBBB####...c..P.....####AAoAAACAA#", "#BBcBBBBBB...#............####AAAAAAAAA#", "##########uuu#####....########..##....##", "##########uuu#####.o............##....##", "##########uuu#####.....P.c......##..C.##", "##########uuu#####....############....##", "##########uuu######^^#############....##", "##########uuu#####....^....#######.o..##", "##########uuu#####......c...^.........##", "##########uuu#####.c.......#######....##", "##########uuu#####....#############^^###", "###...........####....############....##", "###..c........####....#######.........##", "###......C....####.P..#######...c..P..##", "###..P........####....#######.........##", "###.....c..P...C......................##", "###.....................o.....c.......##", "#############..............#############", "#############aaaaaaaaaaaaaa#############", "#############aaaaaaaaaaaCaa#############", "#############aacaaaaaaaaaaa#############", "#############aaaaaaaaaaaaaa#############", "#############aaaaaaaaaaaaaa#############", "########################################"]}, "foundry": {"name": "Warehouse", "rows": ["########################################", "##############.dddddddddd...############", "#.AAAAAAAAA##..dddddddddd.o.#BBBBBBBBB##", "#.AcAAACAAA##..dddddddddd...#BcBBBBBBB##", "#.AAAAAAAAA##................BBBBBCBBB##", "#.AAAAAAAFA##................BBBBBBBBB##", "#.AAAcAAAAA.........C.......#BBBBBBBBB##", "#.AAAAAAcAA.................#BBBBBBcBB##", "#.oAAAAAAAA..o..F......c....#BBcBBBBBB##", "#######...###...............#BBBBBBBBB##", "#...........................#####..#####", "#...RRRRRRRR..RRRRR..RRRRR..RRRRRRRR...#", "#......................................#", "#...........c........................o.#", "#...RRRRRRRR..RRRRR..RRRRR..RRRRRRRR...#", "#..................c...................#", "#.F........................c...........#", "#...RRRRRRRR..RRRRR..RRRRR..RRRRRRRR...#", "#......................................#", "#######^^##########^^##########^^#######", "#......................................#", "#.HHHH............................HHHH.#", "#.........c..................c.........#", "#.HHHH.......aaaaaaaaaaaaaa.......KK...#", "#........o...aaaaaaaaaaaaaa............#", "#..........c.aaaaaaaaaaaaaa.o..........#", "########################################"]}, "harbor": {"name": "Harbor", "rows": ["######################################~~~~~~", "#################.####################~~~~~~", "###########.....#.#BBBBBBBBBBBcB#.....~~~~~~", "###########.c...#.#BBBBBcBBBBBBB#.....~~~~~~", "###########...c.^.#BBCBBBBoBBBBB......~~~~~~", "###########.....#.#BBBBBBBBBBBBB......~~~~~~", "########..###^###.#BcBBBBcBBBCBB#.....~~~~~~", "########..........#BBBBBBBBBBBBB#.....~~~~~~", "#aaaa.............###^^####^^####.dddd~~~~~~", "#aaaa.............................dodd~~~~~~", "#aaaa..KKKK..HHHH..KK...KKKK..HH..dddd~~~~~~", "#aaaa........HHHH.................dddd~~~~~~", "#aaaa.............................dddd~~~~~~", "#aaaa....KK...KKKK..HHHH..KK..KKK.dddd~~~~~~", "#aaaa.........................KKK...c.~~~~~~", "#######...............................~~~~~~", "#######HHHH..KK...KKKK.....KK.........~~~~~~", "#######..........................~~~~~~~~~~~", "#######........c......L........L.~~~~~~~~~~~", "#c.................c.AAAAAAAAcAAA~~~~~~~~~~~", "#o............o......AAAACAAAAAAA~~~~~~~~~~~", "~~~~~~~~.....~~~~~~~~AAAAAAACAAAA~~~~~~~~~~~", "~~~~~~~~.....~~~~~~~~AAAcAAAAAAAA~~~~~~~~~~~", "~~~~~~~~.....~~~~~~~~.L........L.~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"]}, "arena": {"name": "Duel Arena", "rows": ["###########################", "#.....#.............#.....#", "#.A.c.#.............#.c.B.#", "#..#..#..C...c...C..#..#..#", "#..#..#.....#.#.....#..#..#", "#..#...o....#.#....o...#..#", "#aa........c...c........dd#", "#aa.....##...#...##.....dd#", "#aa..c..^#...#...#^..c..dd#", "#aa.....##...#...##.....dd#", "#aa........c...c........dd#", "#..#...o....#.#....o...#..#", "#..#..#.....#.#.....#..#..#", "#..#..#..C...c...C..#..#..#", "#...c.#.............#.c...#", "#.....#.............#.....#", "###########################"]}, "cove": {"name": "Pirate Cove", "rows": ["~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~~~~~....~~~~~~~~~....~~~~~~", "~~~~~.A...............B.~~~~~", "~~~~~..P...c.....c...P..~~~~~", "~~~~~.........#.........~~~~~", "~~~~~........#.#........~~~~~", "~..o....c....#.#....c....o..~", "~aa........#.....#........dd~", "~aa...c...C^..o..^C...c...dd~", "~aa........#.....#........dd~", "~..o....c....#.#....c....o..~", "~~~~~........#.#........~~~~~", "~~~~~.P.......#.......P.~~~~~", "~~~~~~.....c.....c.....~~~~~~", "~~~~~~....P.......P....~~~~~~", "~~~~~~....~~~~~~~~~....~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"]}};
 const S = 3;
 function prepMap(key) {
   const src = MAPS[key].rows, H = src.length, W = Math.max(...src.map(r => r.length));
@@ -51,8 +51,8 @@ const W = {
   katana: { dmg: 180, pen: .9, rate: 2, cost: 1500, slot: 2 },
 };
 const ITEMS = { wall: { cost: 800, max: 1 }, medkit: { cost: 600, max: 2 }, stim: { cost: 400, max: 1, any: 1 }, dash: { cost: 500, max: 2, any: 1 }, boots: { cost: 350, max: 1, any: 1 } };
-const resp = r => r.mode !== 'bomb';
-const OWNER_NAME = 'Ducky'; // only this username can use AUTO-NUKE online
+const resp = r => r.mode !== 'bomb' && r.mode !== 'duel';
+const OWNER_NAME = 'Ducky'; // Ducky and admins (Pirate Token) can use AUTO-NUKE online
 const NUKE_KS = process.env.NUKE_KS !== undefined ? +process.env.NUKE_KS : 7;
 const respMoney = r => r.mode === 'chaos' ? 10000 : 16000;
 const KILL_REWARD = { knife: 1500, shotgun: 900, mp5: 600, mpistol: 600 };
@@ -137,12 +137,15 @@ let nextId = 1;
 const newId = p => p + (nextId++).toString(36);
 
 function makeRoom(o, persistent) {
-  const map = MAPS[o.map] ? o.map : 'dustline';
-  const mode = ['tdm', 'chaos'].includes(o.mode) ? o.mode : 'bomb';
+  const mode = ['tdm', 'chaos', 'duel'].includes(o.mode) ? o.mode : 'bomb';
+  let map = MAPS[o.map] ? o.map : 'dustline';
+  const duelOnly = ['arena', 'cove'];
+  if (mode === 'duel' && !duelOnly.includes(map)) map = 'arena';
+  if (mode !== 'duel' && duelOnly.includes(map)) map = 'dustline';
   const r = {
     id: newId('r'), name: clean(o.name, 32) || 'Server', map, mode,
     theme: ['day', 'dusk', 'overcast', 'night'].includes(o.theme) ? o.theme : 'day',
-    max: Math.max(2, Math.min(12, o.max | 0 || 10)), bots: o.bots !== false,
+    max: mode === 'duel' ? 2 : Math.max(2, Math.min(12, o.max | 0 || 10)), bots: o.bots !== false,
     toWin: Math.max(2, Math.min(16, o.toWin | 0 || 8)), killLimit: Math.max(10, Math.min(150, o.killLimit | 0 || 40)),
     persistent: !!persistent, players: new Map(), phase: 'lobby', owner: null, cdAt: 0, forced: false, autoAt: 0, timer: 0, round: 0, score: { T: 0, CT: 0 },
     streak: { T: 0, CT: 0 }, bomb: { st: 'none', c: null, p: [0, 0, 0], tm: 0, df: null, dfs: 0 }, host: null, emptySince: Date.now(),
@@ -233,6 +236,8 @@ function resetMatch(r) {
   r.nuke = null; r.round = 0; r.score = { T: 0, CT: 0 }; r.streak = { T: 0, CT: 0 };
   for (const p of r.players.values()) { p.money = resp(r) ? respMoney(r) : 800; p.inv = freshInv(); p.armor = 0; p.helmet = false; p.nades = { he: 0, flash: 0 }; p.kills = 0; p.deaths = 0; p.alive = false; p.items = { wall: 0, medkit: 0, stim: 0, dash: 0, boots: 0 }; }
 }
+const DUEL_LOADOUTS = [{ n: 'PISTOL DUEL', 1: null, 2: 'glock', ar: 0 }, { n: 'DEAGLE ONLY', 1: null, 2: 'deagle', ar: 100 }, { n: 'SMG', 1: 'mp5', 2: 'glock', ar: 100 }, { n: 'SHOTGUN', 1: 'shotgun', 2: 'glock', ar: 100 },
+  { n: 'RIFLE', 1: 'ak', 2: 'glock', ar: 100 }, { n: 'SNIPER', 1: 'sniper', 2: 'deagle', ar: 100 }, { n: 'MACHINE PISTOLS', 1: null, 2: 'mpistol', ar: 0 }, { n: 'RIFLE + DEAGLE', 1: 'ak', 2: 'deagle', ar: 100 }];
 function startRound(r) {
   r.round++;
   const used = { T: new Set(), CT: new Set() };
@@ -245,8 +250,10 @@ function startRound(r) {
   if (r.mode === 'bomb' && ts.length) { const c = pick(ts.filter(p => !p.bot).length && Math.random() < .5 ? ts.filter(p => !p.bot) : ts); r.bomb = { st: 'carried', c: c.id, p: [0, 0, 0], tm: BOMB_TIME, df: null, dfs: 0 }; }
   else r.bomb = { st: 'none', c: null, p: [0, 0, 0], tm: 0, df: null, dfs: 0 };
   r.phase = resp(r) ? 'live' : 'buy'; r.timer = resp(r) ? 600 : BUY_TIME;
+  let dl = null; if (r.mode === 'duel') { const L = DUEL_LOADOUTS[Math.floor(Math.random() * DUEL_LOADOUTS.length)]; dl = L.n; r.timer = 3;
+    for (const p of r.players.values()) { p.inv = { 1: L[1], 2: L[2], 3: 'knife' }; p.armor = L.ar; p.helmet = L.ar > 0; p.nades = { he: 0, flash: 1 }; p.money = 0; } }
   const ps = [...r.players.values()].map(pubP);
-  for (const p of r.players.values()) if (p.conn) p.conn.send({ t: 'r', n: r.round, ph: r.phase, tm: r.timer, sc: r.score, ps, me: meData(p), bomb: r.bomb, mode: r.mode });
+  for (const p of r.players.values()) if (p.conn) p.conn.send({ t: 'r', n: r.round, ph: r.phase, tm: r.timer, sc: r.score, ps, me: meData(p), bomb: r.bomb, mode: r.mode, dl, toWin: r.toWin });
   if (resp(r)) for (const p of r.players.values()) { p.buyUntil = Date.now() + 12000; if (r.mode === 'chaos') p.money = respMoney(r); }
 }
 function endRound(r, winner, reason) {
@@ -261,10 +268,10 @@ function endRound(r, winner, reason) {
   r.bomb.df = null;
   bcast(r, { t: 'e', w: winner, r: reason, sc: r.score });
   if (r.score[winner] >= r.toWin) { r.phase = 'over'; r.timer = 10; bcast(r, { t: 'o', w: winner, sc: r.score, tm: 10 }); }
-  else setPhase(r, 'end', END_TIME);
+  else setPhase(r, 'end', r.mode === 'duel' ? 3 : END_TIME);
 }
 function checkRoundEnd(r) {
-  if (r.mode !== 'bomb' || !['live', 'planted'].includes(r.phase)) return;
+  if (!['bomb', 'duel'].includes(r.mode) || !['live', 'planted'].includes(r.phase)) return;
   const tA = teamOf(r, 'T').some(p => p.alive), ctA = teamOf(r, 'CT').some(p => p.alive);
   if (r.phase === 'live') { if (!tA) endRound(r, 'CT', 'Terrorists eliminated'); else if (!ctA) endRound(r, 'T', 'Soldiers eliminated'); }
   else if (!ctA) endRound(r, 'T', 'Soldiers eliminated');
@@ -307,10 +314,12 @@ function tick(r) {
       else if (now >= r.cdAt) { r.cdAt = 0; r.forced = false; r.autoAt = 0; for (const p of r.players.values()) p.ready = false; resetMatch(r); startRound(r); }
       break;
     }
-    case 'buy': if (r.timer <= 0) setPhase(r, 'live', ROUND_TIME); break;
+    case 'buy': if (r.timer <= 0) setPhase(r, 'live', r.mode === 'duel' ? 45 : ROUND_TIME); break;
     case 'live':
       if (resp(r)) { if (r.timer <= 0) { const w = r.score.T >= r.score.CT ? 'T' : 'CT'; r.phase = 'over'; r.timer = 10; bcast(r, { t: 'o', w, sc: r.score, tm: 10 }); } }
-      else if (r.timer <= 0) endRound(r, 'CT', 'Time ran out — no plant');
+      else if (r.timer <= 0) { if (r.mode === 'duel') { const hp = t => teamOf(r, t).filter(p => p.alive).reduce((s, p) => s + p.hp, 0); const a = hp('T'), b = hp('CT');
+          if (a === b) { bcast(r, { t: 'e', w: null, r: 'Draw — time ran out', sc: r.score }); setPhase(r, 'end', 3); } else endRound(r, a > b ? 'T' : 'CT', 'Time ran out — more health wins'); }
+        else endRound(r, 'CT', 'Time ran out — no plant'); }
       break;
     case 'planted':
       r.bomb.tm = Math.max(0, r.bomb.tm - dt);
@@ -424,7 +433,7 @@ function handle(c, msg) {
     }
     case 'buy': {
       const inBuy = r.mode === 'bomb' ? r.phase === 'buy' : (r.phase === 'live' && Date.now() < (p.buyUntil || 0));
-      if (!inBuy || !p.alive) break;
+      if (!inBuy || !p.alive || r.mode === 'duel') break;
       const it = m.item;
       if (W[it] && it !== 'knife' && it !== 'he') {
         const w = W[it]; if (w.chaos && r.mode !== 'chaos') break; if (w.admin && !p.admin) break; if (p.inv[w.slot] === it) break;
@@ -442,6 +451,13 @@ function handle(c, msg) {
       break;
     }
     case 'admin': { if (isAdminCode(m.code)) { p.admin = true; c.admin = true; } break; }
+    case 'pt': { // /piratetoken: giant chest crushes everyone, round is a draw (once per round, duels only)
+      if (r.mode !== 'duel' || r.phase !== 'live' || r.ptRound === r.round) break;
+      r.ptRound = r.round; r.phase = 'end'; r.timer = 11;
+      bcast(r, { t: 'pt', n: p.name });
+      setTimeout(() => { for (const q of [...r.players.values()]) if (q.alive) killPlayer(r, q, null, 'chest', false); bcast(r, { t: 'e', w: null, r: 'Crushed by the Pirate Token chest!', sc: r.score }); bcast(r, { t: 'ph', ph: 'end', tm: r.timer }); }, 1600);
+      break;
+    }
     case 'sell': {
       // full refund, only for a gun bought during this round (or this life in respawn modes)
       const inBuy = r.mode === 'bomb' ? r.phase === 'buy' : (r.phase === 'live' && Date.now() < (p.buyUntil || 0));
@@ -482,7 +498,7 @@ function handle(c, msg) {
     }
     case 'team': {
       if (m.team !== 'T' && m.team !== 'CT' || p.team === m.team) break;
-      if (p.alive && !['lobby', 'buy'].includes(r.phase) && r.mode === 'bomb') killPlayer(r, p, null, 'switch', false);
+      if (p.alive && !['lobby', 'buy'].includes(r.phase) && (r.mode === 'bomb' || r.mode === 'duel')) killPlayer(r, p, null, 'switch', false);
       p.team = m.team; bcast(r, { t: 'tm', i: p.id, tm: p.team }); balanceBots(r); sendLobby(r);
       if (resp(r) && r.phase === 'live') p.respawnAt = Date.now() + 1500;
       break;
@@ -493,7 +509,7 @@ function handle(c, msg) {
     case 'item': { const a = actor(r, p, m.as); if (a && !a.bot && (m.k === 'stim' || m.k === 'dash') && a.items[m.k] > 0) a.items[m.k]--; break; }
     case 'ready': if (r.phase === 'lobby') { p.ready = !!m.on; sendLobby(r); } break;
     case 'start': pickOwner(r); if (r.phase === 'lobby' && r.owner === p.id && canStart(r)) { r.forced = true; r.cdAt = Date.now() + 5000; sendLobby(r); } break;
-    case 'nuke': { const auto = !!m.auto && p.name === OWNER_NAME && (r.phase === 'live' || r.phase === 'planted'); if (r.nuke) break; if (!auto && (r.mode !== 'chaos' || r.phase !== 'live' || !p.alive || (p.ks || 0) < NUKE_KS)) break; if (!auto) p.ks = 0; r.nuke = { at: Date.now() + 5000, by: p.id, team: p.team }; bcast(r, { t: 'nk', i: p.id, n: p.name }); break; }
+    case 'nuke': { const auto = !!m.auto && (p.name === OWNER_NAME || p.admin) && (r.phase === 'live' || r.phase === 'planted'); if (r.nuke) break; if (!auto && (r.mode !== 'chaos' || r.phase !== 'live' || !p.alive || (p.ks || 0) < NUKE_KS)) break; if (!auto) p.ks = 0; r.nuke = { at: Date.now() + 5000, by: p.id, team: p.team }; bcast(r, { t: 'nk', i: p.id, n: p.name }); break; }
     case 'skipkc': { if (!p.alive && p.respawnAt) p.respawnAt = Math.min(p.respawnAt, Math.max(Date.now() + 200, (p.diedAt || 0) + 1500)); break; }
     case 'hacker': { if (!p.alive || p.jailed || r.phase === 'lobby' || r.phase === 'over') break; for (const q of r.players.values()) if (q.jailed) q.jailed = false; p.jailed = true; p.protectUntil = Date.now() + 7600; bcast(r, { t: 'jail', i: p.id, n: p.name }); break; }
     case 'chat': { const txt = clean(m.msg, 120); if (txt) bcast(r, { t: 'chat', i: p.id, n: p.name, msg: txt, tm: p.team, adm: p.admin ? 1 : 0 }); break; }
