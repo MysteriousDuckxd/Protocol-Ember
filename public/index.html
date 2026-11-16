@@ -599,6 +599,62 @@ const nm=s=>String(s).replace(/Kestrel/g,profile.name||'Kestrel');
 
 /*MAPS*/
 const MAPS={
+ rooftops:{name:'Rooftops',style:'urban',rows:[
+'##########################################',
+'#ddd....#........#####.......#####....6..#',
+'#ddd....^..c.....#####...o...#####.......#',
+'#.......#........^...^.......^...^...c...#',
+'#..5....#####.####.###...C...#.####......#',
+'#.......#####.####.###.......#.####......#',
+'####.########.####.#############.#########',
+'#....w...####......#.........x.......#####',
+'#........####..4...^....c............#####',
+'#..c.....####......#....9....o.......^..y#',
+'#........####.###########.############...#',
+'#####.#######.#####...........####.......#',
+'#...........x.#####..AAAA.....####..BBBB.#',
+'#..o...3......^...^..AAAA..c..^..^..BBBB.#',
+'#.............#####...........####.......#',
+'####.###########################.#########',
+'#......2.......c.......x..........w......#',
+'#.aaa.....C.........1..........o.........#',
+'#.aaa....................................#',
+'##########################################']},
+ shantytown:{name:'Shantytown',style:'desert',rows:[
+'########################################',
+'#w.....#...#....k....#....#.....#.....w#',
+'#..c...^...^.........^....^..o..^..c...#',
+'#......#...#..####...#....#.....#......#',
+'###.####.###..####..####.####.####.##.##',
+'#.....k......c...........c.......k.....#',
+'#..####...####..AAAA...####..BBBB..###.#',
+'#..####...####..AAAA...####..BBBB..###.#',
+'#.......c.........ddd.......c..........#',
+'#.####..####...#..ddd..#...####..####..#',
+'#.####..####...#.......#...####..####..#',
+'#......k.........c.........k...........#',
+'###.####.###..####..####.####.####.##.##',
+'#......#...#.........#....#.....#......#',
+'#..o...^...^...aaaa..^....^..c..^..o...#',
+'#w.....#...#...aaaa..#..k.#.....#.....w#',
+'########################################']},
+ outpost:{name:'Mountain Outpost',style:'urban',rows:[
+'############################################',
+'#w.........#######..........#######.......w#',
+'#..c.......#BBBBB#....o.....#ddddd#........#',
+'#..........#BBkBB^..........^ddddd#....C...#',
+'#....C.....#BBBBB#.....c....#ddddd#........#',
+'#..........###^###..........###^###........#',
+'#.....o.......1.........c.........o........#',
+'#..........#######..........#######....c...#',
+'#..c.......#AAAAA#....C.....#.....#........#',
+'#..........#AAAAA^....2.....^.....#........#',
+'#..........###^###..........###^###........#',
+'#.........................3...............o#',
+'#....c.............c..........c............#',
+'#w.......4.........aaaaaa.................w#',
+'#..................aaaaaa..................#',
+'############################################']},
  oldtown:{name:'Old Town',style:'desert',rows:[
 '####################################',
 '#........#######.......####...dddd.#',
@@ -796,7 +852,7 @@ const THEMES={
 const ACTS=[
  {n:'I',title:'The Leak',blurb:'A bomb plot leads back to SIGMA\'s own armory.',ready:true},
  {n:'II',title:'Ash',blurb:'The trail leads abroad to Meridian Group and a stolen prototype called EMBER.',ready:true,count:8},
- {n:'III',title:'Burned',blurb:'Framed and disavowed. SIGMA itself is hunting you.',ready:false,count:7},
+ {n:'III',title:'Burned',blurb:'Framed and disavowed. SIGMA itself is hunting you.',ready:true,count:7},
  {n:'IV',title:'Kindling',blurb:'Rebuild a crew and stop EMBER reaching three cities.',ready:false,count:8},
  {n:'V',title:'Protocol Ember',blurb:'The final assault on SIGMA\'s own headquarters.',ready:false,count:6}];
 const STORY=[
@@ -908,6 +964,57 @@ const STORY=[
   obj:['Breach the gate','Fight through the courtyard','Find Hayes in his office'],
   stars:[['Finish in under 5 minutes',c=>c.time<300],['Headshots 40% or better',c=>c.hs>=40]],
   debrief:['Hayes is gone. Overwatch is Director Reyes, and he has made you the traitor.','SIGMA is coming for you now. All of it.']}
+ ,{act:2,code:'OP-16',title:'Ghost',type:'escape',map:'rooftops',theme:'dusk',side:'def',allies:[],enemies:0,diff:'normal',toWin:1,credits:0,
+  loc:'LISBRA ROOFTOPS · 20:10',
+  intro:['JUNO','SIGMA tactical is on the stairs. You have to run. And Kestrel — they\'re still our people.'],
+  brief:['Reyes has branded you a traitor. A SIGMA tactical team is closing on your hotel.','Run across the rooftops through every checkpoint before they box you in.','They are your own people, following orders. You can shoot back — but a true ghost doesn\'t kill a single one of them.'],
+  obj:['Reach every checkpoint','Lose the SIGMA team','Optional: don\'t kill any SIGMA soldier'],
+  stars:[['Don\'t kill any SIGMA soldier',c=>!c.sigmaKills],['Escape in under 3 minutes',c=>c.time<180]],
+  debrief:['You lose them in the alleys below.','Juno is hiding with friends in the shantytown on the river. "No SIGMA patrols go there," she says.','Meridian does.']},
+ {act:2,code:'OP-17',title:'Favela',type:'survival',survive:150,map:'shantytown',theme:'day',side:'def',allies:[],enemies:0,diff:'normal',toWin:1,credits:0,
+  loc:'RIVER SHANTYTOWN · 14:30',
+  intro:['JUNO','Meridian found us. You\'ve got a knife and a pistol — there are weapon caches in the shacks.'],
+  brief:['Meridian has tracked Juno to the shantytown. You have a knife and a nearly empty pistol.','Weapon caches are hidden around the shacks — walk over a glowing crate to grab what\'s inside.','Hold out until Mara can get a truck in.'],
+  obj:['Survive until extraction','Find weapons in the caches','Reach the truck'],
+  stars:[['Accuracy 35% or better',c=>c.acc>=35],['Open 4 or more caches',c=>c.caches>=4]],
+  debrief:['Mara\'s truck smashes through the last fence.','"I don\'t believe you killed anyone at that embassy," she says. "But Rook does. And Rook is coming."','Mara has a plan to get proof. First, she needs a lookout.']},
+ {act:2,code:'OP-18',title:'High Ground',type:'sniper',map:'rooftops',theme:'night',side:'def',allies:[],enemies:0,diff:'normal',toWin:1,credits:0,
+  loc:'LISBRA ROOFTOPS · 02:40',
+  intro:['MARA','I\'m going in on foot. You\'re my eyes. Anything moves near me, you drop it.'],
+  brief:['Mara is crossing the old quarter to a dead drop with evidence against Reyes.','You\'re on a rooftop with a sniper rifle. Meridian has gunmen waiting along her route.','Keep Mara alive until she reaches the drop. She stops whenever a gunman is close to her.'],
+  obj:['Cover Mara until she reaches the drop','Keep Mara alive','Use the scope (right-click)'],
+  stars:[['Mara above 50% health',c=>c.vipHp>=.5],['Headshots 50% or better',c=>c.hs>=50]],
+  debrief:['Mara reaches the drop. The evidence is real: transfer records between Reyes and Calder Hayes.','But Rook picked up your trail at the rooftops. He\'s waiting for you in the shantytown.','He\'s alone. He wants to talk — or he wants to finish it.']},
+ {act:2,code:'OP-19',title:'Old Friend',type:'boss',nonLethal:true,map:'shantytown',theme:'overcast',side:'def',allies:[],enemies:0,diff:'hard',toWin:1,credits:4000,boss:'ROOK',bossPhases:true,
+  bossIntro:{line:['ROOK','I taught you everything, rookie. Including how this ends.'],card:['BOSS','ROOK','YOUR MENTOR · DO NOT KILL HIM']},
+  loc:'RIVER SHANTYTOWN · DAWN',
+  intro:['ROOK','Kestrel! Come out. Let\'s do this the hard way.'],
+  brief:['Rook believes Reyes. He thinks you killed the ambassador.','He\'s the best soldier you know, and he brought SIGMA backup.','Beat him — but don\'t kill him. When he\'s down, he\'ll listen.'],
+  obj:['Defeat Rook without killing him','Survive his SIGMA backup','Make him listen'],
+  stars:[['Finish in under 4 minutes',c=>c.time<240],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['Rook sits in the mud and reads Mara\'s evidence twice.','"Reyes. All this time." He hands you his radio. "I\'ll keep SIGMA off your back as long as I can."','Juno has found Meridian\'s lab: a research outpost in the mountains, where the EMBER plans are kept.']},
+ {act:2,code:'OP-20',title:'Whiteout',type:'stealth',weather:'snow',map:'outpost',theme:'overcast',side:'def',allies:[],enemies:7,diff:'normal',toWin:1,credits:0,
+  stealthText:['Reach the research lab','Plant Juno\'s uplink','Get back to the ridge','UPLOADING','Uplink is live. Get clear before they notice.','You were caught in the snow.'],
+  loc:'MERIDIAN MOUNTAIN OUTPOST · BLIZZARD · 04:00',
+  intro:['JUNO','The storm covers you. It covers them too. Go slow.'],
+  brief:['A blizzard hides Meridian\'s mountain outpost. It also hides the guards.','Get into the research lab and plant Juno\'s uplink so she can reach the EMBER plans.','Stealth rules: crouch, knife from behind, don\'t let them see you.'],
+  obj:['Reach the research lab','Plant the uplink (hold F)','Get back to the ridge','Optional: never raise the alarm'],
+  stars:[['Ghost: never raise the alarm',c=>!c.alarm],['Finish in under 5 minutes',c=>c.time<300]],
+  debrief:['The uplink is live. Juno is inside Meridian\'s network.','"The plans are huge," she says. "I need ninety seconds of download — and they\'ll trace it in thirty."','You\'ll have to hold the lab while it runs.']},
+ {act:2,code:'OP-21',title:'Blueprint',type:'hackdefend',hackTime:80,weather:'snow',map:'outpost',theme:'overcast',side:'def',allies:['Mara'],enemies:0,diff:'normal',toWin:1,credits:3500,
+  loc:'MERIDIAN MOUNTAIN OUTPOST · 05:10',
+  intro:['JUNO','Download running. Stay near the terminal or it stalls. Here they come.'],
+  brief:['Juno\'s download is running on the lab terminal. It only progresses while you stay near it.','Meridian is sending everything it has from the ridges.','Hold the lab until the download finishes.'],
+  obj:['Stay near the terminal','Hold off Meridian','Finish the download'],
+  stars:[['Accuracy 35% or better',c=>c.acc>=35],['Keep Mara alive',c=>c.alliesAlive===c.alliesTotal]],
+  debrief:['Download complete. The full EMBER design is in Juno\'s hands.','Then her channel fills with static. "Kestrel — they\'re in the van — they found me—"','The line goes dead. And the outpost\'s self-destruct starts counting.']},
+ {act:2,code:'OP-22',title:'Avalanche',type:'escape',escapeTime:100,startAt:'B',weather:'snow',map:'outpost',theme:'overcast',side:'def',allies:['Mara'],enemies:0,diff:'hard',toWin:1,credits:3000,outro:'act3',
+  loc:'MERIDIAN MOUNTAIN OUTPOST · SELF-DESTRUCT',
+  intro:['MARA','Charges are set to blow the whole mountain. Move, move, move!'],
+  brief:['Meridian took Juno and triggered the outpost\'s self-destruct.','Get from the lab to the ridge before the charges go off, through everything they left behind.','Don\'t stop. Don\'t look back.'],
+  obj:['Reach every checkpoint','Get out before the explosion','Survive the guards'],
+  stars:[['Escape with 30 seconds or more left',c=>c.timeLeft>=30],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['The mountain comes down behind you.','Juno is gone, taken by Meridian. The EMBER plans went with her.','You are alone again. But not for long.']}
 ];
 const ALLY_NAMES={def:['Rook','Juno','Atlas','Mara','Sable'],atk:['Ash','Grim','Cinder','Brand','Soot']};
 const ENEMY_NAMES={atk:['Ash','Grim','Shade','Brand','Cinder','Wraith','Soot'],def:['Hawk','Reyes','Kovac','Nash','Ortiz','Volk']};
@@ -1403,7 +1510,7 @@ function buildGun(id,skin='factory'){
 //  CHARACTERS (Terrorists vs Soldiers)
 // =====================================================================
 const LOOK_CACHE={};
-function outfitFor(a){if(a.previewLook)return {look:a.previewLook,o:profile.outfit[a.previewLook]};
+function outfitFor(a){if(a.forceLook)return {look:a.forceLook,o:null};if(a.previewLook)return {look:a.previewLook,o:profile.outfit[a.previewLook]};
   if(a.netOutfit){const lk=sideOf(a.team)==='atk'?'t':'ct';return {look:lk,o:a.netOutfit[lk]};}
   const look=a.boss?'boss':(sideOf(a.team)==='atk'?'t':'ct');if(look==='boss')return {look,o:null};
   if(a.isPlayer||(!state.mp&&profile.squad&&player&&a.team===player.team))return {look,o:profile.outfit[look]};return {look,o:null};}
@@ -1794,6 +1901,8 @@ function damage(v,dmg,att,wid,head,fromPos,pen=.5,quiet){
   else if(att&&att.isPlayer&&!quiet){hitmark(head?'hs':'');head?sfx.head():sfx.hit();}
 }
 function kill(v,att,wid,head){
+  if(v.nonLethal&&!v.surrendered&&MS.on){bossSurrender(v);return;}
+  if(v.sigma&&att===player&&MS.extra)MS.extra.sigmaKills=(MS.extra.sigmaKills|0)+1;
   if(v.jailed)jailEnd(v,att);
   hcDeathCheck(v);
   if(att&&att!==v&&att.team!==v.team&&wid!=='nuke')att.ks=(att.ks|0)+1;v.ks=0;
@@ -2083,7 +2192,7 @@ function endMatch(won){
       if(last)txt+=`<p style="color:var(--gold);letter-spacing:3px;font-weight:700;margin-top:20px">ACT ${ACTS[m.act].n} COMPLETE${cfg.hc?' ON HARDCORE':''}</p>${ACTS[m.act+1]&&!ACTS[m.act+1].ready?`<p style="color:var(--dim)">Act ${ACTS[m.act+1].n}: ${ACTS[m.act+1].title} is coming in the next update.</p>`:''}`;
       if(missionOpen(idx+1))btns=`<button class="btn primary" onclick="openBrief(${idx+1})">NEXT: ${last?'ACT '+ACTS[STORY[idx+1].act].n+' · ':''}${STORY[idx+1].title.toUpperCase()} ▸</button>`;
       btns+=`<button class="btn" onclick="showScreen('scrStory')">CAMPAIGN</button>`;}
-    else{txt=`<p>${MS.failReason?MS.failReason+'.':m.stealthText?m.stealthText[5]:m.type==='stealth'?'You were taken down inside the armory.':m.type==='tutorial'?'Rook shakes his head. "Again."':'The Syndicate held this time. Regroup, re-equip and go again.'}</p><p style="color:var(--dim)">Tip: buy armor, stop before you shoot, aim at head height and flash before you push. You can lower the difficulty on the campaign screen.</p>`;
+    else{txt=`<p>${MS.failReason?MS.failReason+'.':m.stealthText?m.stealthText[5]:m.type==='stealth'?'You were taken down inside the armory.':m.type==='tutorial'?'Rook shakes his head. "Again."':m.type==='waves'||m.type==='survival'||m.type==='hackdefend'?'You were overrun. Regroup and go again.':m.type?'You were killed in action. Regroup and go again.':'The Syndicate held this time. Regroup, re-equip and go again.'}</p><p style="color:var(--dim)">Tip: buy armor, stop before you shoot, aim at head height and flash before you push. You can lower the difficulty on the campaign screen.</p>`;
       btns=`<button class="btn primary" onclick="startStory(${idx})">RETRY MISSION</button><button class="btn" onclick="showScreen('scrStory')">CAMPAIGN</button>`;}}
   else{txt=`<p>${won?'Clean match. The bots are filing a complaint.':'The bots took this one. Run it back?'}</p>`;btns=`<button class="btn primary" onclick="setupMatch(state.cfg)">REMATCH</button><button class="btn" onclick="showScreen('scrQuick')">CHANGE SETTINGS</button>`;}
   btns+=`<button class="btn" onclick="showScreen('scrMain')">MAIN MENU</button>`;
@@ -2112,7 +2221,7 @@ function update(dt){
   for(let i=0;i<agents.length;i++)for(let j=i+1;j<agents.length;j++){const a=agents[i],b=agents[j];if(!a.alive||!b.alive)continue;const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,d=Math.hypot(dx,dz);
     if(d<.7&&d>1e-4){const p=(.7-d)/2;a.pos.x-=dx/d*p;a.pos.z-=dz/d*p;b.pos.x+=dx/d*p;b.pos.z+=dz/d*p;}}
   if(player.alive&&blindT<=0&&Math.floor(T*8)!==Math.floor((T-dt)*8)){const f=camForward();for(const e of agents){if(e.team===player.team||!e.alive)continue;const d=V3().subVectors(V3(e.pos.x,e.pos.y+1.2,e.pos.z),camera.position);const L=d.length();if(L<100&&d.dot(f)/L>.55&&canSee(camera.position,e))e.spotted=T+1.2;}}
-  updateNades(dt);updateSpike(dt);checkRound();updateFx(dt);updateParts(dt);updateHack();updateProjs(dt);updateDyn();updateChaosAgents(dt);msTick(dt);bossTick();msMarkerHUD();
+  updateNades(dt);updateSpike(dt);checkRound();updateFx(dt);updateParts(dt);updateHack();updateProjs(dt);updateDyn();updateChaosAgents(dt);weatherTick(dt);msTick(dt);bossTick();msMarkerHUD();
 }
 function updateCamera(dt){
   if(CS.on)return;
@@ -2887,7 +2996,7 @@ function renderMissions(){$('storyName').textContent='Sergeant '+profile.name;
     if(!A.ready){h+=`<div class="actLocked">🔒 ${A.count} missions · coming in a future update</div>`;return;}
     h+='<div class="missions">';STORY.forEach((m,i)=>{if(m.act!==ai)return;const open=missionOpen(i);const st=CAMP.stars[m.code]|0;
       const cleared=isHC()?i<CAMP.hc.prog-1:st>0;
-      const sub=({tutorial:'TRAINING',stealth:'STEALTH',escort:'ESCORT',hostage:'HOSTAGE RESCUE',waves:'HOLD OUT',defuse2:'DOUBLE DEFUSE',boss:'BOSS',assault:'ASSAULT'})[m.type]||(m.boss?'BOSS · RETAKE':m.retake?'RETAKE':'DEFEND');
+      const sub=({tutorial:'TRAINING',stealth:'STEALTH',escort:'ESCORT',hostage:'HOSTAGE RESCUE',waves:'HOLD OUT',defuse2:'DOUBLE DEFUSE',boss:'BOSS',assault:'ASSAULT',escape:'ESCAPE',survival:'SURVIVAL',sniper:'SNIPER',hackdefend:'HACK & DEFEND'})[m.type]||(m.boss?'BOSS · RETAKE':m.retake?'RETAKE':'DEFEND');
       h+=`<div class="mcard ${open?'':'locked'}" data-m="${i}">${cleared?'<div class="done">✓ CLEARED</div>':''}<div class="code">${m.code}</div><div class="t">${m.title}</div><div class="s">${MAPS[m.map].name.toUpperCase()}<br>${sub}</div><div class="stars">${'★'.repeat(st)}<i>${'★'.repeat(3-st)}</i></div>${open?'':'<div class="s" style="margin-top:6px">🔒 LOCKED</div>'}</div>`;});
     h+='</div>';});
   $('missionList').innerHTML=h;}
@@ -2897,7 +3006,7 @@ let briefIdx=0;
 function openBrief(i){briefIdx=i;const m=STORY[i];const D=CAMP_DIFFS[CAMP.diff];$('bTitle').innerHTML=`<small>${m.code} · ACT ${ACTS[m.act].n}</small>${m.title.toUpperCase()}`;$('bLoc').textContent=m.loc;$('bText').innerHTML=m.brief.map(p=>`<p>${nm(p)}</p>`).join('');
   $('bObj').innerHTML=m.obj.map(o=>`<li>${o}</li>`).join('');
   const goals=starGoals(m);
-  const mode=({tutorial:'Training',stealth:'Stealth infiltration',escort:'Escort',hostage:'Hostage rescue',waves:'Hold out ('+m.waves+' waves)',defuse2:'Two bombs, one clock',boss:'Boss fight',assault:'Assault'})[m.type]||(m.retake?'Retake':'Bomb defusal');
+  const mode=({tutorial:'Training',stealth:'Stealth infiltration',escort:'Escort',hostage:'Hostage rescue',waves:'Hold out ('+m.waves+' waves)',defuse2:'Two bombs, one clock',boss:'Boss fight',assault:'Assault',escape:m.escapeTime?'Timed escape':'Escape',survival:'Survival',sniper:'Sniper overwatch',hackdefend:'Hack and defend'})[m.type]||(m.retake?'Retake':'Bomb defusal');
   $('bIntel').innerHTML=`<div class="kv"><span>Mode</span><b>${mode}</b></div><div class="kv"><span>Squad</span><b>${profile.name}${m.allies.length?', '+m.allies.join(', '):' (solo)'}</b></div>${m.enemies?`<div class="kv"><span>${m.type==='stealth'?'Guards':'Terrorists'}</span><b>${m.enemies+(m.type?0:D.extra)}${m.boss?' + '+m.boss:''}</b></div>`:''}<div class="kv"><span>Difficulty</span><b style="color:${isHC()?'var(--red)':'inherit'}">${D.label}</b></div>${m.type?'':`<div class="kv"><span>Starting money</span><b>$${Math.round(m.credits*D.cred)}</b></div>`}<div class="kv"><span>Map</span><b>${MAPS[m.map].name} · ${m.theme}</b></div>
    <div style="margin-top:10px;color:var(--dim);font-size:13px;letter-spacing:2px">STARS</div>${goals.map(g=>`<div class="kv"><span>★</span><b style="font-weight:500">${g}</b></div>`).join('')}`;
   showScreen('scrBrief');}
@@ -2911,7 +3020,8 @@ function startStory(i){const m=STORY[i];const D=CAMP_DIFFS[CAMP.diff];
   document.body.classList.toggle('hc',isHC());
   state.betrayShown=false;state.outroPlayed=false;state.missionT0=T;
   if(m.type)msStart(m);
-  const shots=introShots(m);if(m.boss){const b2=bossIntroShots2(m);shots.push(...(b2||bossIntroShots()));}
+  const quick=state.quickRestart;state.quickRestart=false;
+  const shots=quick?[]:introShots(m);if(m.boss&&!quick){const b2=bossIntroShots2(m);shots.push(...(b2||bossIntroShots()));}
   playCS(shots,()=>{if(m.type==='tutorial')msBegin();else if(m.type)msBegin();});}
 
 // ---------- cutscene director ----------
@@ -2937,7 +3047,7 @@ function csTick(rdt){const s=CS.shots[CS.i];if(!s){csEnd();return;}const dt=rdt*
   const look=s.look?(s.lookTo?vlerp(s.look,s.lookTo,k):s.look):null;if(look)camera.lookAt(look);camYaw=camera.rotation.y;
   const fv=s.fov?(s.fovTo?lerp(s.fov,s.fovTo,k):s.fov):settings.fov;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix();}
   T+=dt;for(const a of agents)if(!a.isPlayer&&(a.puppet||a.dummy||!a.alive))updateBot(a,dt);
-  updateFx(dt);updateParts(dt);
+  updateFx(dt);updateParts(dt);weatherTick(dt);
   if(keys.Space){CS.skipT+=rdt;if(CS.skipT>=.6){csEnd(true);return;}}else CS.skipT=Math.max(0,CS.skipT-rdt*2);
   $('cineSkip').firstElementChild.style.width=(CS.skipT/.6*100)+'%';
   if(CS.t>=s.d)csNext();}
@@ -3036,15 +3146,17 @@ function msStart(m){Object.assign(MS,{on:true,m,i:-1,alarm:false,detect:0,prog:n
     if(m.map==='vault')areas.splice(0,areas.length,MAP.siteC.B,MAP.siteC.B,MAP.siteC.A,MAP.spawnC.def,vlerp(MAP.siteC.A,MAP.siteC.B,.5),vlerp(MAP.spawnC.atk,MAP.siteC.A,.5),MAP.siteC.A,MAP.spawnC.def);
     agents.filter(a=>a.team==='red').forEach((g,i)=>{const c=areas[i%areas.length];const route=[0,1,2].map(()=>randomCellNear(c,3));
       g.guard={route,i:0,wait:rand(0,2),det:0};g.pos.copy(route[0]);g.vel.set(0,0,0);g.armor=0;g.helmet=false;g.inv[1]=mkInst(i%2?'mp5':'ak');g.slot=1;setBotGun(g);g.puppet={};});}
+  if(m.weather)weatherStart(m.weather);
   if(['escort','hostage','waves','defuse2','boss','assault'].includes(m.type))act2Start(m);
+  if(['escape','survival','sniper','hackdefend'].includes(m.type))act3Start(m);
   $('mobj').classList.remove('hidden');}
 function msBegin(){MS.started=true;MS.t0=T;msNextStep();if(MS.m.type==='stealth')banner('INFILTRATE','Stay hidden · knife guards from behind','neutral',2.6);}
 function msNextStep(){MS.i++;const s=MS.steps[MS.i];if(!s){msComplete();return;}MS.prompt='';MS.prog=null;s.enter&&s.enter();sfx.radio&&sfx.radio();}
-function msComplete(){if(MS.done)return;MS.done=true;setMarker(null);if(MS.m.outro==='act2'){playCS(act2OutroShots(),()=>endMatch(true));return;}banner('MISSION COMPLETE','','win',2.5);sfx.win();setTimeout(()=>{if(state.running)endMatch(true);},2200);}
+function msComplete(){if(MS.done)return;MS.done=true;setMarker(null);if(MS.m.outro==='act2'||MS.m.outro==='act3'){playCS(MS.m.outro==='act2'?act2OutroShots():act3OutroShots(),()=>endMatch(true));return;}banner('MISSION COMPLETE','','win',2.5);sfx.win();setTimeout(()=>{if(state.running)endMatch(true);},2200);}
 function msTick(dt){if(!MS.on||!MS.started||MS.done||!state.running)return;state.timer=T-MS.t0;
   const s=MS.steps[MS.i];if(s&&player.alive&&s.check(dt))msNextStep();
   const st=MS.steps[MS.i];if(st){setT('mobjT',st.obj);setT('mobjS',st.prog?st.prog():st.sub||'');}
-  if(MS.m.type==='stealth')stealthTick(dt);else if(!MS.done)act2Tick(dt);
+  if(MS.m.type==='stealth')stealthTick(dt);else if(!MS.done){act2Tick(dt);if(!MS.done)act3Tick(dt);}
   if(MS.beam&&MS.beam.visible)MS.beam.material.opacity=.16+Math.sin(T*4)*.08;}
 function msMarkerHUD(){const el=$('mmark');if(!MS.on||!MS.marker||!player.alive||CS.on){el.classList.add('hidden');return;}
   const v=MS.marker.clone().setY(1.4);const d=Math.hypot(v.x-player.pos.x,v.z-player.pos.z);if(typeof v.project!=='function'){el.classList.add('hidden');return;}const p=v.clone().project(camera);let x=p.x,y=p.y;
@@ -3059,7 +3171,7 @@ function stealthTick(dt){let maxDet=0;const P=player;
     if(!g.puppet)g.puppet={};
     if(!g.puppet.path||g.puppet.pi>=g.puppet.path.length){G.wait-=dt;if(G.wait<=0){G.i=(G.i+1)%G.route.length;puppetGo(g,G.route[G.i],1.6);G.wait=rand(1.6,3.4);G.base=g.yaw;}else g.puppet.face=(G.base!=null?G.base:g.yaw)+Math.sin(T*.7+G.i*2)*1.2;}
     if(P.alive){const e=eyeOf(g);const dx=P.pos.x-g.pos.x,dz=P.pos.z-g.pos.z,d=Math.hypot(dx,dz);const fw=fwdOf(g.yaw);const dot=(dx*fw.x+dz*fw.z)/Math.max(d,.01);
-      const range=(P.crouch?14:24)*(state.cfg.theme==='night'?.85:1);
+      const range=(P.crouch?14:24)*(state.cfg.theme==='night'?.85:1)*wxVision();
       const seen=d<range&&(dot>.55||d<2.2)&&canSee(e,P);
       if(seen){G.det+=dt*(.35+1.6*(1-d/range))*(P.crouch?.6:1)*(Math.hypot(P.vel.x,P.vel.z)>3?1.4:1);g.puppet.look=P;g.puppet.path=null;}
       else{G.det=Math.max(0,G.det-dt*.3);if(g.puppet.look===P&&G.det<.2)delete g.puppet.look;}
@@ -3081,7 +3193,7 @@ function msAlarm(why){if(MS.alarm||!MS.on)return;MS.alarm=true;banner('ALARM RAI
   for(let i=0;i<n;i++){const a=makeAgent({name:'Response '+(i+1),team:'red',diff:storyDiff('hard'),credits:4000});a.guard={route:[MAP.spawnC.def],i:0,wait:0,det:1};a.inv[1]=mkInst('ak');a.slot=1;a.armor=100;
     const p=randomCellNear(MAP.spawnC.def,3);a.pos.set(p.x,0,p.z);setBotGun(a);a.investigate=player.pos.clone();a.investigateUntil=T+60;agents.push(a);}
   buildAlives();}
-function msStop(){if(MS.m)act2Cleanup();TS_UNTIL=0;document.body.classList.remove('slowmo');MS.on=false;MS.started=false;setMarker(null);$('mobj').classList.add('hidden');$('mdet').classList.add('hidden');$('mmark').classList.add('hidden');}
+function msStop(){if(MS.m){act2Cleanup();act3Cleanup();}TS_UNTIL=0;document.body.classList.remove('slowmo');MS.on=false;MS.started=false;setMarker(null);$('mobj').classList.add('hidden');$('mdet').classList.add('hidden');$('mmark').classList.add('hidden');}
 
 // ---------- Vex boss phases ----------
 function bossTick(){const cfg=state.cfg;if(!cfg||!cfg.story||!cfg.story.bossPhases||state.mp)return;const v=agents.find(a=>a.boss);const bb=$('bossbar');
@@ -3090,7 +3202,7 @@ function bossTick(){const cfg=state.cfg;if(!cfg||!cfg.story||!cfg.story.bossPhas
   $('bbFill').style.width=Math.max(0,v.hp/v.maxHp*100)+'%';$('bbShield').style.width=Math.max(0,(v.oshield||0)/80*100)+'%';
   if(!v.alive||(state.phase!=='live'&&state.phase!=='planted'))return;const f=v.hp/v.maxHp;
   if(f<=.66&&!state.bp2){state.bp2=true;banner('PHASE 2',v.name+' called in backup','lose',2);radio(v.name,'Boys! Get in here!',true);say('Boys! Get in here!',{pitch:1.1});if(state.cfg.story.fog)for(let i=0;i<8;i++)puff(V3(v.pos.x+rand(-4,4),1,v.pos.z+rand(-4,4)),6,4,4);
-    const n=CAMP.diff==='recruit'?1:2;for(let i=0;i<n;i++){const a=makeAgent({name:'Hollow·Guard '+(i+1),team:v.team,diff:storyDiff('hard'),credits:4000,temp:true});a.inv[1]=mkInst(i?'mp5':'ak');a.slot=1;a.armor=100;const p=randomCellNear(v.pos,4);a.pos.set(p.x,0,p.z);setBotGun(a);a.investigate=player.pos.clone();a.investigateUntil=T+30;agents.push(a);}buildAlives();}
+    const n=CAMP.diff==='recruit'?1:2;for(let i=0;i<n;i++){const a=makeAgent({name:(v.backupName||'Hollow·Guard')+' '+(i+1),team:v.team,diff:storyDiff('hard'),credits:4000,temp:true,forceLook:v.forceLook,sigma:!!v.nonLethal});a.inv[1]=mkInst(i?'mp5':'ak');a.slot=1;a.armor=100;const p=randomCellNear(v.pos,4);a.pos.set(p.x,0,p.z);setBotGun(a);a.investigate=player.pos.clone();a.investigateUntil=T+30;agents.push(a);}buildAlives();}
   if(f<=.33&&!state.bp3){state.bp3=true;v.oshield=CAMP.diff==='recruit'?40:80;banner('PHASE 3',v.name+' is shielded and coming for you','lose',2);radio(v.name,'Fine. Let\'s finish this ourselves.',true);say('Fine. Let\'s finish this ourselves.',{pitch:1.1});
     v.investigate=player.pos.clone();v.investigateUntil=T+30;v.awareUntil=T+3;v.faceTo=player.pos.clone();sfx.armorHit&&sfx.armorHit();}}
 function bossRoundReset(){state.bp2=false;state.bp3=false;let rm=false;for(let i=agents.length-1;i>=0;i--){const a=agents[i];if(a.temp){scene.remove(a.mesh);agents.splice(i,1);rm=true;}}if(rm)buildAlives();const v=agents.find(a=>a.boss);if(v)v.oshield=0;}
@@ -3100,7 +3212,10 @@ function missionStars(m,won){const st=state.stats;const c={acc:st.shots?st.hits/
   const goals=m.stars||[['Accuracy 35% or better',x=>x.acc>=35],['Die once or less',x=>x.deaths<=1]];
   const got=[!!won].concat(goals.map(g=>won&&!!g[1](c)));return {got,labels:starGoals(m)};}
 function hcDeathCheck(v){const cfg=state.cfg;if(!cfg||!cfg.story||state.mp)return;if(v!==player)return;
-  if(cfg.hc||MS.on)setTimeout(()=>{if(state.running&&!player.alive&&state.cfg===cfg)endMatch(false);},2600);}
+  if(cfg.hc){setTimeout(()=>{if(state.running&&!player.alive&&state.cfg===cfg)endMatch(false);},2600);return;}
+  if(MS.done)return;MS.done=MS.on?true:MS.done;
+  setTimeout(()=>{if(state.running&&!player.alive&&state.cfg===cfg)banner('YOU DIED','Restarting mission…','lose',2.5);},1200);
+  setTimeout(()=>{if(state.running&&!player.alive&&state.cfg===cfg){kcStop();state.quickRestart=true;state.restarts=(state.restarts|0)+1;startStory(cfg.storyIdx);}},3600);}
 
 // =====================================================================
 //  ACT II mission types: escort, hostage, waves, defuse2, boss, assault
@@ -3125,7 +3240,7 @@ function sentryTick(dt){const P=player;
     if(G.alerted){G.re=(G.re||0)-dt;if(G.re<=0){G.re=2;if(!g.target){g.investigate=huntTarget(g).clone();g.investigateUntil=T+10;}}continue;}
     if(!g.puppet)g.puppet={};g.puppet.face=(G.base!=null?G.base:(G.base=g.yaw))+Math.sin(T*.6+g.pos.x)*1.1;
     for(const b of agents){if(!b.alive||b.team==='red'||b.noTarget)continue;const e=eyeOf(g);const dx=b.pos.x-g.pos.x,dz=b.pos.z-g.pos.z,d=Math.hypot(dx,dz);const fw=fwdOf(g.yaw);const dot=(dx*fw.x+dz*fw.z)/Math.max(d,.01);
-      const range=(b.isPlayer&&b.crouch?13:22)*(state.cfg.theme==='night'?.85:1)*(state.cfg.story&&state.cfg.story.fog?.6:1);
+      const range=(b.isPlayer&&b.crouch?13:22)*(state.cfg.theme==='night'?.85:1)*(state.cfg.story&&state.cfg.story.fog?.6:1)*wxVision();
       if(d<range&&(dot>.5||d<2.2)&&canSee(e,b)){G.det+=dt*(.6+2*(1-d/range))*(b.isPlayer&&b.crouch?.6:1);g.puppet.look=b;}
       if(G.det>=1){sentryAlert(g);break;}}
     G.det=Math.max(0,G.det-dt*.25);}}
@@ -3159,6 +3274,7 @@ function act2Start(m){const t=m.type;MS.extra={};MS.breached=false;MS.failReason
         const nx=MS.bombs.find(b=>!b.done);if(nx)setMarker(nx.pos);return !nx;}}];}
   if(t==='boss'){teleportSquad(MAP.spawnC.def);const gs=marksOf('g');gs.forEach((p,i)=>spawnSentry(p,sentryName(i)));
     const B=makeAgent({name:m.boss,team:'red',diff:'boss',boss:true,scale:1.08,maxHp:CAMP.diff==='recruit'?220:320,hp:CAMP.diff==='recruit'?220:320,credits:16000,noFlash:true});
+    if(m.nonLethal){B.nonLethal=true;B.forceLook='ct';B.backupName='SIGMA·Tactical';B.noFlash=false;rebuildMesh(B);}
     B.pos.set(MAP.siteC.B.x,0,MAP.siteC.B.z);armBot(B,'ak',100);B.yaw=yawTo(player.pos.x-B.pos.x,player.pos.z-B.pos.z);agents.push(B);MS.boss=B;
     if(m.fog&&scene.fog){scene.fog.near=4;scene.fog.far=42;}
     MS.steps=[{obj:'Find and kill '+m.boss,sub:'She is somewhere in the smoke',enter(){setMarker(null);},prog:()=>m.boss+' '+Math.max(0,Math.ceil(B.hp/B.maxHp*100))+'%',check:()=>!B.alive}];}
@@ -3209,7 +3325,76 @@ function act2OutroShots(){const k=msMark('k');const desk=new THREE.Group();
    {d:4,from:sp.clone().add(V3(1.4,.6,.6)),to:sp.clone().add(V3(1.2,.5,.4)),look:sp,fov:45,sub:['JUNO','That voice... that\'s Overwatch. That\'s Director Reyes.']},
    {d:5,from:sp.clone().add(V3(.15,.25,.8)),to:sp.clone().add(V3(.1,.12,.55)),look:sp.clone().add(V3(0,.05,-.2)),fov:36,sub:['REYES','And as of thirty seconds ago, you are a rogue agent who murdered an ambassador. Run, Kestrel.']},
    {d:4,black:true,card:['SIGMA ALERT · ALL UNITS','SGT. KESTREL — ROGUE','Armed and dangerous. Shoot on sight.'],say:false},
-   {d:4.5,black:true,card:['ACT II COMPLETE','ASH','Act III: Burned — coming in the next update'],say:false,always(){scene.remove(desk);for(const a of agents)if(a._hid)a._hid=false;}}];}
+   {d:4.5,black:true,card:['ACT II COMPLETE','ASH','Next: Act III — Burned'],say:false,always(){scene.remove(desk);for(const a of agents)if(a._hid)a._hid=false;}}];}
+
+// =====================================================================
+//  ACT III mission types: escape, survival, sniper, hackdefend, weather
+// =====================================================================
+const WX={kind:null,pts:null,pos:null};
+function weatherStart(kind){weatherStop();WX.kind=kind;if(kind!=='snow')return;
+  if(scene.fog){scene.fog.color&&scene.fog.color.setHex&&scene.fog.color.setHex(0xdfe6ec);scene.fog.near=5;scene.fog.far=58;}
+  if(scene.background&&scene.background.setHex)scene.background.setHex(0xdfe6ec);
+  try{const N=1400,g=new THREE.BufferGeometry(),a=new Float32Array(N*3);for(let i=0;i<N;i++){a[i*3]=rand(-25,25);a[i*3+1]=rand(0,18);a[i*3+2]=rand(-25,25);}
+    g.setAttribute('position',new THREE.BufferAttribute(a,3));WX.pos=a;WX.pts=new THREE.Points(g,new THREE.PointsMaterial({color:0xffffff,size:.09,transparent:true,opacity:.85,depthWrite:false}));WX.pts.frustumCulled=false;scene.add(WX.pts);}catch(e){WX.pts=null;}}
+function weatherStop(){if(WX.pts){scene.remove(WX.pts);WX.pts=null;}WX.kind=null;}
+function weatherTick(dt){if(!WX.pts||!WX.pos)return;const a=WX.pos,c=camera.position;
+  for(let i=0;i<a.length;i+=3){a[i+1]-=dt*(2.2+(i%7)*.15);a[i]+=Math.sin(T*.7+i)*dt*.4;if(a[i+1]<0){a[i+1]=18;a[i]=rand(-25,25);a[i+2]=rand(-25,25);}}
+  WX.pts.position.set(c.x,0,c.z);try{WX.pts.geometry.attributes.position.needsUpdate=true;}catch(e){}}
+const wxVision=()=>WX.kind==='snow'?.62:1;
+function spawnSigma(p,i){const a=spawnHunter(p,'SIGMA·Tactical '+(i+1),pick(['mp5','ak']));a.sigma=true;a.forceLook='ct';rebuildMesh(a);setBotGun(a);return a;}
+function digitRoute(){return Object.keys(MAP.marks||{}).filter(k=>/[0-9]/.test(k)&&k!=='9').sort().map(k=>msMark(k));}
+function spawnCache(p){const m=new THREE.Mesh(new THREE.BoxGeometry(.7,.45,.5),new THREE.MeshStandardMaterial({color:0x2f4a2a,emissive:0x40ff60,emissiveIntensity:.35}));m.position.set(p.x,.23,p.z);scene.add(m);return {pos:p,mesh:m,taken:false};}
+function takeCache(c){c.taken=true;scene.remove(c.mesh);MS.extra.caches=(MS.extra.caches|0)+1;const P=player;
+  const roll=pick(['ak','mp5','shotgun','deagle','ammo','armor','he','ak','mp5']);let msg='';
+  if(roll==='ammo'){for(const s of [1,2]){const it=P.inv[s];if(it){const w=WEAPONS[it.id];it.reserve=w.reserve;it.mag=w.mag;}}msg='Ammo refilled';}
+  else if(roll==='armor'){P.armor=100;P.helmet=true;msg='Armor and helmet';}
+  else if(roll==='he'){P.nadesN.he=1;P.nadesN.flash=Math.max(P.nadesN.flash,1);msg='Frag and flashbang';}
+  else{const w=WEAPONS[roll];const slot=w.slot||1;P.inv[slot]=mkInst(roll);equip(P,slot,true);msg=w.name;}
+  banner('CACHE',msg,'win',1.4);sfx.swap&&sfx.swap();}
+function act3Start(m){const t=m.type;if(m.weather)weatherStart(m.weather);MS.extra=Object.assign(MS.extra||{},{sigmaKills:0,caches:0});
+  if(t==='escape'){const route=digitRoute();if(m.startAt==='B'){route.push(MAP.spawnC.atk.clone());teleportSquad(MAP.siteC.B);}else teleportSquad(MAP.spawnC.atk);
+    MS.route=route;MS.ci=0;MS.pT=4;MS.escT=m.escapeTime?({recruit:1.3,veteran:1,elite:.9,hardcore:.85})[CAMP.diff]*m.escapeTime:0;
+    if(m.startAt==='B'){let i=0;for(const r of route.slice(0,-1))for(let j=0;j<diffCount(2);j++)spawnSentry(randomCellNear(r,3),sentryName(i++));}
+    MS.steps=[{obj:'Reach every checkpoint',sub:'Keep moving',enter(){setMarker(route[0]);},prog:()=>'Checkpoint '+Math.min(MS.ci+1,route.length)+' / '+route.length+(MS.escT?' · '+fmtTime(MS.escT)+' to detonation':''),
+      check:()=>{if(near(route[MS.ci],3.2)){MS.ci++;sfx.radio&&sfx.radio();if(MS.ci<route.length)setMarker(route[MS.ci]);}return MS.ci>=route.length;}}];}
+  if(t==='survival'){teleportSquad(MAP.spawnC.def);player.inv={1:null,2:Object.assign(mkInst('glock'),{mag:6,reserve:0}),3:mkInst('knife')};player.slot=2;player.armor=0;player.helmet=false;player.nadesN={he:0,flash:0};equip(player,2,true);
+    MS.caches=marksOf('k').map(spawnCache);MS.surv=m.survive*({recruit:.8,veteran:1,elite:1.1,hardcore:1.15})[CAMP.diff];MS.sT=MS.surv;MS.pT=6;
+    MS.steps=[{obj:'Survive until extraction',sub:'Walk over glowing crates to grab weapons',enter(){setMarker(null);},prog:()=>fmtTime(MS.sT)+' until the truck arrives · '+(MS.caches.filter(c=>!c.taken).length)+' caches left',check:()=>MS.sT<=0},
+     {obj:'Reach the truck',sub:'South edge of the shantytown',enter(){setMarker(MAP.spawnC.atk);radio('MARA','Truck\'s here! South side, go!');},check:()=>near(MAP.spawnC.atk,3.5)}];}
+  if(t==='sniper'){const route=digitRoute();const perch=msMark('9');player.pos.copy(nearestOpen(perch));player.inv={1:mkInst('sniper'),2:mkInst('deagle'),3:mkInst('knife')};player.slot=1;player.armor=100;player.helmet=true;equip(player,1,true);
+    const V=makeAgent({name:'Mara',team:'blue',diff:'normal',maxHp:150,hp:150,vip:true,forceLook:'ct'});rebuildMesh(V);V.pos.copy(nearestOpen(route[0]));V.puppet={};V.inv[1]=mkInst('sniper');V.slot=1;setBotGun(V);agents.push(V);
+    MS.vip=V;MS.route=route;MS.ri=1;MS.amb={2:'x',3:'y',4:'w',5:'x'};player.yaw=yawTo(V.pos.x-player.pos.x,V.pos.z-player.pos.z);
+    MS.steps=[{obj:'Cover Mara until she reaches the drop',sub:'She stops when gunmen are near her',enter(){setMarker(route[route.length-1]);},prog:()=>'Mara '+Math.max(0,Math.ceil(V.hp/V.maxHp*100))+'% · waypoint '+Math.min(MS.ri,route.length-1)+' / '+(route.length-1),check:()=>MS.ri>=route.length&&V.pos.distanceTo(route[route.length-1])<3}];}
+  if(t==='hackdefend'){teleportSquad(msMark('k'));const term=msMark('k');MS.hack=0;MS.pT=3;MS.allies=agents.filter(a=>a.team==='blue'&&!a.isPlayer);MS.extra.alliesTotal=MS.allies.length;MS.buyOK=true;setTimeout(()=>{MS.buyOK=false;},15000);
+    MS.steps=[{obj:'Hold the lab while Juno downloads',sub:'Stay within 9m of the terminal',enter(){setMarker(term);},prog:()=>'Download '+Math.floor(MS.hack*100)+'%'+(near(term,9)?'':' · STALLED — get back to the terminal'),check:()=>MS.hack>=1}];}
+  buildAlives();}
+function act3Tick(dt){const t=MS.m.type;
+  if(t==='escape'){if(MS.escT){MS.escT-=dt;MS.extra.timeLeft=MS.escT;if(MS.escT<=0){for(let i=0;i<5;i++){const p=randomCellNear(player.pos,4);explosionFx(p,'rocket');}sfx.rocket(player.pos);shakeT=2.5;msFail('The outpost exploded');return;}}
+    if(MS.m.startAt!=='B'){MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?11:8;const alive=agents.filter(a=>a.sigma&&a.alive).length;if(alive<diffCount(3)){const back=MS.route[Math.max(0,MS.ci-2)];const p=MS.ci===0?randomCellNear(MAP.spawnC.def,2):randomCellNear(back,3);spawnSigma(p,agents.filter(a=>a.sigma).length);buildAlives();if(Math.random()<.4)radio('SIGMA','Target is moving! Box them in!',true);}}}
+    else{MS.pT-=dt;if(MS.pT<=0){MS.pT=10;if(agents.filter(a=>a.hunter&&a.alive).length<diffCount(2)){spawnHunter(randomCellNear(pick(marksOf('w')),2),'Meridian·Cleaner '+(agents.length));buildAlives();}}}
+    sentryTick(dt);}
+  if(t==='survival'){MS.sT-=dt;for(const c of MS.caches)if(!c.taken){c.mesh.rotation.y+=dt;if(near(c.pos,1.4)&&player.alive)takeCache(c);}
+    if(MS.sT>0){MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?8:6;if(agents.filter(a=>a.hunter&&a.alive).length<diffCount(4)){spawnHunter(randomCellNear(pick(marksOf('w')),2),'Meridian·Raider '+agents.length,pick(['mp5','glock','shotgun','ak']));buildAlives();}}}}
+  if(t==='sniper'){const V=MS.vip;if(!V.alive){msFail('Mara was killed');return;}MS.extra.vipHp=V.hp/V.maxHp;
+    const tgt=MS.route[Math.min(MS.ri,MS.route.length-1)];const danger=agents.some(a=>a.team==='red'&&a.alive&&a.pos.distanceTo(V.pos)<14);
+    if(!danger){if(!V.puppet.path||V.puppet.pi>=V.puppet.path.length||V.puppet.goal!==MS.ri){puppetGo(V,tgt,2.6);V.puppet.goal=MS.ri;}}else{V.puppet.path=null;}
+    if(V.pos.distanceTo(tgt)<2.2&&MS.ri<MS.route.length){const ch=MS.amb[MS.ri];MS.ri++;if(ch){const pts=marksOf(ch);const n=diffCount(2);for(let i=0;i<n;i++){const a=spawnHunter(randomCellNear(pts[i%pts.length]||tgt,2),'Meridian·Gunman '+agents.length,pick(['ak','mp5']));a.investigate=V.pos.clone();}buildAlives();radio('MARA','Contacts ahead of me. Take them!');}}}
+  if(t==='hackdefend'){const term=msMark('k');if(near(term,9)&&player.alive)MS.hack=Math.min(1,MS.hack+dt/(MS.m.hackTime*({recruit:.8,veteran:1,elite:1.1,hardcore:1.15})[CAMP.diff]));MS.extra.alliesAlive=MS.allies.filter(a=>a.alive).length;
+    MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?7:5;if(agents.filter(a=>a.hunter&&a.alive).length<diffCount(4)+Math.floor(MS.hack*3)){spawnHunter(randomCellNear(pick(marksOf('w')),2),'Meridian·Trooper '+agents.length);buildAlives();}}}
+  for(const a of agents)if(a.hunter&&a.alive&&!a.target){a.reT=(a.reT||0)-dt;if(a.reT<=0){a.reT=2.2;a.investigate=(t==='sniper'&&MS.vip&&MS.vip.alive?MS.vip.pos:huntTarget(a)).clone();a.investigateUntil=T+10;}}}
+function act3Cleanup(){if(MS.caches)for(const c of MS.caches)scene.remove(c.mesh);MS.caches=null;weatherStop();}
+function bossSurrender(v){v.surrendered=true;v.alive=true;v.hp=1;v.noTarget=true;v.kneel=true;v.puppet={};v.oshield=0;
+  for(const a of agents)if(a.team==='red'&&a!==v&&a.alive){a.noTarget=true;a.puppet={look:v};a.target=null;}
+  const e=eyeAt(v,1.1),f=fwdOf(v.yaw);const pe=player.pos.clone();
+  playCS([{d:3.6,from:pe.clone().add(V3(0,1.6,0)),to:vlerp(pe.clone().add(V3(0,1.6,0)),e,.35),look:e,fov:50,sub:['ROOK','Enough... Enough. You could have killed me.']},
+    {d:4.2,from:e.clone().addScaledVector(f,2).add(V3(.4,.3,0)),to:e.clone().addScaledVector(f,1.6).add(V3(.3,.2,0)),look:e,fov:42,sub:['ROOK','Reyes said you shot the ambassador. Tell me he\'s lying.']},
+    {d:3.6,from:e.clone().addScaledVector(f,2.4).add(V3(-.6,.5,0)),look:e,fov:45,sub:['ROOK','...Show me the proof, rookie. I\'m listening.']}],()=>msComplete());}
+function act3OutroShots(){const c=V3(MAP.W*S/2,0,MAP.H*S*.25);const pe=player.pos.clone();
+  return [{d:4.5,from:pe.clone().add(V3(0,2,0)).addScaledVector(fwdOf(player.yaw),-2),to:pe.clone().add(V3(0,6,0)).addScaledVector(fwdOf(player.yaw),-6),look:c.clone().setY(3),fov:55,shake:.08,
+     at:[[.3,()=>{explosionFx(c,'rocket');sfx.rocket(c);}],[1.1,()=>{explosionFx(vlerp(c,MAP.siteC.B,.5),'rocket');sfx.rocket(c);shakeT=1.5;}],[2,()=>{explosionFx(MAP.siteC.B,'rocket');explosionFx(MAP.spawnC.def,'rocket');sfx.boom&&sfx.boom();}],[3,()=>{explosionFx(MAP.siteC.A,'rocket');}]],sub:['MARA','The whole mountain\'s coming down!']},
+    {d:4,from:pe.clone().add(V3(0,1.6,0)),look:c.clone().setY(4),fov:50,sub:['MARA','Juno\'s gone, Kestrel. They took her.']},
+    {d:4,black:true,card:['MERIDIAN TRANSPORT · DESTINATION UNKNOWN','JUNO — CAPTURED','The EMBER plans went with her.'],say:false},
+    {d:4.5,black:true,card:['ACT III COMPLETE','BURNED','Act IV: Kindling — coming in the next update'],say:false}];}
 
 let afterReq=false;
 function flashHit(dur){afterReq=true;if(!AU.ctx)return;const ctx=AU.ctx,t=ctx.currentTime,g=AU.master.gain,len=Math.min(5,dur+.5);
