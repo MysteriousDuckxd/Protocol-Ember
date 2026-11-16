@@ -2448,6 +2448,12 @@ function makeBotMesh(a){
   return g;
 }
 
+function crouchPose(a,ud,dt){a.crouchK=lerp(a.crouchK||0,a.crouch?1:0,1-Math.exp(-12*dt));const K=a.crouchK;if(K<.01)return;
+  // bend at hips and knees, sink the body, lean the chest slightly forward
+  const hs=Math.hypot(a.vel.x,a.vel.z),sw=Math.sin(a.walkPhase||0)*Math.min(1,hs/2.5)*.35;const L=ud.legs;
+  L[0].hip.rotation.x=lerp(L[0].hip.rotation.x,1.0+sw,K);L[1].hip.rotation.x=lerp(L[1].hip.rotation.x,1.0-sw,K);
+  L[0].knee.rotation.x=lerp(L[0].knee.rotation.x,-1.6-Math.max(0,-sw)*.4,K);L[1].knee.rotation.x=lerp(L[1].knee.rotation.x,-1.6-Math.max(0,sw)*.4,K);
+  a.mesh.position.y-=.3*K*a.scale;ud.head.rotation.x+= -.1*K;}
 function isDefusing(a){return !!a&&a.alive&&spike.state==='planted'&&spike.defuser===a;}
 function kneelPose(a,ud,dt){const want=isDefusing(a)||a.planting>0||!!a.kneel;a.kneelK=lerp(a.kneelK||0,want?1:0,1-Math.exp(-9*dt));const K=a.kneelK;
   if(ud.gunHolder)ud.gunHolder.visible=K<.5;if(ud.kit)ud.kit.visible=K>=.5&&!a.kneel;if(K<.01)return;
@@ -2848,8 +2854,8 @@ let lastShotEnd=V3();
 function hitscanRay(shooter,o,d,w,muzzle,hits,drawTracer){
   const wr=(HACK.wallbang&&shooter.isPlayer)?{t:260,hit:false,axis:-1,sign:0}:rayWorld(o,d,260);let best=wr.t,hitA=null,part=null;
   for(const e of agents){if(!e.alive||!foe(e,shooter))continue;const s=e.scale;
-    const ck=e.remote&&e.crouch;const th=raySphere(o,d,V3(e.pos.x,e.pos.y+(ck?1.12:1.66)*s,e.pos.z),(HACK.bighead&&shooter.isPlayer?.42:.15)*s);if(th!==null&&th<best){best=th;hitA=e;part='head';}
-    const bb=rayBox(o,d,{x0:e.pos.x-.25*s,x1:e.pos.x+.25*s,y0:e.pos.y,y1:e.pos.y+(ck?1.02:1.52)*s,z0:e.pos.z-.25*s,z1:e.pos.z+.25*s});
+    const ck=e.isPlayer?0:(e.crouchK||0);const th=raySphere(o,d,V3(e.pos.x,e.pos.y+(1.66-.3*ck)*s,e.pos.z),(HACK.bighead&&shooter.isPlayer?.42:.15)*s);if(th!==null&&th<best){best=th;hitA=e;part='head';}
+    const bb=rayBox(o,d,{x0:e.pos.x-.25*s,x1:e.pos.x+.25*s,y0:e.pos.y,y1:e.pos.y+(1.52-.3*ck)*s,z0:e.pos.z-.25*s,z1:e.pos.z+.25*s});
     if(bb&&bb.t<best){best=bb.t;hitA=e;const hy=o.y+d.y*bb.t-e.pos.y;part=hy<.9*s?'leg':'body';}}
   const p=V3().copy(o).addScaledVector(d,best);lastShotEnd=p;
   if(drawTracer)tracer(muzzle,p,shooter.team===player.team?0xfff0b0:0xff9a70);
@@ -2904,7 +2910,7 @@ function groundAtPoint(p){return groundHeight({pos:V3(p.x,p.y+.1,p.z)},.1);}
 
 function updatePlayer(dt){
   const a=player;if(!a.alive)return;
-  const frozen=state.phase==='buy'||a.planting>0||(spike.defuser===a);
+  const frozen=a.planting>0||(spike.defuser===a);const noFire=frozen||state.phase==='buy';const bpx=a.pos.x,bpz=a.pos.z;
   const w=weaponOf(a);
   const ck=settings.crouchKey;a.crouch=!!((ck!=='ctrl'&&keys.KeyC)||(ck!=='c'&&(keys.ControlLeft||keys.ControlRight))||(TOUCH.on&&TOUCH.crouch));
   const tMag=TOUCH.on?Math.hypot(TOUCH.mx,TOUCH.my):0;
@@ -2923,6 +2929,7 @@ function updatePlayer(dt){
   if(keys.Space&&a.onGround&&!frozen&&!a.crouch&&!HACK.fly){a.vel.y=HACK.jump?13:6.9;a.onGround=false;}
   a.height=a.crouch?1.2:1.8;
   if(HACK.fly&&!frozen){a.pos.x+=a.vel.x*dt*1.5;a.pos.z+=a.vel.z*dt*1.5;a.pos.y=Math.max(0,a.pos.y+((keys.Space?7:0)-(a.crouch?7:0))*dt);a.vel.y=0;a.onGround=true;}else moveEntity(a,dt);
+  if(state.phase==='buy')buyClamp(a,bpx,bpz);
   if(a.jailed&&JAIL.c){a.pos.x=clamp(a.pos.x,JAIL.c.x-1.05,JAIL.c.x+1.05);a.pos.z=clamp(a.pos.z,JAIL.c.z-1.05,JAIL.c.z+1.05);if(a.pos.y>1.2){a.pos.y=1.2;a.vel.y=Math.min(0,a.vel.y);}}
   a.eyeH=lerp(a.eyeH,(a.isPlayer&&(isDefusing(a)||a.planting>0))?.98:a.crouch?1.05:1.62,1-Math.exp(-14*dt));
   const hs=Math.hypot(a.vel.x,a.vel.z);if(a.onGround&&hs>4.5){a.stepT-=dt*hs/6;if(a.stepT<=0){a.stepT=.42;sfx.step(a.pos,true);}}
@@ -2937,10 +2944,10 @@ function updatePlayer(dt){
     else{const p=(T-a.reloadStart)/(a.reloadUntil-a.reloadStart);
       if(p>.3&&a.rStage<1){a.rStage=1;sfx.magOut();spawnDroppedMag(a);}if(p>.7&&a.rStage<2){a.rStage=2;sfx.magIn();}if(p>.87&&a.rStage<3){a.rStage=3;w.cls==='pistol'?sfx.slide():sfx.bolt();}
       if(T>=a.reloadUntil){finishReload(a);a.reloadUntil=0;}}}
-  if(w.spinup){const want=mouseDown&&!frozen;a.spin=clamp((a.spin||0)+(want?dt:-dt*1.5),0,w.spinup+.15);if(want){a.spinSnd=(a.spinSnd||0)-dt;if(a.spinSnd<=0){a.spinSnd=.12;sTone({f:110+a.spin*320,dur:.14,vol:.05,type:'sawtooth'});}}}else a.spin=0;
+  if(w.spinup){const want=mouseDown&&!noFire;a.spin=clamp((a.spin||0)+(want?dt:-dt*1.5),0,w.spinup+.15);if(want){a.spinSnd=(a.spinSnd||0)-dt;if(a.spinSnd<=0){a.spinSnd=.12;sTone({f:110+a.spin*320,dur:.14,vol:.05,type:'sawtooth'});}}}else a.spin=0;
   if(TOUCH.on&&settings.assist)aimAssist(a,dt);
-  if(HACK.aim&&mouseDown&&!frozen)aimbot(a);
-  if(mouseDown&&!frozen)playerFire();
+  if(HACK.aim&&mouseDown&&!noFire)aimbot(a);
+  if(mouseDown&&!noFire)playerFire();
   // objectives
   let pr='';
   if(state.phase==='live'&&sideOf(a.team)==='atk'&&spike.carrier===a){const s=siteAt(a.pos);
@@ -3109,7 +3116,8 @@ function updateBot(b,dt){if(b.coopGuest){coopProxyTick(b,dt);return;}
   b.mesh.position.set(b.pos.x,b.pos.y+Math.abs(Math.cos(b.walkPhase))*.025*Math.min(1,hs/4),b.pos.z);b.mesh.rotation.y=b.yaw;
   if(tgt&&engaging){const ey=eyeOf(b);ud.arms.rotation.x=lerp(ud.arms.rotation.x,Math.atan2(tgt.pos.y+1.2-ey.y+.25,Math.hypot(tgt.pos.x-b.pos.x,tgt.pos.z-b.pos.z)),.2);}
   else ud.arms.rotation.x=lerp(ud.arms.rotation.x,busy?-.7:blind?.5:-.12,.1);
-  ud.head.rotation.x=blind?.5:0;ud.arms.rotation.y=0;kneelPose(b,ud,dt);
+  if(!b.puppet){if(b.holdCrouch===undefined)b.holdCrouch=Math.random()<.4;b.crouch=(engaging&&T<b.reloadUntil)||(!engaging&&speed===0&&state.phase!=='buy'&&b.holdCrouch);}
+  ud.head.rotation.x=blind?.5:0;ud.arms.rotation.y=0;crouchPose(b,ud,dt);kneelPose(b,ud,dt);
   if(hs>4.2&&b.onGround){b.stepT-=dt*hs/6;if(b.stepT<=0){b.stepT=.42;if(b.pos.distanceTo(camera.position)<26)sfx.step(b.pos,false);}}}
 function botShoot(b,t,D,w,it,dist){
   if(T<b.nextShot||T<b.reloadUntil)return;
@@ -3269,7 +3277,40 @@ function updateCamera(dt){
 let hudSlow=0;
 function setOp(id,v){v=v<.003?0:Math.round(v*100)/100;if(hudCache['o'+id]===v)return;hudCache['o'+id]=v;const e=$(id).style;e.opacity=v;e.display=v?'block':'none';}
 function phaseLabel(){if(state.phase==='warmup')return 'WARMUP · WAITING FOR PLAYERS';if(state.phase==='over')return 'MATCH OVER';if(state.cfg&&state.cfg.chaos)return 'CHAOS · FIRST TO '+state.cfg.killLimit+' KILLS';if(state.mp&&state.cfg.mode==='tdm')return 'DEATHMATCH · FIRST TO '+state.cfg.killLimit;return {buy:'BUY PHASE',live:'ROUND '+state.round,planted:'BOMB PLANTED',end:'ROUND OVER'}[state.phase]||'';}
-function updateHUD(dt){
+
+// ---------- BUY-PHASE BARRIER: walk around your spawn, a glowing wall keeps you in ----------
+const BZ={key:'',set:null,grp:null};
+function buyZone(){const side=player?sideOf(player.team):'def';const key=MAP.key+'|'+side;if(BZ.key===key&&BZ.set)return BZ;
+  const src=(MAP.spawns[side]||[]).filter(([c,r])=>walkable(c,r));const set=new Set();const q=[];const dist={};
+  for(const [c,r] of src){const k=c+','+r;set.add(k);dist[k]=0;q.push([c,r]);}
+  for(let i=0;i<q.length;i++){const [c,r]=q[i];const d=dist[c+','+r];if(d>=3)continue;for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const n=(c+dx)+','+(r+dz);if(set.has(n)||!walkable(c+dx,r+dz))continue;set.add(n);dist[n]=d+1;q.push([c+dx,r+dz]);}}
+  if(BZ.grp){levelGroup.remove(BZ.grp);disposeGroup(BZ.grp);}
+  const grp=new THREE.Group();const tex=canvasTex(64,128,(g,w,h)=>{const gr=g.createLinearGradient(0,h,0,0);gr.addColorStop(0,'rgba(255,200,60,.85)');gr.addColorStop(1,'rgba(255,200,60,0)');g.fillStyle=gr;g.fillRect(0,0,w,h);g.fillStyle='rgba(255,255,255,.5)';for(let y=0;y<h;y+=16)g.fillRect(0,y,w,2);},1,1);
+  const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,opacity:.8});
+  for(const k of set){const [c,r]=k.split(',').map(Number);for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const n=(c+dx)+','+(r+dz);if(set.has(n)||!walkable(c+dx,r+dz))continue;
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(S,2.4),mat);m.position.set(c*S+S/2+dx*S/2,1.2,r*S+S/2+dz*S/2);m.rotation.y=dx?Math.PI/2:0;grp.add(m);}}
+  grp.visible=false;levelGroup.add(grp);MAP.anim.push(()=>{if(grp.visible){tex.offset.y=(T*.6)%1;mat.opacity=.55+.25*Math.sin(T*4);}});
+  Object.assign(BZ,{key,set,grp});return BZ;}
+function inBuyZone(x,z){const Z=buyZone();if(!Z.set||!Z.set.size)return true;return Z.set.has(Math.floor(x/S)+','+Math.floor(z/S));}
+function buyClamp(a,px,pz){if(!a.isPlayer||!MAP||isRespawnMode()||(state.cfg&&state.cfg.training))return;if(inBuyZone(a.pos.x,a.pos.z))return;
+  if(!inBuyZone(px,pz))return; // spawned outside (e.g. scripted start) — don't trap
+  const nx=a.pos.x,nz=a.pos.z;a.pos.x=px;if(inBuyZone(a.pos.x,nz)){a.pos.z=nz;a.vel.x=0;return;}a.pos.x=nx;a.pos.z=pz;if(inBuyZone(nx,a.pos.z)){a.vel.z=0;return;}a.pos.x=px;a.pos.z=pz;a.vel.x=a.vel.z=0;}
+function buyZoneTick(){if(!state.running||!MAP||!player)return;const on=state.phase==='buy'&&!isRespawnMode()&&!(state.cfg&&state.cfg.training);if(on){const Z=buyZone();Z.grp.visible=true;}else if(BZ.grp)BZ.grp.visible=false;}
+// ---------- NAME TAGS: teammates see names; admins get a gold tag everyone can see ----------
+function isAdminA(a){return a.isPlayer?!!profile.adminSkin:!!a.isAdmin;}
+function makeTag(a){const adm=isAdminA(a);const c=document.createElement('canvas');c.width=256;c.height=adm?96:56;const g=c.getContext('2d');g.textAlign='center';g.textBaseline='middle';
+  let y=c.height-28;if(adm){g.fillStyle='rgba(0,0,0,.55)';g.fillRect(58,4,140,34);g.strokeStyle='#ffc23a';g.lineWidth=2;g.strokeRect(58,4,140,34);g.fillStyle='#ffd86a';g.font='bold 24px Rajdhani,sans-serif';g.fillText('☠ ADMIN',128,22);}
+  g.font='bold 30px Rajdhani,sans-serif';const nm=String(a.name||'').slice(0,16).toUpperCase();const tw=Math.min(250,g.measureText(nm).width+20);g.fillStyle='rgba(0,0,0,.5)';g.fillRect(128-tw/2,y-18,tw,36);g.fillStyle=adm?'#ffd86a':'#eaf6ff';g.fillText(nm,128,y);
+  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false,sizeAttenuation:false}));
+  sp.scale.set(.16,.16*c.height/256,1);sp.position.set(0,2.32,0);sp.renderOrder=11;sp.userData={name:a.name,adm};return sp;}
+function tagTick(){if(!state.running||!player)return;for(const a of agents){if(a.isPlayer||!a.mesh)continue;const ud=a.mesh.userData;
+    const ally=a.team===player.team,adm=isAdminA(a);const want=a.alive&&a.mesh.visible&&!a.dummy&&(ally||adm)&&!(CS.on);
+    if(!want){if(ud.tag)ud.tag.visible=false;continue;}
+    if(!ud.tag||ud.tag.userData.name!==a.name||ud.tag.userData.adm!==adm){if(ud.tag){a.mesh.remove(ud.tag);ud.tag.material.map.dispose();ud.tag.material.dispose();}ud.tag=makeTag(a);a.mesh.add(ud.tag);}
+    ud.tag.visible=true;ud.tag.material.depthTest=!ally; // enemies only see an admin's tag when the admin is in sight
+    const d=a.pos.distanceTo(camera.position);ud.tag.material.opacity=ally?1:clamp(1.4-d/45,.25,1);
+    if(ud.marker)ud.marker.position.y=ud.tag.visible?2.05:2.15;}}
+function updateHUD(dt){buyZoneTick();tagTick();
   setT('scoreB',state.score.blue);setT('scoreR',state.score.red);
   if(state.phase==='planted'){setT('timer','▣ '+Math.ceil(spike.timer));$('timer').className='planted';}else{setT('timer',fmtTime(state.phase==='end'?0:state.timer));$('timer').className='';}
   setT('phaseLbl',phaseLabel());
@@ -3516,7 +3557,7 @@ function applyScore(sc){if(!sc)return;state.score.blue=sc[NET.myTeam]||0;state.s
 function setNetWeapon(a,w){if(!WEAPONS[w])return;const sl=WEAPONS[w].slot;if(sl!==3){if(!a.inv[sl]||a.inv[sl].id!==w)a.inv[sl]=mkInst(w);}a.slot=sl;if(a.mesh)setBotGun(a);}
 function addNetAgent(p){if(byNet[p.i]||p.i===NET.me)return;
   const a=makeAgent({name:p.n,team:absToLocal(p.tm),remote:true,netId:p.i,netBot:!!p.bot,absTeam:p.tm,netOutfit:p.out||null,diff:'normal',credits:800});
-  a.alive=!!p.al;a.hp=p.hp||100;a.pos.set(p.x||0,0,p.z||0);a.netT=a.pos.clone();a.yaw=a.netYaw=p.yaw||0;a.kills=p.k||0;a.deaths=p.d||0;setNetWeapon(a,p.w||'glock');
+  a.isAdmin=!!p.adm;a.alive=!!p.al;a.hp=p.hp||100;a.pos.set(p.x||0,0,p.z||0);a.netT=a.pos.clone();a.yaw=a.netYaw=p.yaw||0;a.kills=p.k||0;a.deaths=p.d||0;setNetWeapon(a,p.w||'glock');
   a.mesh.visible=a.alive;agents.push(a);byNet[p.i]=a;setBotControl();buildAlives();return a;}
 function removeNetAgent(id){const a=byNet[id];if(!a||a.isPlayer)return;scene.remove(a.mesh);disposeGroupGeo(a.mesh);agents.splice(agents.indexOf(a),1);delete byNet[id];if(spike.carrier===a)spike.carrier=null;if(spike.defuser===a)spike.defuser=null;buildAlives();}
 function setBotControl(){for(const a of agents){if(!a.netBot)continue;const local=NET.host;if(a.remote===!local)continue;a.remote=!local;
@@ -3653,8 +3694,8 @@ function updateRemote(a,dt){const ud=a.mesh.userData;
   a.yaw+=angDiff(a.yaw,a.netYaw||0)*Math.min(1,dt*16);
   const hs=Math.hypot(a.vel.x,a.vel.z);a.walkPhase+=dt*hs*2.3;const sw=Math.sin(a.walkPhase)*Math.min(1,hs/4)*.6;
   ud.legs[0].hip.rotation.x=sw;ud.legs[1].hip.rotation.x=-sw;ud.legs[0].knee.rotation.x=Math.max(0,-Math.sin(a.walkPhase-.6))*Math.min(1,hs/4)*.9;ud.legs[1].knee.rotation.x=Math.max(0,Math.sin(a.walkPhase-.6))*Math.min(1,hs/4)*.9;
-  a.mesh.position.set(a.pos.x,a.pos.y,a.pos.z);a.mesh.rotation.y=a.yaw;a.mesh.scale.set(a.scale,a.scale*(a.crouch?.68:1),a.scale);
-  ud.arms.rotation.x=lerp(ud.arms.rotation.x,a.netPitch||0,.3);ud.head.rotation.x=0;ud.arms.rotation.y=0;kneelPose(a,ud,dt);}
+  a.mesh.position.set(a.pos.x,a.pos.y,a.pos.z);a.mesh.rotation.y=a.yaw;a.mesh.scale.setScalar(a.scale);
+  ud.arms.rotation.x=lerp(ud.arms.rotation.x,a.netPitch||0,.3);ud.head.rotation.x=0;ud.arms.rotation.y=0;crouchPose(a,ud,dt);kneelPose(a,ud,dt);}
 function updateSpikeMP(dt){const m=spike.mesh;if(state.coopGuest){player._coopDef=!!(player.alive&&keys.KeyF&&spike.state==='planted'&&Math.hypot(player.pos.x-spike.pos.x,player.pos.z-spike.pos.z)<1.7);return;}
   if(spike.myDef&&(!spike.defuser||!ctrl(spike.defuser)||!spike.defuser.alive)){send({t:'dfz',as:spike.myDefId,on:0});spike.myDef=false;spike.dfOk=false;spike.defuse=0;}
   if(spike.state==='dropped'){m.visible=true;m.position.copy(spike.pos);
@@ -3710,7 +3751,7 @@ function tAct(act,down){const P=player;if(!P)return;
 function touchLook(dx,dy){const P=player;if(!P||!P.alive||!state.running)return;const w=weaponOf(P);let z=1;if(w.scope&&isScoped())z=w.zoom;else if(w.adsZoom)z=lerp(1,w.adsZoom,P.ads);
   const k=.0046*settings.tsens/z*(TOUCH.assist?.55:1);P.yaw-=dx*k;P.pitch-=dy*k*(settings.inv?-1:1);P.pitch=clamp(P.pitch,-1.5,1.5);TOUCH.lookT=T;
   vm.swayX=clamp(vm.swayX-dx*.0004,-.04,.04);vm.swayY=clamp(vm.swayY+dy*.0004,-.04,.04);}
-function bestTarget(maxAng,needLos){const f=camForward();let best=null,ba=maxAng;for(const e of agents){if(!e.alive||!foe(e,player))continue;const ck=e.remote&&e.crouch;
+function bestTarget(maxAng,needLos){const f=camForward();let best=null,ba=maxAng;for(const e of agents){if(!e.alive||!foe(e,player))continue;const ck=e.isPlayer?0:(e.crouchK||0);
     const c=V3(e.pos.x,e.pos.y+(ck?.8:1.25)*e.scale,e.pos.z);const d=V3().subVectors(c,camera.position);const L=d.length();if(L>90)continue;const ang=Math.acos(clamp(d.dot(f)/L,-1,1));if(ang<ba&&(!needLos||canSee(camera.position,e))){ba=ang;best={e,c,L};}}return best;}
 function aimAssist(a,dt){const b=bestTarget(.085,false);TOUCH.assist=b&&canSee(camera.position,b.e)?1:0;
   if(TOUCH.assist&&(T-TOUCH.lookT<.25||Math.hypot(TOUCH.mx,TOUCH.my)>.2||mouseDown)){const cp=camera.position;const wy=yawTo(b.c.x-cp.x,b.c.z-cp.z),wp=Math.atan2(b.c.y-cp.y,Math.hypot(b.c.x-cp.x,b.c.z-cp.z));const k=Math.min(1,dt*2.4);a.yaw+=angDiff(a.yaw,wy)*k*.45;a.pitch+=(wp-a.pitch)*k*.3;}}
@@ -3750,14 +3791,14 @@ function coopNote(t){const el=$('coopNote');if(el)el.textContent=t;}
 // ---------- HOST ----------
 function coopHostStart(i){const m=STORY[i];if(/claude|anthropic|usercontent/.test(location.host)){coopNote('Co-op needs the online site (your Render address) — it is blocked in the claude.ai preview.');return;}
   coopConnect(()=>{COOP.pendingIdx=i;rawSend({t:'ccreate',name:profile.name+"'s co-op",map:m.map,theme:m.theme,title:m.code+' '+m.title,diff:CAMP.diff});coopNote('Opening co-op game…');});}
-function coopMakeProxy(g){const sp=player?player.pos:MAP.spawnC.def;const a=makeAgent({name:g.name,team:'blue',diff:'normal',coopGuest:g.id,netOutfit:g.outfit,credits:0});
+function coopMakeProxy(g){const sp=player?player.pos:MAP.spawnC.def;const a=makeAgent({name:g.name,team:'blue',diff:'normal',coopGuest:g.id,netOutfit:g.outfit,credits:0,isAdmin:!!g.admin});
   const p=randomCellNear(sp,2);a.pos.set(p.x,0,p.z);a.netT=a.pos.clone();a.netYaw=a.yaw=player?player.yaw:0;a.inv[1]=mkInst(g.gun||'ak');a.slot=1;setBotGun(a);agents.push(a);g.agent=a;g.deadUntil=0;buildAlives&&buildAlives();return a;}
 function coopHostLoad(){if(COOP.role!=='host'||!state.cfg||!state.cfg.story)return;const i=state.cfg.storyIdx,m=STORY[i];COOP.idx=i;COOP.known.clear();
   rawSend({t:'cmeta',map:m.map,theme:m.theme,title:m.code+' '+m.title});
   for(const g of COOP.guests.values()){coopMakeProxy(g);coopEv({k:'load',idx:i,diff:CAMP.diff,side:m.side,p:arr(g.agent.pos)},g.id);}}
 function coopHostMsg(from,d){if(!d||COOP.role!=='host')return;let g=COOP.guests.get(from);
   switch(d.k){
-    case 'join':g={id:from,name:String(d.name||'Player').slice(0,16),outfit:d.outfit||null,agent:null,gun:'ak'};COOP.guests.set(from,g);radio('SYSTEM',esc(g.name)+' joined your co-op squad.');
+    case 'join':g={id:from,name:String(d.name||'Player').slice(0,16),outfit:d.outfit||null,agent:null,gun:'ak',admin:!!d.admin};COOP.guests.set(from,g);radio('SYSTEM',esc(g.name)+' joined your co-op squad.');
       if(state.running&&state.cfg&&state.cfg.story){coopMakeProxy(g);coopEv({k:'load',idx:state.cfg.storyIdx,diff:CAMP.diff,side:STORY[state.cfg.storyIdx].side,p:arr(g.agent.pos)},from);}else coopEv({k:'idle'},from);break;
     case 'leave':if(g){radio('SYSTEM',esc(g.name)+' left the squad.');if(g.agent){const ix=agents.indexOf(g.agent);if(ix>=0){scene.remove(g.agent.mesh);agents.splice(ix,1);}}COOP.guests.delete(from);buildAlives&&buildAlives();}break;
     case 'hello':if(g&&state.running&&state.cfg&&state.cfg.story&&g.agent)coopEv({k:'load',idx:state.cfg.storyIdx,diff:CAMP.diff,side:STORY[state.cfg.storyIdx].side,p:arr(g.agent.pos)},from);break;
@@ -3778,7 +3819,7 @@ function coopHostTick(dt){if(COOP.role!=='host'||!COOP.guests.size||!state.runni
     for(const a of agents){if(!a.cid){a.cid=++COOP.n;COOP.byCid[a.cid]=a;}if(!COOP.known.has(a.cid))fresh=true;
       const fl=(a.crouch?1:0)|(isDefusing(a)?2:0)|(a.planting>0?4:0)|(a.kneel?8:0);
       ag.push([a.cid,r2(a.pos.x),r2(a.pos.y),r2(a.pos.z),r2(a.yaw),r2(a.isPlayer?a.pitch:(a.mesh&&a.mesh.userData.arms?a.mesh.userData.arms.rotation.x:0)),a.alive?1:0,Math.round(a.hp),instOf(a).id,fl,a.team==='blue'?'b':'r']);}
-    COOP.rosterT-=.066;if(fresh||COOP.rosterT<=0){COOP.rosterT=2;const ro=agents.map(a=>{COOP.known.add(a.cid);return [a.cid,a.isPlayer?profile.name:a.name,a.boss?1:0,r2(a.scale||1),a.isPlayer?profile.outfit:(a.netOutfit||null),a.coopGuest||0,a.isPlayer?1:0];});coopEv({k:'roster',ro});}
+    COOP.rosterT-=.066;if(fresh||COOP.rosterT<=0){COOP.rosterT=2;const ro=agents.map(a=>{COOP.known.add(a.cid);return [a.cid,a.isPlayer?profile.name:a.name,a.boss?1:0,r2(a.scale||1),a.isPlayer?profile.outfit:(a.netOutfit||null),a.coopGuest||0,a.isPlayer?1:0,isAdminA(a)?1:0];});coopEv({k:'roster',ro});}
     coopEv({k:'snap',ag,sp:[spike.state,r2(spike.pos.x),r2(spike.pos.y),r2(spike.pos.z),r2(spike.timer||0),r2(spike.defuse||0)],ph:state.phase});}
   COOP.hudT-=dt;if(COOP.hudT<=0){COOP.hudT=.25;const el=$('mobj');const h={on:!el.classList.contains('hidden'),h:$('mobjH').textContent,t:$('mobjT').textContent,s:$('mobjS').textContent,l:$('mobjL').innerHTML,mk:MS.on&&MS.marker?arr(MS.marker):null,pr:$('progress').classList.contains('hidden')?null:[$('progLbl').textContent,parseFloat($('progFill').style.width)||0]};
     const js=JSON.stringify(h);if(js!==COOP.lastHud||Math.random()<.05){COOP.lastHud=js;coopEv(Object.assign({k:'hud'},h));}}}
@@ -3812,10 +3853,10 @@ function coopGuestMsg(d){if(!d)return;
   switch(d.k){
     case 'load':coopGuestLoad(d);break;
     case 'idle':COOP.waiting=true;coopWaitShow('Waiting for '+(COOP.hostName||'the host')+' to start a mission…');break;
-    case 'roster':for(const r of d.ro){const [cid,name,boss,scale,outfit,gid,isHost]=r;if(gid===COOP.me){COOP.myCid=cid;continue;}if(COOP.mirror[cid])continue;
-        const a=makeAgent({name,team:'red',remote:true,netId:'c'+cid,boss:!!boss,scale:scale||1,netOutfit:outfit||null,diff:'normal'});a.cid=cid;a.alive=false;a.mesh.visible=false;agents.push(a);COOP.mirror[cid]=a;byNet['c'+cid]=a;}
+    case 'roster':for(const r of d.ro){const [cid,name,boss,scale,outfit,gid,isHost,adm]=r;if(COOP.mirror[cid])COOP.mirror[cid].isAdmin=!!adm;if(gid===COOP.me){COOP.myCid=cid;continue;}if(COOP.mirror[cid])continue;
+        const a=makeAgent({name,team:'red',remote:true,netId:'c'+cid,boss:!!boss,scale:scale||1,netOutfit:outfit||null,diff:'normal'});a.cid=cid;a.isAdmin=!!adm;a.alive=false;a.mesh.visible=false;agents.push(a);COOP.mirror[cid]=a;byNet['c'+cid]=a;}
       buildAlives();break;
-    case 'snap':{if(!state.coopGuest||!player)break;const seen=new Set();
+    case 'snap':{if(!state.coopGuest||!player)break;const seen=new Set();if(d.ph)state.phase=d.ph==='planted'||d.ph==='end'?'live':d.ph;
       for(const e of d.ag){const [cid,x,y,z,yaw,pitch,al,hp,gun,fl,tm]=e;seen.add(cid);
         if(cid===COOP.myCid){const was=player.alive;if(hp<player.hp-.5&&al){vigT=.7;sfx.hurt();}player.hp=hp;if(was&&!al){player.alive=false;state.stats.deaths++;banner('YOU WENT DOWN','You will be back in a few seconds','lose',2.4);spectateIdx=-1;spectateT=T+3;}continue;}
         const a=COOP.mirror[cid];if(!a)continue;const team=tm==='b'?'blue':'red';if(a.team!==team){a.team=team;}
@@ -3934,7 +3975,7 @@ function espFor(a){if(a.esp&&a.esp.parent===a.mesh)return a.esp;const g=new THRE
   const c=document.createElement('canvas');c.width=256;c.height=48;const x=c.getContext('2d');x.font='bold 30px Arial';x.textAlign='center';x.lineWidth=6;x.strokeStyle='#000';x.fillStyle='#ff6a80';x.strokeText(a.name,128,34);x.fillText(a.name,128,34);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,transparent:true}));sp.scale.set(1.5,.28,1);sp.position.y=2.2;sp.renderOrder=999;g.add(sp);
   a.mesh.add(g);a.esp=g;return g;}
-function aimbot(a){const b=bestTarget(.6,!HACK.wallbang);if(!b)return;const e=b.e,ck=e.remote&&e.crouch;const h=V3(e.pos.x,e.pos.y+(ck?1.12:1.66)*e.scale,e.pos.z);const cp=camera.position;
+function aimbot(a){const b=bestTarget(.6,!HACK.wallbang);if(!b)return;const e=b.e,ck=e.remote&&e.crouch;const h=V3(e.pos.x,e.pos.y+(1.66-.3*ck)*e.scale,e.pos.z);const cp=camera.position;
   a.yaw=yawTo(h.x-cp.x,h.z-cp.z);a.pitch=Math.atan2(h.y-cp.y,Math.hypot(h.x-cp.x,h.z-cp.z));a.recoilP=0;a.recoilY=0;camera.rotation.set(a.pitch,a.yaw,0);}
 function updateHack(){if(!player)return;const anyEsp=HACK.esp,big=HACK.bighead;
   for(const a of agents){if(a.isPlayer||!a.mesh)continue;const enemy=a.team!==player.team;
@@ -3969,7 +4010,7 @@ function projExplode(q,direct){const w=WEAPONS[q.wid],p=q.pos.clone();
     if(!los(V3(p.x,p.y+.2,p.z),c)&&!los(V3(p.x,p.y+.2,p.z),eyeOf(a)))continue;let dm=w.splash*(1-d/w.radius);if(a===q.owner)dm*=.5;if(dm>1)damage(a,dm,q.owner,q.wid,false,p,w.pen);}}
 function railShot(a,o,d,w,muz,hits){const wr=(HACK.wallbang&&a.isPlayer)?{t:260,hit:false,axis:-1,sign:0}:rayWorld(o,d,260);
   for(const e of agents){if(!e.alive||e===a||e.team===a.team)continue;const s=e.scale,ck=e.remote&&e.crouch;
-    const th=raySphere(o,d,V3(e.pos.x,e.pos.y+(ck?1.12:1.66)*s,e.pos.z),.17*s);const bb=rayBox(o,d,{x0:e.pos.x-.27*s,x1:e.pos.x+.27*s,y0:e.pos.y,y1:e.pos.y+(ck?1.02:1.52)*s,z0:e.pos.z-.27*s,z1:e.pos.z+.27*s});
+    const th=raySphere(o,d,V3(e.pos.x,e.pos.y+(1.66-.3*ck)*s,e.pos.z),.17*s);const bb=rayBox(o,d,{x0:e.pos.x-.27*s,x1:e.pos.x+.27*s,y0:e.pos.y,y1:e.pos.y+(1.52-.3*ck)*s,z0:e.pos.z-.27*s,z1:e.pos.z+.27*s});
     const head=th!==null&&th<wr.t;if(!head&&!(bb&&bb.t<wr.t))continue;const dm=w.dmg*(head?w.headMul:1);hits.set(e,{dmg:dm,head,headDmg:head?dm:0});burst(V3(e.pos.x,e.pos.y+1.2,e.pos.z),0x40e8ff,8,3,.4);}
   const end=V3().copy(o).addScaledVector(d,wr.t);lastShotEnd=end;railBeam(muz,end);
   if(wr.hit){const n=V3();if(wr.axis>=0)n.setComponent(wr.axis,wr.sign);else n.set(0,1,0);decal(end,n,scorchTex,.45);burst(end,0x40e8ff,10,3,.4);}}
@@ -4253,7 +4294,7 @@ function puppetTick(b,dt,ud){const P=b.puppet;let mvx=0,mvz=0,sp=0;
   const hs=Math.hypot(b.vel.x,b.vel.z);b.walkPhase+=dt*hs*2.3;const sw=Math.sin(b.walkPhase)*Math.min(1,hs/4)*.6;
   ud.legs[0].hip.rotation.x=sw;ud.legs[1].hip.rotation.x=-sw;ud.legs[0].knee.rotation.x=Math.max(0,-Math.sin(b.walkPhase-.6))*Math.min(1,hs/4)*.9;ud.legs[1].knee.rotation.x=Math.max(0,Math.sin(b.walkPhase-.6))*Math.min(1,hs/4)*.9;
   b.mesh.position.set(b.pos.x,b.pos.y+Math.abs(Math.cos(b.walkPhase))*.025*Math.min(1,hs/4),b.pos.z);b.mesh.rotation.y=b.yaw;
-  ud.arms.rotation.x=lerp(ud.arms.rotation.x,(P&&P.aim)?.02:b.dummy?-.25:-.5,.12);ud.head.rotation.x=0;
+  ud.arms.rotation.x=lerp(ud.arms.rotation.x,(P&&P.aim)?.02:b.dummy?-.25:-.5,.12);ud.head.rotation.x=0;crouchPose(b,ud,dt);
   if(b.kneel){b.kneelK=1;kneelPose(b,ud,1);}}
 
 // ---------- scripted missions (tutorial, stealth) ----------
