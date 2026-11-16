@@ -472,8 +472,59 @@ function leaveRoom(c) {
 //  HTTP + upgrade
 // ---------------------------------------------------------------------
 const PUBLIC = path.join(__dirname, 'public');
+// ===================== ACCOUNTS (cloud saves) =====================
+// Storage: Upstash Redis REST if UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN are set (survives restarts),
+// otherwise a local JSON file (fine for testing, but Render's free disk is wiped on every restart/redeploy).
+const KV_URL = process.env.UPSTASH_REDIS_REST_URL || '', KV_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || '';
+const DATA_FILE = path.join(__dirname, 'data', 'accounts.json');
+let fileKV = {}; try { fileKV = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch (e) {}
+let fileSaveT = null;
+function fileFlush() { clearTimeout(fileSaveT); fileSaveT = setTimeout(() => { try { fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true }); fs.writeFileSync(DATA_FILE, JSON.stringify(fileKV)); } catch (e) { console.log('save failed', e.message); } }, 400); }
+async function kv(cmd) {
+  if (KV_URL) { const r = await fetch(KV_URL, { method: 'POST', headers: { Authorization: 'Bearer ' + KV_TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify(cmd) }); const j = await r.json(); if (j.error) throw new Error(j.error); return j.result; }
+  const [op, k, v] = cmd; if (op === 'GET') return k in fileKV ? fileKV[k] : null; if (op === 'SET') { fileKV[k] = v; fileFlush(); return 'OK'; } if (op === 'DEL') { delete fileKV[k]; fileFlush(); return 1; } return null;
+}
+const kvGet = async k => { const v = await kv(['GET', k]); return v == null ? null : JSON.parse(v); };
+const kvSet = (k, v) => kv(['SET', k, JSON.stringify(v)]);
+const kvDel = k => kv(['DEL', k]);
+const hashPass = (pass, salt) => crypto.scryptSync(pass, salt, 32).toString('hex');
+const loginHits = new Map();
+function rateOk(ip) { const now = Date.now(); const h = (loginHits.get(ip) || []).filter(t => now - t < 60000); h.push(now); loginHits.set(ip, h); return h.length <= 12; }
+function readBody(req, max) { return new Promise((res, rej) => { let b = '', n = 0; req.on('data', c => { n += c.length; if (n > max) { rej(new Error('too big')); req.destroy(); } else b += c; }); req.on('end', () => { try { res(b ? JSON.parse(b) : {}); } catch (e) { rej(new Error('bad json')); } }); req.on('error', rej); }); }
+function jsonRes(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); }
+async function authUser(req) { const t = (req.headers.authorization || '').replace(/^Bearer\s+/, ''); if (!/^[a-f0-9]{48}$/.test(t)) return null; const u = await kvGet('tok:' + t); if (!u) return null; const a = await kvGet('acct:' + u); return a ? { a, t } : null; }
+async function handleApi(req, res, url) {
+  const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  try {
+    if (url === '/api/register' || url === '/api/login') {
+      if (req.method !== 'POST') return jsonRes(res, 405, { error: 'POST only' });
+      if (!rateOk(ip)) return jsonRes(res, 429, { error: 'Too many tries. Wait a minute.' });
+      const b = await readBody(req, 4096); const user = String(b.user || '').trim(), pass = String(b.pass || '');
+      if (!/^[A-Za-z0-9_]{3,16}$/.test(user)) return jsonRes(res, 400, { error: 'Username must be 3-16 letters, numbers or _' });
+      if (pass.length < 6 || pass.length > 72) return jsonRes(res, 400, { error: 'Password must be at least 6 characters' });
+      const key = 'acct:' + user.toLowerCase(); let a = await kvGet(key);
+      if (url === '/api/register') { if (a) return jsonRes(res, 409, { error: 'That username is taken' }); const salt = crypto.randomBytes(16).toString('hex'); a = { user, salt, hash: hashPass(pass, salt), tokens: [], save: null, updated: 0, created: Date.now() }; }
+      else { if (!a || !crypto.timingSafeEqual(Buffer.from(hashPass(pass, a.salt), 'hex'), Buffer.from(a.hash, 'hex'))) return jsonRes(res, 401, { error: 'Wrong username or password' }); }
+      const tok = crypto.randomBytes(24).toString('hex'); a.tokens = (a.tokens || []).concat(tok); while (a.tokens.length > 8) { const old = a.tokens.shift(); await kvDel('tok:' + old); }
+      await kvSet(key, a); await kvSet('tok:' + tok, user.toLowerCase());
+      return jsonRes(res, 200, { token: tok, user: a.user, save: a.save, updated: a.updated || 0 });
+    }
+    if (url === '/api/save') {
+      const au = await authUser(req); if (!au) return jsonRes(res, 401, { error: 'Please log in again' });
+      if (req.method === 'GET') return jsonRes(res, 200, { user: au.a.user, save: au.a.save, updated: au.a.updated || 0 });
+      if (req.method === 'POST') { const b = await readBody(req, 300000); if (!b || typeof b.save !== 'object') return jsonRes(res, 400, { error: 'No save data' });
+        au.a.save = b.save; au.a.updated = Date.now(); await kvSet('acct:' + au.a.user.toLowerCase(), au.a); return jsonRes(res, 200, { ok: true, updated: au.a.updated }); }
+      return jsonRes(res, 405, { error: 'GET or POST' });
+    }
+    if (url === '/api/logout' && req.method === 'POST') { const au = await authUser(req); if (au) { au.a.tokens = (au.a.tokens || []).filter(x => x !== au.t); await kvSet('acct:' + au.a.user.toLowerCase(), au.a); await kvDel('tok:' + au.t); } return jsonRes(res, 200, { ok: true }); }
+    if (url === '/api/status') return jsonRes(res, 200, { accounts: true, storage: KV_URL ? 'cloud' : 'file' });
+    return jsonRes(res, 404, { error: 'Unknown endpoint' });
+  } catch (e) { console.log('api error', e.message); return jsonRes(res, e.message === 'too big' ? 413 : 500, { error: e.message === 'too big' ? 'Save too large' : 'Server error' }); }
+}
+
 const server = http.createServer((req, res) => {
   const url = req.url.split('?')[0];
+  if (url.startsWith('/api/')) { handleApi(req, res, url); return; }
   if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); res.end('ok'); return; }
   if (url === '/rooms') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify([...rooms.values()].map(roomInfo))); return; }
   const file = url === '/' ? 'index.html' : url.replace(/^\/+/, '');
