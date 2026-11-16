@@ -496,7 +496,7 @@ function handle(c, msg) {
     case 'nuke': { const auto = !!m.auto && p.name === OWNER_NAME && (r.phase === 'live' || r.phase === 'planted'); if (r.nuke) break; if (!auto && (r.mode !== 'chaos' || r.phase !== 'live' || !p.alive || (p.ks || 0) < NUKE_KS)) break; if (!auto) p.ks = 0; r.nuke = { at: Date.now() + 5000, by: p.id, team: p.team }; bcast(r, { t: 'nk', i: p.id, n: p.name }); break; }
     case 'skipkc': { if (!p.alive && p.respawnAt) p.respawnAt = Math.min(p.respawnAt, Math.max(Date.now() + 200, (p.diedAt || 0) + 1500)); break; }
     case 'hacker': { if (!p.alive || p.jailed || r.phase === 'lobby' || r.phase === 'over') break; for (const q of r.players.values()) if (q.jailed) q.jailed = false; p.jailed = true; p.protectUntil = Date.now() + 7600; bcast(r, { t: 'jail', i: p.id, n: p.name }); break; }
-    case 'chat': { const txt = clean(m.msg, 120); if (txt) bcast(r, { t: 'chat', i: p.id, n: p.name, msg: txt, tm: p.team }); break; }
+    case 'chat': { const txt = clean(m.msg, 120); if (txt) bcast(r, { t: 'chat', i: p.id, n: p.name, msg: txt, tm: p.team, adm: p.admin ? 1 : 0 }); break; }
   }
 }
 function joinRoom(c, r) {
