@@ -158,7 +158,7 @@ function roomInfo(r) {
   return { id: r.id, name: r.name, map: r.map, mapName: MAPS[r.map].name, mode: r.mode, theme: r.theme, n: humans(r).length, b: r.players.size - humans(r).length, max: r.max, ph: r.phase, sc: r.score, rd: r.round, persistent: r.persistent };
 }
 function bcast(r, msg, except) { const s = JSON.stringify(msg); for (const p of r.players.values()) if (p.conn && p !== except) p.conn.send(s); }
-function pubP(p) { return { i: p.id, n: p.name, tm: p.team, bot: p.bot, al: p.alive, hp: p.hp, x: r1(p.pos[0]), z: r1(p.pos[2]), yaw: r1(p.yaw), w: p.inv[1] || p.inv[2], out: p.outfit, k: p.kills, d: p.deaths }; }
+function pubP(p) { return { i: p.id, n: p.name, tm: p.team, bot: p.bot, al: p.alive, hp: p.hp, x: r1(p.pos[0]), z: r1(p.pos[2]), yaw: r1(p.yaw), w: p.inv[1] || p.inv[2], out: p.outfit, adm: p.admin ? 1 : 0, k: p.kills, d: p.deaths }; }
 function buyTok(r, p) { return r.mode === 'bomb' ? 'r' + r.round : 'l' + (p.buyUntil || 0); }
 function sellable(p) { const r = p.room; const out = []; if (!r || !p.bought) return out; const t = buyTok(r, p); for (const s of [1, 2]) if (p.bought[s] && p.bought[s].tok === t && p.bought[s].id === p.inv[s]) out.push(s); return out; }
 function meData(p) { return { sb: sellable(p), money: p.money, inv: p.inv, nades: p.nades, ar: p.armor, hl: p.helmet, items: p.items, os: Math.round(p.oshield) }; }
