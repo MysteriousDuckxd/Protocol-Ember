@@ -49,7 +49,6 @@ const W = {
   railgun: { dmg: 95, head: 1.6, pen: 1, rate: .85, cost: 3200, slot: 1, chaos: 1, multi: 4 },
   plasma: { dmg: 44, pen: .8, rate: 7, cost: 2500, slot: 1, chaos: 1, multi: 3 },
   katana: { dmg: 180, pen: .9, rate: 2, cost: 1500, slot: 2 },
-  admin: { dmg: 250, head: 2, pen: 1, rate: 8, cost: 0, slot: 1, multi: 6, admin: 1 },
 };
 const ITEMS = { wall: { cost: 800, max: 1 }, medkit: { cost: 600, max: 2 }, stim: { cost: 400, max: 1, any: 1 }, dash: { cost: 500, max: 2, any: 1 }, boots: { cost: 350, max: 1, any: 1 } };
 const resp = r => r.mode !== 'bomb';
@@ -64,14 +63,14 @@ const PATS = ['solid', 'woodland', 'digital', 'desert', 'urban', 'arctic', 'tige
 const clean = (s, n) => String(s || '').replace(/[<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
 const ADMIN_CODE = 'pirate token';
 function isAdminCode(v) { return typeof v === 'string' && v.trim().toLowerCase().replace(/\s+/g, ' ') === ADMIN_CODE; }
-function cleanOutfit(o) {
+function cleanOutfit(o, admin) {
   const out = {}; if (!o || typeof o !== 'object') return null;
   for (const side of ['ct', 't']) {
     const src = o[side] || {}, d = {};
     for (const k of ['top', 'pants', 'vest', 'head', 'gloves', 'boots']) d[k] = /^#[0-9a-f]{6}$/i.test(src[k]) ? src[k] : null;
-    for (const k of ['topPat', 'pantsPat']) d[k] = PATS.includes(src[k]) ? src[k] : 'solid';
+    for (const k of ['topPat', 'pantsPat']) d[k] = (PATS.includes(src[k]) || (admin && src[k] === 'admin')) ? src[k] : 'solid';
     if (Object.values(d).some(v => v === null)) return null;
-    d.body = src.body === 'f' ? 'f' : 'm'; d.hair = /^#[0-9a-f]{6}$/i.test(src.hair) ? src.hair : '#3a2416';
+    d.body = src.body === 'f' ? 'f' : 'm'; if (admin && src.admin) d.admin = true; d.hair = /^#[0-9a-f]{6}$/i.test(src.hair) ? src.hair : '#3a2416';
     out[side] = d;
   }
   return out;
@@ -336,19 +335,61 @@ function actor(r, p, as) { // who is this action for? (host may act for bots)
   if (!as || as === p.id) return p;
   const a = r.players.get(as); if (a && a.bot && r.host === p.id) return a; return null;
 }
+
+// ---------------------------------------------------------------------
+//  CO-OP CAMPAIGN: a relay room. The host's game runs the mission;
+//  the server just forwards messages between host and guests.
+// ---------------------------------------------------------------------
+const coops = new Map();
+function coopInfo(k) { return { id: k.id, name: k.name, mode: 'coop', map: k.map, mapName: (MAPS[k.map] && MAPS[k.map].name) || k.map, theme: k.theme, n: k.members.size, b: 0, max: 4, ph: 'live', sc: { T: 0, CT: 0 }, rd: 0, title: k.title, diff: k.diff }; }
+function allRooms() { return [...rooms.values()].map(roomInfo).concat([...coops.values()].map(coopInfo)); }
+function coopLeave(c) {
+  const k = c.coop; if (!k) return; c.coop = null; k.members.delete(c.cid);
+  if (k.host === c.cid) { for (const m of k.members.values()) { m.coop = null; m.send({ t: 'cend', msg: 'The host ended the co-op session.' }); } coops.delete(k.id); console.log('[coop] closed ' + k.name); return; }
+  const h = k.members.get(k.host); if (h) h.send({ t: 'cx', from: c.cid, d: { k: 'leave' } });
+}
+function coopHandle(c, m) {
+  switch (m.t) {
+    case 'ccreate': {
+      coopLeave(c); leaveRoom(c);
+      const k = { id: newId('k'), name: clean(m.name, 32) || ((c.name || 'Player') + "'s co-op"), map: MAPS[m.map] ? m.map : 'dustline', theme: clean(m.theme, 12) || 'day', title: clean(m.title, 40) || 'Campaign', diff: clean(m.diff, 12) || 'veteran', host: null, members: new Map() };
+      c.cid = newId('c'); k.host = c.cid; k.members.set(c.cid, c); c.coop = k; coops.set(k.id, k);
+      c.send({ t: 'ccreated', id: k.id, you: c.cid }); console.log('[coop] ' + c.name + ' hosts ' + k.title); return true;
+    }
+    case 'cjoin': {
+      const k = coops.get(m.room); if (!k) { c.send({ t: 'err', msg: 'That co-op game has ended.' }); return true; }
+      if (k.members.size >= 4) { c.send({ t: 'err', msg: 'That co-op game is full (4 players).' }); return true; }
+      coopLeave(c); leaveRoom(c); c.cid = newId('c'); k.members.set(c.cid, c); c.coop = k;
+      c.send({ t: 'cj', you: c.cid, host: k.host, room: coopInfo(k) });
+      const h = k.members.get(k.host); if (h) h.send({ t: 'cx', from: c.cid, d: { k: 'join', name: c.name || 'Player', outfit: c.outfit || null, admin: !!c.admin } });
+      return true;
+    }
+    case 'cmeta': { const k = c.coop; if (k && k.host === c.cid) { if (MAPS[m.map]) k.map = m.map; k.theme = clean(m.theme, 12) || k.theme; k.title = clean(m.title, 40) || k.title; } return true; }
+    case 'cx': { // guest -> host
+      const k = c.coop; if (!k || k.host === c.cid) return true; const h = k.members.get(k.host); if (h) h.send({ t: 'cx', from: c.cid, d: m.d }); return true;
+    }
+    case 'cb': { // host -> guests (all, or one)
+      const k = c.coop; if (!k || k.host !== c.cid) return true; const out = JSON.stringify({ t: 'cb', d: m.d });
+      for (const [id, mem] of k.members) if (id !== k.host && (!m.to || m.to === id)) mem.send(out); return true;
+    }
+    case 'cleave': coopLeave(c); c.send({ t: 'cend', msg: '' }); return true;
+  }
+  return false;
+}
 function handle(c, msg) {
   let m; try { m = JSON.parse(msg); } catch (e) { return; }
   if (!m || typeof m.t !== 'string') return;
   const p = c.player, r = c.room;
+  if (m.t[0] === 'c' && coopHandle(c, m)) return;
   switch (m.t) {
-    case 'hello': c.admin = isAdminCode(m.code); c.name = clean(m.name, 16) || 'Player'; c.outfit = cleanOutfit(m.outfit); c.send({ t: 'welcome', rooms: [...rooms.values()].map(roomInfo) }); return;
-    case 'list': c.send({ t: 'L', rooms: [...rooms.values()].map(roomInfo) }); return;
+    case 'hello': c.admin = isAdminCode(m.code); c.name = clean(m.name, 16) || 'Player'; c.outfit = cleanOutfit(m.outfit, c.admin); c.send({ t: 'welcome', rooms: allRooms() }); return;
+    case 'list': c.send({ t: 'L', rooms: allRooms() }); return;
     case 'pi': c.send({ t: 'po', c: m.c }); return;
     case 'create': {
       if (rooms.size >= MAX_ROOMS) { c.send({ t: 'err', msg: 'Server is full of rooms — join an existing one.' }); return; }
-      const nr = makeRoom(m); joinRoom(c, nr); if (c.player) { nr.owner = c.player.id; sendLobby(nr); } return;
+      coopLeave(c); const nr = makeRoom(m); joinRoom(c, nr); if (c.player) { nr.owner = c.player.id; sendLobby(nr); } return;
     }
-    case 'join': { const nr = rooms.get(m.room); if (!nr) { c.send({ t: 'err', msg: 'That server no longer exists.' }); return; } joinRoom(c, nr); return; }
+    case 'join': { if (coops.has(m.room)) { coopHandle(c, { t: 'cjoin', room: m.room }); return; } const nr = rooms.get(m.room); if (!nr) { c.send({ t: 'err', msg: 'That server no longer exists.' }); return; } joinRoom(c, nr); return; }
     case 'leave': leaveRoom(c); return;
   }
   if (!p || !r) return;
@@ -562,7 +603,7 @@ server.on('upgrade', (req, sock) => {
   sock.setNoDelay(true);
   const c = new Conn(sock);
   c.onmessage = msg => handle(c, msg);
-  c.onclose = () => leaveRoom(c);
+  c.onclose = () => { coopLeave(c); leaveRoom(c); };
 });
 
 // default public servers that are always listed
