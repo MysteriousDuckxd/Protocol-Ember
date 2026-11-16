@@ -393,12 +393,13 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
   <div class="screen" id="scrMain">
     <h1 class="logo">PROTOCOL<span>:</span><br>EMBER</h1>
     <div class="tag">TERRORISTS VS SOLDIERS · BOMB DEFUSAL · OFFLINE</div>
-    <div id="who"></div>
+    <div id="who"></div><div id="acctWho" class="note" style="margin:-6px 0 12px;font-size:14px;letter-spacing:1px"></div>
     <button class="btn primary" data-go="story">STORY CAMPAIGN</button>
     <button class="btn" data-go="mp">MULTIPLAYER (ONLINE)</button>
     <button class="btn" data-go="quick">QUICK MATCH VS BOTS</button>
     <button class="btn" data-go="profile">PROFILE &amp; LOADOUT</button>
     <button class="btn" data-go="shop">SHOP</button>
+    <button class="btn" data-go="account">ACCOUNT &amp; CLOUD SAVE</button>
     <button class="btn" data-go="settings">SETTINGS</button>
     <button class="btn" data-go="controls">CONTROLS</button>
     <div class="note">Mouse &amp; keyboard required. Click into the game to lock the mouse — Esc pauses.</div>
@@ -513,6 +514,25 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
         <label>MATCH LENGTH</label><div class="seg" data-mk="goal"><button data-v="s">SHORT</button><button data-v="m" class="on">NORMAL</button><button data-v="l">LONG</button></div>
       </div><button class="btn small primary" id="mcCreate">CREATE &amp; JOIN</button></details>
     <div class="note">Online you play with the name and outfit from PROFILE. Chat in game with <b>Enter</b>. Online play needs your own server (see the README that comes with the server files).</div>
+    <div class="row"><button class="btn small" data-go="main">← BACK</button></div>
+  </div>
+  <div class="screen hidden" id="scrAccount">
+    <h2><small>CLOUD SAVE · PLAY ON ANY DEVICE</small>ACCOUNT</h2>
+    <div id="acctOut" class="panel" style="max-width:520px">
+      <div class="form" style="margin:6px 0 14px">
+        <label>USERNAME</label><input id="acctUser" class="txt" maxlength="16" placeholder="3-16 letters, numbers, _" autocomplete="username" spellcheck="false">
+        <label>PASSWORD</label><input id="acctPass" class="txt" type="password" maxlength="72" placeholder="at least 6 characters" autocomplete="current-password">
+      </div>
+      <div class="row"><button class="btn small primary" id="acctLogin">LOG IN</button><button class="btn small" id="acctReg">CREATE ACCOUNT</button></div>
+      <div class="note">New account? Your progress on this device is uploaded to it. Logging in on another device loads your saved progress there.</div>
+    </div>
+    <div id="acctIn" class="panel hidden" style="max-width:520px">
+      <div style="font:700 22px Rajdhani,sans-serif;letter-spacing:2px">SIGNED IN AS <span id="acctName" style="color:var(--acc,#ffb03a)"></span></div>
+      <div class="note" id="acctLast"></div>
+      <div class="row" style="margin-top:12px"><button class="btn small primary" id="acctSync">SAVE TO CLOUD NOW</button><button class="btn small" id="acctPullB">LOAD FROM CLOUD</button><button class="btn small" id="acctOutB">LOG OUT</button></div>
+      <div class="note">Campaign, stars, hardcore runs, coins, unlocks, loadout and settings save automatically a few seconds after they change.</div>
+    </div>
+    <div class="note" id="acctMsg" style="min-height:22px;margin-top:10px"></div>
     <div class="row"><button class="btn small" data-go="main">← BACK</button></div>
   </div>
   <div class="screen hidden" id="scrPause">
@@ -2639,9 +2659,9 @@ addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseDown=false;r
 // =====================================================================
 //  MENUS
 // =====================================================================
-function showScreen(id){document.querySelectorAll('#menu .screen').forEach(s=>s.classList.toggle('hidden',s.id!==id));$('menu').classList.remove('hidden');if(id==='scrStory')renderMissions();if(id==='scrSettings')syncSettings();if(id==='scrMain')renderWho();if(id==='scrProfile')renderProfile();if(id==='scrShop')renderShop();if(id==='scrMP')openMPScreen();
+function showScreen(id){document.querySelectorAll('#menu .screen').forEach(s=>s.classList.toggle('hidden',s.id!==id));$('menu').classList.remove('hidden');if(id==='scrStory')renderMissions();if(id==='scrSettings')syncSettings();if(id==='scrMain')renderWho();if(id==='scrProfile')renderProfile();if(id==='scrShop')renderShop();if(id==='scrMP')openMPScreen();if(id==='scrAccount'){acctStatus('');acctRender();}
   if((id==='scrMain'||id==='scrStory'||id==='scrQuick')&&!state.running)menuBackdrop();}
-const goMap={mp:'scrMP',main:'scrMain',story:'scrStory',quick:'scrQuick',settings:'scrSettings',controls:'scrControls',profile:'scrProfile',shop:'scrShop'};
+const goMap={mp:'scrMP',main:'scrMain',story:'scrStory',quick:'scrQuick',settings:'scrSettings',controls:'scrControls',profile:'scrProfile',shop:'scrShop',account:'scrAccount'};
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{initAudio();showScreen(goMap[b.dataset.go]);}));
 $('pauseSettings').onclick=()=>showScreen('scrSettings');
 $('pauseControls').onclick=()=>showScreen('scrControls');
@@ -3783,6 +3803,57 @@ function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;con
   if(prev&&prev.model&&!$('menu').classList.contains('hidden')&&!$('scrProfile').classList.contains('hidden')){if(!prev.drag)prev.rot+=dt*.25;prev.model.rotation.y=prev.rot;prev.r.render(prev.sc,prev.cam);}
   if(state.running&&player&&player.alive&&!isScoped()&&!CS.on){renderer.clearDepth();renderer.render(vmScene,vmCam);}
   lastCalls=renderer.info.render.calls;}
+/* ===================== ACCOUNTS / CLOUD SAVE ===================== */
+const ACCT_KEYS=['pe2_profile','pe2_settings','pe2_progress','pe2_done','pe3_camp'];
+const ACCT={token:'',user:'',last:0,busy:false,t:null};
+try{const a=JSON.parse(localStorage.getItem('pe3_acct')||'null');if(a){ACCT.token=a.token||'';ACCT.user=a.user||'';ACCT.last=a.last||0;}}catch(e){}
+function acctPersist(){try{localStorage.setItem('pe3_acct',JSON.stringify({token:ACCT.token,user:ACCT.user,last:ACCT.last}));}catch(e){}}
+function acctBase(){
+  if(/^https?:$/.test(location.protocol)&&!/claude|anthropic|usercontent/.test(location.host))return location.origin;
+  let a='';try{a=localStorage.getItem('pe2_server')||'';}catch(e){}a=a.trim().replace(/\/+$/,'');if(!a)return '';
+  if(/^wss:\/\//.test(a))return 'https://'+a.slice(6);if(/^ws:\/\//.test(a))return 'http://'+a.slice(5);if(/^https?:\/\//.test(a))return a;
+  return (/^(localhost|127\.|192\.168\.|10\.|172\.)/.test(a)?'http://':'https://')+a;}
+async function acctApi(path,method,body){const base=acctBase();if(!base)throw new Error('No server set. Open MULTIPLAYER and connect to your server first.');
+  const h={'Content-Type':'application/json'};if(ACCT.token)h.Authorization='Bearer '+ACCT.token;
+  let r;try{r=await fetch(base+path,{method,headers:h,body:body?JSON.stringify(body):undefined});}catch(e){throw new Error('Can\'t reach the server. Accounts only work on the online site.');}
+  let j={};try{j=await r.json();}catch(e){}if(!r.ok){const er=new Error(j.error||('Server error '+r.status));er.status=r.status;throw er;}return j;}
+function acctCollect(){const o={};ACCT_KEYS.forEach(k=>{try{const v=localStorage.getItem(k);if(v!=null)o[k]=v;}catch(e){}});o._t=Date.now();return o;}
+function acctLocalTime(){try{return +localStorage.getItem('pe3_localt')||0;}catch(e){return 0;}}
+function acctMarkLocal(){try{localStorage.setItem('pe3_localt',Date.now());}catch(e){}}
+function acctApply(save){ACCT_KEYS.forEach(k=>{try{if(save[k]!=null)localStorage.setItem(k,save[k]);}catch(e){}});try{localStorage.setItem('pe3_localt',save._t||Date.now());}catch(e){}}
+function acctStatus(msg,bad){const el=$('acctMsg');if(el){el.textContent=msg;el.style.color=bad?'#ff6a5a':'';}}
+function acctRender(){const inn=!!ACCT.token;$('acctOut').classList.toggle('hidden',inn);$('acctIn').classList.toggle('hidden',!inn);
+  if(inn){$('acctName').textContent=ACCT.user.toUpperCase();$('acctLast').textContent=ACCT.last?('Last synced '+new Date(ACCT.last).toLocaleString()):'Not synced yet';}
+  if(!acctBase())acctStatus('Accounts need the online server. Play on your Render site, or connect to your server in MULTIPLAYER first.',true);
+  const w=$('acctWho');if(w)w.innerHTML=inn?`☁ SIGNED IN AS <b>${ACCT.user.toUpperCase()}</b>`:'☁ <a href="#" id="acctWhoLink">SIGN IN</a> TO SAVE ACROSS DEVICES';
+  const l=$('acctWhoLink');if(l)l.onclick=e=>{e.preventDefault();showScreen('scrAccount');};}
+async function acctUpload(quiet){if(!ACCT.token||ACCT.busy)return;ACCT.busy=true;
+  try{const j=await acctApi('/api/save','POST',{save:acctCollect()});ACCT.last=j.updated||Date.now();acctPersist();if(!quiet)acctStatus('Progress saved to your account.');}
+  catch(e){if(e.status===401){ACCT.token='';acctPersist();}if(!quiet)acctStatus(e.message,true);}
+  finally{ACCT.busy=false;if($('scrAccount')&&!$('scrAccount').classList.contains('hidden'))acctRender();}}
+function acctQueue(){acctMarkLocal();if(!ACCT.token)return;clearTimeout(ACCT.t);ACCT.t=setTimeout(()=>acctUpload(true),4000);}
+// After logging in: whichever copy is newer wins.
+function acctMerge(j){const cloud=j.save,cloudT=cloud&&cloud._t||0,localT=acctLocalTime();
+  if(cloud&&cloudT>localT){acctApply(cloud);acctStatus('Loaded your saved progress. Reloading…');setTimeout(()=>location.reload(),700);return;}
+  acctUpload(false);}
+async function acctAuth(kind){const user=$('acctUser').value.trim(),pass=$('acctPass').value;if(!user||!pass)return acctStatus('Enter a username and password.',true);
+  acctStatus(kind==='register'?'Creating account…':'Logging in…');
+  try{const j=await acctApi('/api/'+kind,'POST',{user,pass});ACCT.token=j.token;ACCT.user=j.user;ACCT.last=j.updated||0;acctPersist();$('acctPass').value='';
+    if(kind==='register'||!j.save){acctStatus('Account ready. Uploading this device\'s progress…');acctUpload(false);}else acctMerge(j);acctRender();}
+  catch(e){acctStatus(e.message,true);}}
+async function acctPull(){acctStatus('Downloading…');try{const j=await acctApi('/api/save','GET');if(!j.save)return acctStatus('Nothing saved on this account yet.');
+  acctApply(j.save);acctStatus('Loaded. Reloading…');setTimeout(()=>location.reload(),600);}catch(e){if(e.status===401){ACCT.token='';acctPersist();acctRender();}acctStatus(e.message,true);}}
+async function acctLogout(){try{await acctApi('/api/logout','POST');}catch(e){}ACCT.token='';ACCT.user='';ACCT.last=0;acctPersist();acctStatus('Logged out. Progress on this device is kept.');acctRender();}
+// Hook every save function so changes upload automatically.
+['saveSettings','saveProfile','saveProgress','saveCamp'].forEach(n=>{const f=window[n];if(typeof f!=='function')return;window[n]=function(){const r=f.apply(this,arguments);acctQueue();return r;};});
+$('acctLogin').onclick=()=>acctAuth('login');$('acctReg').onclick=()=>acctAuth('register');
+$('acctPass').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')acctAuth('login');});$('acctUser').addEventListener('keydown',e=>e.stopPropagation());
+$('acctSync').onclick=()=>acctUpload(false);$('acctPullB').onclick=acctPull;$('acctOutB').onclick=acctLogout;
+window.addEventListener('pagehide',()=>{if(ACCT.token&&ACCT.t){clearTimeout(ACCT.t);try{const b=acctBase();if(b)fetch(b+'/api/save',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:'Bearer '+ACCT.token},body:JSON.stringify({save:acctCollect()})});}catch(e){}}});
+// Pull newer cloud progress on startup (e.g. you played on another device).
+if(ACCT.token)setTimeout(async()=>{try{const j=await acctApi('/api/save','GET');if(j.save&&(j.save._t||0)>acctLocalTime()+2000&&!state.running){acctApply(j.save);location.reload();}}catch(e){if(e.status===401){ACCT.token='';acctPersist();}}acctRender();},1200);
+acctRender();
+
 resize();applyCrosshair();menuBackdrop();showScreen('scrMain');$('loading').classList.add('hidden');requestAnimationFrame(frame);
 </script>
 </body>
