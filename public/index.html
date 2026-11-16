@@ -260,7 +260,7 @@ body.touch #spectate{bottom:60px;font-size:14px}
 #endChoice h3{margin:0 0 4px;letter-spacing:4px;color:var(--gold)}#endChoice p{margin:0 0 14px;color:#ccc}#endChoice button{display:block;width:100%;margin:8px 0;padding:12px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);color:#fff;cursor:pointer;text-align:left;font:inherit}#endChoice button:hover{background:rgba(255,160,60,.18);border-color:var(--gold)}#endChoice b{display:block;font-size:18px;letter-spacing:3px}#endChoice span{color:#bbb;font-size:13px}
 #cineBlack{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .3s;z-index:1}
 #cineCard{z-index:2}
-body.cine #hud{display:none!important}
+body.cine #hud>*:not(#cine):not(#nukeflash):not(#lightning){visibility:hidden!important}
 #mobj{position:absolute;left:16px;top:246px;width:220px;box-sizing:border-box;background:linear-gradient(90deg,rgba(10,14,18,.85),rgba(10,14,18,0));padding:8px 14px;border-left:3px solid var(--gold)}#mobj.hidden{display:none}
 #mobjL{margin:6px 0 0;padding:0;list-style:none;font-size:12px;color:var(--dim)}#mobjL li{margin:2px 0}#mobjL li::before{content:'▸ ';color:var(--gold)}
 #mobj small{display:block;font-size:11px;letter-spacing:3px;color:var(--gold)}#mobjT{font-size:17px;font-weight:700;letter-spacing:1px}#mobjS{font-size:13px;color:var(--dim);margin-top:2px}
