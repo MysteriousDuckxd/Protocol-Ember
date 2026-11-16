@@ -239,6 +239,36 @@ body.touch #spectate{bottom:60px;font-size:14px}
 .hk:hover{border-color:#ff3b5c}.hk.on{background:#ff3b5c;color:#0a0003;border-color:#ff3b5c;font-weight:700}.hk.act{border-style:dashed}.hk:disabled{opacity:.3;cursor:not-allowed}
 #chaosItems{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}#chaosItems div{font-size:12px;padding:3px 8px;background:rgba(10,14,18,.6);color:#80f0ff;font-weight:700;letter-spacing:1px}body.touch #chaosItems{display:none}
 #after{position:absolute;inset:0;width:100%;height:100%;filter:blur(6px) brightness(1.9) grayscale(.5);mix-blend-mode:screen;opacity:0;display:none}
+.actHdr{display:flex;align-items:baseline;gap:12px;margin:18px 0 8px;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:6px;flex-wrap:wrap}
+.actHdr span{color:var(--gold);letter-spacing:3px;font-size:13px;font-weight:700}.actHdr b{font-size:20px;letter-spacing:3px}.actHdr em{color:var(--dim);font-style:normal;font-size:13px}
+.actLocked{color:var(--dim);font-size:13px;letter-spacing:2px;padding:6px 0 4px}
+#missionList{max-height:56vh;overflow-y:auto;padding-right:8px}#missionList .missions{margin:8px 0 6px}
+.mcard .stars{color:var(--gold);letter-spacing:2px;margin-top:6px;font-size:15px}.mcard .stars i{color:rgba(255,255,255,.18);font-style:normal}
+.campTop{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:6px 0 4px}#campDiffNote{color:var(--dim);font-size:13px;max-width:520px}
+#campDiff button[data-v="hardcore"].on{background:var(--red);color:#fff;border-color:var(--red)}
+#campHC{margin:8px 0;padding:8px 12px;border-left:3px solid var(--red);background:rgba(200,30,30,.12);font-size:14px;letter-spacing:1px}#campHC.hidden{display:none}
+#cine{position:fixed;inset:0;z-index:45;pointer-events:none}#cine.hidden{display:none}
+#cine .cb{position:absolute;left:0;right:0;height:11vh;background:#000}#cine .cb.top{top:0}#cine .cb.bot{bottom:0}
+#cineCard{position:absolute;left:6vw;bottom:16vh;opacity:0;transition:opacity .6s;text-shadow:0 2px 12px #000}#cineCard.show{opacity:1}
+#cineCard small{display:block;font-size:14px;letter-spacing:5px;color:var(--gold)}#cineCard b{display:block;font-size:clamp(34px,6vw,72px);letter-spacing:4px;font-weight:900;line-height:1.05}#cineCard span{display:block;font-size:15px;letter-spacing:3px;color:#ddd;margin-top:6px}
+#cineSub{position:absolute;left:50%;bottom:13vh;transform:translateX(-50%);max-width:70vw;text-align:center;font-size:clamp(16px,2vw,24px);text-shadow:0 2px 8px #000,0 0 3px #000;opacity:0;transition:opacity .25s;z-index:2}#cineSub.show{opacity:1}
+#cineSub b{color:var(--gold);letter-spacing:2px;margin-right:10px}
+#cineSkip{position:absolute;right:24px;bottom:3.5vh;font-size:12px;letter-spacing:2px;color:#bbb;width:200px;z-index:2}#cineSkip i{display:block;height:2px;background:var(--gold);width:0;margin-bottom:4px}
+#csSkipBtn{position:absolute;right:24px;top:3.5vh;pointer-events:auto;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.35);color:#fff;font:700 13px inherit;letter-spacing:2px;padding:7px 14px;cursor:pointer;z-index:2}
+#cineBlack{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .3s;z-index:1}
+#cineCard{z-index:2}
+body.cine #hud{display:none!important}
+#mobj{position:absolute;left:18px;top:200px;max-width:310px;background:linear-gradient(90deg,rgba(10,14,18,.85),rgba(10,14,18,0));padding:8px 14px;border-left:3px solid var(--gold)}#mobj.hidden{display:none}
+#mobj small{display:block;font-size:11px;letter-spacing:3px;color:var(--gold)}#mobjT{font-size:17px;font-weight:700;letter-spacing:1px}#mobjS{font-size:13px;color:var(--dim);margin-top:2px}
+#mmark{position:absolute;transform:translate(-50%,-100%);color:#ffd23a;font-size:18px;text-align:center;text-shadow:0 0 6px #000;pointer-events:none}#mmark span{display:block;font-size:12px;letter-spacing:1px;color:#fff}#mmark.hidden{display:none}
+#mdet{position:absolute;left:50%;top:84px;transform:translateX(-50%);text-align:center;font-size:12px;letter-spacing:3px;font-weight:700;color:#cfe}#mdet.hidden{display:none}
+#mdet i{display:block;width:180px;height:4px;background:rgba(255,255,255,.18);margin:4px auto 0}#mdet b{display:block;height:100%;width:0;background:#ffd23a}
+#mdet.warn{color:#ffb13a}#mdet.alarm{color:#ff4a3a}#mdet.alarm b{background:#ff4a3a}
+#bossbar{position:absolute;left:50%;top:70px;transform:translateX(-50%);width:min(520px,70vw);text-align:center;font-size:13px;letter-spacing:4px;font-weight:800;color:#ffb0a0}#bossbar.hidden{display:none}
+#bossbar i{display:block;position:relative;height:9px;background:rgba(0,0,0,.55);border:1px solid rgba(255,120,100,.5);margin-top:4px}#bossbar b{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#c0281c,#ff5a3a)}#bossbar em{position:absolute;left:0;top:0;height:3px;background:#7fd8ff}
+body.hc #killfeed,body.hc #alivesR{display:none}
+.starsRes{display:flex;flex-direction:column;gap:4px;margin:4px 0 14px}.starsRes div{font-size:15px}.starsRes .y{color:var(--gold)}.starsRes .n{color:var(--dim)}
+
 #killcam{position:fixed;inset:0;pointer-events:none;z-index:40;box-shadow:inset 0 70px 0 rgba(0,0,0,.85),inset 0 -70px 0 rgba(0,0,0,.85)}#killcam.hidden{display:none}
 #killcam .kcTop{position:absolute;top:20px;left:24px;font-size:18px;letter-spacing:3px;font-weight:800}#killcam .kcRec{color:#ff3b3b;margin-right:14px;animation:haP .5s infinite alternate}
 #killcam .kcX{position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;background:linear-gradient(#fff,#fff) center/2px 100% no-repeat,linear-gradient(#fff,#fff) center/100% 2px no-repeat;opacity:.85}
@@ -299,7 +329,9 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
   <canvas id="after" width="320" height="180"></canvas>
   <div id="blind"></div>
   <div id="spectate" class="hidden"></div>
+  <div id="mobj" class="hidden"><small>OBJECTIVE</small><div id="mobjT"></div><div id="mobjS"></div></div><div id="mmark" class="hidden">▼<span id="mmarkD"></span></div><div id="mdet" class="hidden"><span id="mdetL">◉ HIDDEN</span><i><b id="mdetF"></b></i></div><div id="bossbar" class="hidden"><span id="bbName"></span><i><b id="bbFill"></b><em id="bbShield"></em></i></div>
   <div id="deathcam" class="hidden"></div>
+  <div id="cine" class="hidden"><div class="cb top"></div><div class="cb bot"></div><div id="cineCard"><small id="ccS"></small><b id="ccT"></b><span id="ccL"></span></div><div id="cineSub"><b id="csWho"></b><span id="csTxt"></span></div><div id="cineSkip"><i></i>HOLD <kbd>SPACE</kbd> TO SKIP</div><button id="csSkipBtn" type="button">SKIP ▸▸</button><div id="cineBlack"></div></div>
   <div id="killcam" class="hidden"><div class="kcTop"><span class="kcRec">◉ KILLCAM</span><span id="kcWho"></span></div><div class="kcX"></div><div id="kcBar"><i></i></div><button id="kcSkip" type="button">SKIP ▶▶ <small>SPACE / CLICK</small></button></div>
   <div id="jailTimer" class="hidden"></div><div id="jailVig" class="hidden"></div>
   <div id="nukewarn" class="hidden"><div class="nk1">☢ TACTICAL NUKE INCOMING ☢</div><div class="nk2">called in by <b id="nkName"></b></div><div class="nk3" id="nkCount">5</div></div>
@@ -360,8 +392,10 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
   </div>
   <div class="screen hidden" id="scrStory">
     <h2><small>SIGMA COUNTER-TERROR UNIT · CASE FILE 7</small>CAMPAIGN</h2>
-    <p style="color:var(--dim);font-size:18px;max-width:740px">You are <b style="color:var(--paper)" id="storyName">Sergeant Kestrel</b>, newest soldier in SIGMA. The Hollow Syndicate terror cell is planting bombs across the region — and somebody inside your own unit is helping them.</p>
-    <div class="missions" id="missionList"></div>
+    <p style="color:var(--dim);font-size:18px;max-width:740px">You are <b style="color:var(--paper)" id="storyName">Sergeant Kestrel</b>, newest soldier in SIGMA. A bomb plot leads back to your own armory — and it's only the beginning. Five acts, 36 missions.</p>
+    <div class="campTop"><div class="seg" id="campDiff"><button data-v="recruit">RECRUIT</button><button data-v="veteran">VETERAN</button><button data-v="elite">ELITE</button><button data-v="hardcore">☠ HARDCORE</button></div><div id="campDiffNote"></div></div>
+    <div id="campHC" class="hidden"></div>
+    <div id="missionList"></div>
     <button class="btn small" data-go="main">← BACK</button>
   </div>
   <div class="screen hidden" id="scrBrief">
@@ -419,7 +453,7 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
       <div>Walk (quiet, accurate)<kbd>SHIFT</kbd></div><div>Crouch<kbd>C or CTRL</kbd></div>
       <div>Jump<kbd>SPACE</kbd></div><div>Reload<kbd>R</kbd></div>
       <div>Primary / Pistol / Knife<kbd>1 2 3</kbd></div><div>Throw grenade<kbd>G</kbd></div>
-      <div>Switch grenade (Frag ↔ Flash)<kbd>4</kbd></div><div>Plant / Defuse (hold)<kbd>E</kbd></div>
+      <div>Switch grenade (Frag ↔ Flash)<kbd>4</kbd></div><div>Plant / Defuse / Use (hold)<kbd>F</kbd></div><div>Lean left / right<kbd>Q / E</kbd></div>
       <div>Buy menu (15s buy phase)<kbd>B</kbd></div><div>Scoreboard<kbd>TAB</kbd></div>
       <div>Dash pack / jump boots (double jump)<kbd>V / SPACE×2</kbd></div><div>Chaos: call in nuke (7-kill streak)<kbd>N</kbd></div><div>Shield wall / medkit / stim<kbd>5 6 7</kbd></div><div>Pause<kbd>ESC</kbd></div><div>Next spectate target<kbd>CLICK</kbd></div>
     </div>
@@ -564,6 +598,24 @@ const nm=s=>String(s).replace(/Kestrel/g,profile.name||'Kestrel');
 
 /*MAPS*/
 const MAPS={
+ killhouse:{name:'Killhouse',style:'urban',rows:[
+'############################',
+'#ddd.....#.........#.......#',
+'#ddd.....#..x.x.x..#.y...y.#',
+'#........#.........#...c...#',
+'#...1....^....2....^.......#',
+'#........#..c...c..#..y.y..#',
+'#........#.........#.......#',
+'####.###############.#######',
+'####.###############.#######',
+'#.......................3.a#',
+'#...........c....c.........#',
+'####.#################.#####',
+'#A.......#.z.....C.z#..BB..#',
+'#A...5...^..........^..B9..#',
+'#A..z....#..z.c..c..#.zBB..#',
+'#A.......#....z.....#..BB.z#',
+'############################']},
  dustline:{name:'Dustline',style:'desert',rows:[
 '########################################',
 '#BBBBBBBBB#####dddddddddd#####AAAAAAAAA#',
@@ -644,37 +696,63 @@ const THEMES={
   night:   {top:'#050a16',hor:'#1b2a44',fog:0x101a2c,fogN:22,fogF:130,hemiS:0x7f9cff,hemiG:0x1a1a26,hemiI:.55,sun:0xb8ccff,sunI:.55,sunPos:[40,90,-50],sunCol:'#dfe8ff',exp:1.25,ground:0x3d4048,lights:true},
 };
 
+const ACTS=[
+ {n:'I',title:'The Leak',blurb:'A bomb plot leads back to SIGMA\'s own armory.',ready:true},
+ {n:'II',title:'Ash',blurb:'The trail leads abroad to Meridian Group and a stolen prototype called EMBER.',ready:false,count:8},
+ {n:'III',title:'Burned',blurb:'Framed and disavowed. SIGMA itself is hunting you.',ready:false,count:7},
+ {n:'IV',title:'Kindling',blurb:'Rebuild a crew and stop EMBER reaching three cities.',ready:false,count:8},
+ {n:'V',title:'Protocol Ember',blurb:'The final assault on SIGMA\'s own headquarters.',ready:false,count:6}];
 const STORY=[
- {code:'OP-01',title:'First Watch',map:'dustline',theme:'day',side:'def',allies:['Rook'],enemies:3,diff:'easy',toWin:2,credits:1000,
+ {act:0,code:'OP-01',title:'Boot Camp',type:'tutorial',map:'killhouse',theme:'day',side:'def',allies:[],enemies:0,diff:'easy',toWin:1,credits:4000,
+  loc:'SIGMA TRAINING FACILITY · KILLHOUSE · 08:00',
+  intro:['ROOK','Morning, rookie. I\'m Rook. Today you learn how not to die.'],
+  brief:['Welcome to SIGMA, Kestrel. Before anyone hands you a live mission, you run the killhouse.','Sergeant Rook will walk you through moving, buying, shooting, grenades and sneaking — then a timed run through the last three rooms.','Beat the clock and Rook might even remember your name.'],
+  obj:['Follow Rook\'s instructions','Clear the timed run','Reach the exit'],
+  stars:[['Accuracy 40% or better',c=>c.acc>=40],['Timed run under 45 seconds',c=>c.runTime>0&&c.runTime<45]],
+  debrief:['Not bad. Rook logs your run time on the board and grunts something that might be a compliment.','Then the alarm board lights up: a Hollow Syndicate cell has been spotted in the Dustline market.','Training is over. You\'re going in.']},
+ {act:0,code:'OP-02',title:'First Watch',map:'dustline',theme:'day',side:'def',allies:['Rook'],enemies:3,diff:'easy',toWin:2,credits:1000,
   loc:'DUSTLINE MARKET · OLD QUARTER · 13:20',
-  brief:['Welcome to SIGMA, Kestrel. First shift and it\'s already hot.','A Hollow Syndicate cell is moving through the Dustline market with a bomb. Their targets: the water depot (Site A) or the fuel store (Site B).','You and Rook hold the market. Kill them before they plant — or defuse the bomb if they get it down. They\'re poorly trained. Buy a weapon and show us what you\'ve got.'],
-  obj:['Stop the Terrorists planting the bomb','Defuse it if planted (hold E)','Win 2 rounds'],
+  intro:['OVERWATCH','Hollow cell is moving through the market. Hold both sites.'],
+  brief:['First real shift, and it\'s already hot.','A Hollow Syndicate cell is moving through the Dustline market with a bomb. Their targets: the water depot (Site A) or the fuel store (Site B).','You and Rook hold the market. Kill them before they plant, or defuse it if they do.'],
+  obj:['Stop the Terrorists planting the bomb','Defuse it if planted (hold F)','Win 2 rounds'],
   radio:[['OVERWATCH','Press B to buy. Grab armor, a gun and a flashbang.'],['ROOK','Stop moving before you shoot. Running ruins your aim.'],['OVERWATCH','One more. Finish it clean.']],
   debrief:['The market is clear. Good work for a first day.','One problem: the bomb casing carried SIGMA serial numbers. The explosives came from our own armory — signed out with valid clearance codes.','Somebody inside is supplying the Syndicate.']},
- {code:'OP-02',title:'Harbor Lights',map:'harbor',theme:'night',side:'def',allies:['Rook','Vex'],enemies:4,diff:'normal',toWin:2,credits:2500,
+ {act:0,code:'OP-03',title:'Harbor Lights',map:'harbor',theme:'night',side:'def',allies:['Rook','Vex'],enemies:4,diff:'normal',toWin:2,credits:2500,
   loc:'HARBOR · PIER 9 · 02:15',
+  intro:['VEX','Vex, Internal Affairs. I\'m here to find your leak. Tonight I hold the line with you.'],
   brief:['A Hollow strike team is heading for Pier 9 to blow the pumps that keep half the city drinking.','Vex has come over from Internal Affairs to hunt the leak. Tonight she holds the line with you and Rook.','Hold both pump sites. If they plant, retake and defuse.'],
   obj:['Stop the Terrorists detonating a bomb','Defuse any planted bomb','Win 2 rounds'],
   radio:[['VEX','They\'ll hit one site hard. Don\'t over-rotate.'],['OVERWATCH','Hollow comms are spiking. Second wave inbound.'],['ROOK','Last push. Hold your angles.']],
-  debrief:['The pumps survived.','But the Hollow team knew our positions to the second. Vex wants to trace their encrypted uplink.','The trace leads back to Dustline.']},
- {code:'OP-03',title:'Ghost Signal',map:'dustline',theme:'overcast',side:'def',retake:true,allies:['Rook','Vex'],enemies:3,diff:'normal',toWin:3,credits:3500,betray:{name:'Vex',round:3},
+  debrief:['The pumps survived.','But the Hollow team knew our positions to the second. Somebody is feeding them.','Vex has a plan: steal the armory sign-out logs before the leak can wipe them. Quietly.']},
+ {act:0,code:'OP-04',title:'Paper Trail',type:'stealth',map:'dustline',theme:'night',side:'def',allies:[],enemies:6,diff:'normal',toWin:1,credits:0,
+  loc:'DUSTLINE · SIGMA FIELD ARMORY · 01:40',
+  intro:['VEX','The office is in the old fuel store. Get in, pull the logs, get out. Nobody can know we were there.'],
+  brief:['Vex suspects someone inside SIGMA signed out the explosives. The proof is in the armory sign-out logs, stored in the old fuel store office (Site B).','The armory is guarded by contractors who don\'t know you. If they raise the alarm, the leak will hear about it within minutes.','You carry a suppressed pistol and a knife. Stay out of their sight, crouch to move quietly, and knife guards from behind for silent takedowns.'],
+  obj:['Reach the armory office (Site B)','Download the sign-out logs (hold F)','Get back to the drop-off','Optional: never raise the alarm'],
+  stars:[['Ghost: never raise the alarm',c=>!c.alarm],['Finish in under 4 minutes',c=>c.time<240]],
+  debrief:['You\'re out with the logs.','Vex reads them in the van. The explosives were signed out with Rook\'s clearance code.','Rook swears he never touched them. Vex says she can trace who really used the code — from the Dustline relay, at dawn.']},
+ {act:0,code:'OP-05',title:'Ghost Signal',map:'dustline',theme:'overcast',side:'def',retake:true,allies:['Rook','Vex'],enemies:3,diff:'normal',toWin:3,credits:3500,betray:{name:'Vex',round:3},
   loc:'DUSTLINE · RELAY BLOCK · 05:10',
-  brief:['The Syndicate has already armed a bomb on the Dustline relay, with gunmen holding the site.','This is a retake. The clock starts the moment the buy phase ends. Push the site, clear it and defuse.','Vex runs the trace while you fight. Stay sharp — something about this op feels rehearsed.'],
-  obj:['RETAKE: the bomb is already planted','Clear the site and defuse (hold E, 7s)','Win 3 rounds'],
-  radio:[['VEX','Trace is warming up. Keep them busy.'],['ROOK','Clean so far. Too clean.'],['VEX','Sorry, Kestrel. Nothing personal — the Syndicate simply pays better.']],
-  debrief:['Vex was the leak. She used the op to wipe the relay — and our only proof.','Rook is down and command has frozen your clearance pending review.','Vex\'s crew is heading to the Harbor to blow the servers that hold her access logs. You\'re going in alone.']},
- {code:'OP-04',title:'Undertow',map:'harbor',theme:'overcast',side:'def',allies:[],enemies:3,diff:'normal',toWin:2,credits:4500,
+  intro:['OVERWATCH','Bomb is already armed on the relay. Clear it, defuse it, keep Vex\'s trace alive.'],
+  brief:['The Syndicate has already armed a bomb on the Dustline relay, with gunmen holding the site.','This is a retake. The clock starts the moment the buy phase ends. Push the site, clear it and defuse.','Vex runs the trace while you fight. Stay sharp — something about this feels wrong.'],
+  obj:['RETAKE: the bomb is already planted','Clear the site and defuse (hold F, 7s)','Win 3 rounds'],
+  radio:[['VEX','Trace is warming up. Keep them busy.'],['ROOK','Clean so far. Too clean.'],null],
+  debrief:['Vex was the leak. She framed Rook with his own code and used the op to wipe the relay — and our only proof.','Rook is down and command has frozen your clearance pending review.','Vex\'s crew is heading to the Harbor to blow the servers that hold her access logs. You\'re going alone.']},
+ {act:0,code:'OP-06',title:'Undertow',map:'harbor',theme:'overcast',side:'def',allies:[],enemies:3,diff:'normal',toWin:2,credits:4500,
   loc:'HARBOR · SERVER BARGES · 05:45',
+  intro:['JUNO','Kestrel. Name\'s Juno. I\'m pulling Vex\'s logs while you hold. Buy me time.'],
   brief:['No team. No handler. Comms are dark.','Vex\'s cleaners will try to plant on the server barges holding her access logs. If those burn, nobody will ever believe you.','Three of them. One of you. Use your grenades and pick your fights.'],
   obj:['Defend the servers — alone','Defuse anything they plant','Win 2 rounds'],
-  radio:[['???','Kestrel. This is Juno. I\'m pulling the logs while you hold. Buy me time.'],['JUNO','Halfway there. Don\'t let them near the barges.'],['JUNO','Got enough. One more round!']],
-  debrief:['The logs survived. Juno pushed them to command and your clearance is restored.','The logs also show where Vex is hiding: the Syndicate warehouse on the east docks.','Command has given you a full squad. This ends tonight.']},
- {code:'OP-05',title:'Hollow Crown',map:'foundry',theme:'dusk',side:'def',retake:true,allies:['Rook','Juno','Atlas','Mara'],enemies:4,diff:'hard',toWin:3,credits:6000,boss:'VEX',
+  radio:[['JUNO','Pulling the logs. Don\'t let them near the barges.'],['JUNO','Halfway there. Keep going.'],['JUNO','Got enough. One more round!']],
+  debrief:['The logs survived. Juno pushed them to command and your clearance is restored.','Rook pulled through surgery. The first thing he asked for was his rifle.','The logs show where Vex is hiding: the Syndicate warehouse on the east docks. Command has given you a full squad.']},
+ {act:0,code:'OP-07',title:'Hollow Crown',map:'foundry',theme:'dusk',side:'def',retake:true,allies:['Rook','Juno','Atlas','Mara'],enemies:4,diff:'hard',toWin:3,credits:6000,boss:'VEX',bossPhases:true,outro:'act1',
   loc:'EAST DOCKS WAREHOUSE · 19:59',
-  brief:['Vex has armed the warehouse charges herself and is holding the site with her best people.','Full squad. Rook is back on his feet and wants a word with her.','Vex wears heavy armor and is the best shot they have. Flash her, trade kills, and don\'t duel her alone.'],
-  obj:['RETAKE the site and defuse the bomb','Take down Vex (armored boss)','Win 3 rounds'],
-  radio:[['ROOK','Five of us. Flash in, trade kills, nobody plays hero.'],['VEX','You should have stayed in the Harbor, rookie.'],['OVERWATCH','Charges are live. Finish this.'],['JUNO','Last round. Make it count.']],
-  debrief:['The warehouse is secure. Vex is in custody.','SIGMA has a new rule: no op runs without a second set of eyes on the intel.','Welcome to the unit, Kestrel. For real this time.']},
+  intro:['ROOK','Five of us. Flash in, trade kills, nobody plays hero.'],
+  brief:['Vex has armed the warehouse charges herself and is holding the site with her best people.','Full squad. Rook is back on his feet and wants a word with her.','Vex fights in three phases: she calls in backup when hurt and puts on a shield when cornered. Flash her, trade kills, and don\'t fight her alone.'],
+  obj:['RETAKE the site and defuse the bomb','Take down Vex (boss, 3 phases)','Win 3 rounds'],
+  stars:[['Accuracy 35% or better',c=>c.acc>=35],['Beat it on Veteran or harder',c=>c.diff!=='recruit']],
+  radio:[null,['OVERWATCH','Charges are live. Finish this.'],['JUNO','Last round. Make it count.']],
+  debrief:['The warehouse is secure. Vex is in custody.','For one night, SIGMA sleeps.']}
 ];
 const ALLY_NAMES={def:['Rook','Juno','Atlas','Mara','Sable'],atk:['Ash','Grim','Cinder','Brand','Soot']};
 const ENEMY_NAMES={atk:['Ash','Grim','Shade','Brand','Cinder','Wraith','Soot'],def:['Hawk','Reyes','Kovac','Nash','Ortiz','Volk']};
@@ -779,7 +857,7 @@ let MAP=null;
 function wallHeight(c,r,W,H){if(r===0||c===0||r===H-1||c===W-1)return 7.5;return [5.2,6,6.8,6][Math.floor(hash(c,r)*4)];}
 function loadMap(key){
   const src=MAPS[key].rows; const H=src.length; const W=Math.max(...src.map(r=>r.length));
-  const grid=[],sites={A:[],B:[]},spawns={atk:[],def:[]},boxes=new Array(W*H);
+  const grid=[],sites={A:[],B:[]},spawns={atk:[],def:[]},boxes=new Array(W*H),marks={};
   for(let r=0;r<H;r++){const row=src[r].padEnd(W,'#').split('');for(let c=0;c<W;c++)if(r===0||c===0||r===H-1||c===W-1)row[c]='#';grid.push(row);}
   for(let r=0;r<H;r++)for(let c=0;c<W;c++){
     const ch=grid[r][c],x0=c*S,z0=r*S,bx=[];
@@ -790,11 +868,11 @@ function loadMap(key){
     else if(ch==='u')bx.push({x0,x1:x0+S,y0:3.2,y1:3.7,z0,z1:z0+S});
     else if(ch==='^')bx.push({x0,x1:x0+S,y0:3.3,y1:6,z0,z1:z0+S});
     if(ch==='A')sites.A.push([c,r]);if(ch==='B')sites.B.push([c,r]);
-    if(ch==='a')spawns.atk.push([c,r]);if(ch==='d')spawns.def.push([c,r]);
+    if(ch==='a')spawns.atk.push([c,r]);if(ch==='d')spawns.def.push([c,r]);if(/[0-9xyz]/.test(ch))(marks[ch]||(marks[ch]=[])).push([c,r]);
     boxes[r*W+c]=bx;
   }
   const centroid=l=>{let x=0,z=0;l.forEach(([c,r])=>{x+=c*S+S/2;z+=r*S+S/2;});return V3(x/l.length,0,z/l.length);};
-  MAP={key,style:MAPS[key].style,W,H,grid,sites,spawns,boxes,siteC:{A:centroid(sites.A),B:centroid(sites.B)},spawnC:{atk:centroid(spawns.atk),def:centroid(spawns.def)}};
+  MAP={key,marks,style:MAPS[key].style,W,H,grid,sites,spawns,boxes,siteC:{A:centroid(sites.A),B:centroid(sites.B)},spawnC:{atk:centroid(spawns.atk),def:centroid(spawns.def)}};
 }
 const cellOf=v=>[Math.floor(v.x/S),Math.floor(v.z/S)];
 const cellCenter=(c,r)=>V3(c*S+S/2,0,r*S+S/2);
@@ -1353,7 +1431,7 @@ function killfeed(k,v,wid,hs){const d=document.createElement('div');d.className=
 let hitmarkT=0;function hitmark(cls){const h=$('hitmark');h.className=cls||'';h.style.opacity=1;hitmarkT=cls==='kill'?.35:.15;}
 let bannerT=0;function banner(t,s,cls,dur=3){$('bannerT').textContent=t;$('bannerT').className=cls||'neutral';$('bannerS').textContent=s||'';$('banner').classList.add('show');bannerT=dur;}
 let vigT=0,dirT=0,flashT=0,blindT=0,blindMax=1,shakeT=0;
-function prompt(html){if(TOUCH.on)html=html.replace(/<kbd>E<\/kbd>/g,'<kbd>USE</kbd>').replace(/<kbd>B<\/kbd>/g,'<kbd>BUY</kbd>');setH('prompt',html);}
+function prompt(html){if(TOUCH.on)html=html.replace(/<kbd>F<\/kbd>/g,'<kbd>USE</kbd>').replace(/<kbd>B<\/kbd>/g,'<kbd>BUY</kbd>');setH('prompt',html);}
 function buildAlives(){for(const t of ['blue','red']){const el=$(t==='blue'?'alivesB':'alivesR');el.innerHTML='';agents.filter(a=>a.team===t).forEach(()=>el.appendChild(document.createElement('i')));}}
 function updateAlives(){for(const t of ['blue','red']){const el=$(t==='blue'?'alivesB':'alivesR');const list=agents.filter(a=>a.team===t);if(el.children.length!==list.length)buildAlives();list.forEach((a,i)=>el.children[i]&&el.children[i].classList.toggle('dead',!a.alive));}}
 function applyCrosshair(){['xu','xd','xl','xr','xdot'].forEach(i=>$(i).style.background=settings.xhair);}
@@ -1381,7 +1459,7 @@ function drawMinimap(){const g=$('minimap').getContext('2d');g.clearRect(0,0,220
 //  MATCH SETUP
 // =====================================================================
 function clearAgents(){byNet={};for(const a of agents){if(a.mesh){scene.remove(a.mesh);disposeGroupGeo(a.mesh);}}agents.length=0;}
-function setupMatch(cfg){jailClear();NUKE.on=false;NUKE.at=0;{const w=$('nukewarn');if(w)w.classList.add('hidden');}if(NUKE.fx){scene.remove(NUKE.fx);NUKE.fx=null;}kcStop();SHOTS.length=0;if(player)player.ks=0;
+function setupMatch(cfg){jailClear();msStop();if(CS.on){CS.on=false;document.body.classList.remove('cine');$('cine').classList.add('hidden');}document.body.classList.remove('hc');state.pendingCS=null;NUKE.on=false;NUKE.at=0;{const w=$('nukewarn');if(w)w.classList.add('hidden');}if(NUKE.fx){scene.remove(NUKE.fx);NUKE.fx=null;}kcStop();SHOTS.length=0;if(player)player.ks=0;
   const hiL=Q()===2;flashLight.visible=hiL;nadeLight.visible=hiL;spikeLight.visible=hiL;
   initAudio();state.cfg=cfg;clearFx();clearAgents();
   buildLevel(cfg.map,cfg.theme);rebuildVMs();state.coinsEarned=0;
@@ -1415,7 +1493,7 @@ function spawnAgents(){const used=new Set();
     const tgt=side==='atk'?(state.cfg.retake?MAP.spawnC.def:V3((MAP.siteC.A.x+MAP.siteC.B.x)/2,0,(MAP.siteC.A.z+MAP.siteC.B.z)/2)):MAP.spawnC.atk;
     a.yaw=yawTo(tgt.x-a.pos.x,tgt.z-a.pos.z);a.pitch=0;}}
 function startRound(){
-  jailClear();state.round++;const cfg=state.cfg;
+  jailClear();bossRoundReset();state.round++;const cfg=state.cfg;
   if(cfg.swap&&!state.swapped&&state.round===cfg.toWin){state.swapped=true;state.sides={blue:state.sides.red,red:state.sides.blue};
     for(const a of agents){a.credits=800;a.inv=freshInv();a.armor=0;a.helmet=false;a.nadesN={he:0,flash:0};a.alive=false;a.lossStreak=0;rebuildMesh(a);}
     banner('SWITCHING SIDES','You are now the '+sideName(state.sides.blue),'neutral',2.5);}
@@ -1446,12 +1524,13 @@ function startRound(){
   defs.forEach((b,i)=>{const site=i%3===2?'mid':(i%2===0?'A':'B');b.role=site;b.holdSpot=site==='mid'?randomCellNear(V3((MAP.siteC.A.x+MAP.siteC.B.x)/2,0,(MAP.siteC.A.z+MAP.siteC.B.z)/2),2):randomSiteSpot(site);computeHoldFacing(b);});
   agents.filter(a=>!a.isPlayer&&sideOf(a.team)==='atk').forEach(b=>{b.role=Math.random()<.2?'lurk':'main';});
   if(cfg.radio){const line=cfg.radio[Math.min(state.round-1,cfg.radio.length-1)];if(line)setTimeout(()=>{if(state.running)radio(line[0],line[1],line[0]==='VEX'&&(cfg.boss||(cfg.betray&&state.round>=cfg.betray.round)));},900);}
-  if(cfg.betray&&state.round===cfg.betray.round){setTimeout(()=>{if(state.running){banner('BETRAYAL','Vex has joined the Syndicate','lose',3);radio('ROOK','Vex?! She\'s with them — watch your back!');}},2500);}
+  if(cfg.betray&&state.round===cfg.betray.round&&!state.betrayShown){state.betrayShown=true;state.pendingCS=()=>playCS(betrayalShots());}
   else banner('ROUND '+state.round,cfg.retake?(sideOf(player.team)==='def'?'RETAKE — bomb planted on '+state.plantSite:'HOLD THE PLANTED BOMB ON '+state.plantSite):(sideOf(player.team)==='atk'?'TERRORISTS — plant the bomb':'SOLDIERS — defend both sites'),'neutral',2.2);
   $('spectate').classList.add('hidden');
   setT('sideB',sideName(state.sides.blue));setT('sideR',sideName(state.sides.red));
   $('sideB').style.color=state.sides.blue==='atk'?'var(--t)':'var(--ct)';$('sideR').style.color=state.sides.red==='atk'?'var(--t)':'var(--ct)';
   if(state.cfg.chaos)chaosStart();
+  if(state.pendingCS){const f=state.pendingCS;state.pendingCS=null;f();}
 }
 function computeHoldFacing(b){const path=findPath(b.holdSpot,MAP.spawnC.atk);if(path&&path.length>2){const p=path[Math.min(4,path.length-1)];b.faceYaw=yawTo(p.x-b.holdSpot.x,p.z-b.holdSpot.z);}else b.faceYaw=yawTo(MAP.spawnC.atk.x-b.holdSpot.x,MAP.spawnC.atk.z-b.holdSpot.z);}
 function botBuy(b){let c=b.credits;
@@ -1502,7 +1581,7 @@ function playerFire(){
   a.recoilP=(a.recoilP||0)+pat[0]*rk;a.recoilY=(a.recoilY||0)+pat[1]*rk;vm.kickRoll=rand(-1,1);
   vm.kick=1;vm.flashT=.05;flashLight.position.copy(camera.position);flashLight.intensity=2.4;
   sfx.shot(it.id,a.pos,true);if(w===WEAPONS.shotgun)setTimeout(()=>{sfx.pump();vm.pumpT=T;ejectBrass(true);},300);else if(w===WEAPONS.sniper)setTimeout(()=>{sfx.bolt();vm.boltT=T;ejectBrass(false);},420);else ejectBrass(false);
-  state.stats.shots++;alertByGunfire(a);
+  state.stats.shots++;alertByGunfire(a);msNoise(a,w);
   if(it.mag===0&&it.reserve>0)setTimeout(()=>{if(player.alive&&instOf(player)===it&&it.mag===0)startReload(player);},250);
   if(w.scope){a.ads=0;a.rescopeAt=T+1/w.rate*.95;}
 }
@@ -1548,6 +1627,7 @@ function damage(v,dmg,att,wid,head,fromPos,pen=.5,quiet){
   if(!v.alive)return;
   if(HACK.god&&v.isPlayer&&!state.mp)return;
   if(!state.mp&&T<(v.protectUntil||0))return;
+  if(!state.mp&&state.cfg&&state.cfg.story){if(v.isPlayer&&state.cfg.dmgIn)dmg*=state.cfg.dmgIn;else if(att&&att.isPlayer&&state.cfg.dmgOut)dmg*=state.cfg.dmgOut;if(MS.on)dmg=msDamage(v,dmg,att,wid);}
   if(state.mp){if(!att||!ctrl(att)||!v.netId)return;send({t:'hit',as:att.netId,v:v.netId,d:Math.round(dmg*10)/10,h:!!head,w:wid});if(att.isPlayer&&v!==att&&!quiet){hitmark(head?'hs':'');head?sfx.head():sfx.hit();}return;}
   if(v.oshield>0){const sh=Math.min(v.oshield,dmg);v.oshield-=sh;dmg-=sh;if(v.isPlayer)sfx.armorHit();if(dmg<=0){if(att&&att.isPlayer&&!quiet){hitmark('');sfx.hit();}return;}}
   if(v.armor>0&&(!head||v.helmet)){const hpD=dmg*pen;const arD=(dmg-hpD)*.5;v.armor=Math.max(0,v.armor-arD);dmg=hpD;if(v.isPlayer)sfx.armorHit();}
@@ -1560,6 +1640,7 @@ function damage(v,dmg,att,wid,head,fromPos,pen=.5,quiet){
 }
 function kill(v,att,wid,head){
   if(v.jailed)jailEnd(v,att);
+  hcDeathCheck(v);
   if(att&&att!==v&&att.team!==v.team&&wid!=='nuke')att.ks=(att.ks|0)+1;v.ks=0;
   if(att===player&&v!==player&&att.team!==v.team){player.mk=T-(player.mkT||-9)<4?(player.mk|0)+1:1;player.mkT=T;const ml={2:'Double kill!',3:'Triple kill!',4:'Quad kill!',5:'Rampage!'}[Math.min(5,player.mk)];if(ml&&wid!=='nuke')say(ml,{rate:1.05});
     if(state.cfg&&state.cfg.chaos&&(player.ks|0)===NUKE_KILLS)setTimeout(()=>say('Tactical nuke ready. Press N.',{prio:1}),700);}
@@ -1618,13 +1699,14 @@ function updatePlayer(dt){
   // objectives
   let pr='';
   if(state.phase==='live'&&sideOf(a.team)==='atk'&&spike.carrier===a){const s=siteAt(a.pos);
-    if(s&&a.onGround){pr='Hold <kbd>E</kbd> to plant the bomb';if(keys.KeyE){a.planting+=dt;if(a.planting>=PLANT_TIME){plantSpike(a);a.planting=0;}}else a.planting=0;}
+    if(s&&a.onGround){pr='Hold <kbd>F</kbd> to plant the bomb';if(keys.KeyF){a.planting+=dt;if(a.planting>=PLANT_TIME){plantSpike(a);a.planting=0;}}else a.planting=0;}
     else{a.planting=0;pr='<span style="color:var(--gold)">▣ BOMB</span> — get to Site A or B';}}
   else a.planting=0;
   if(state.phase==='planted'&&sideOf(a.team)==='def'){const d=Math.hypot(a.pos.x-spike.pos.x,a.pos.z-spike.pos.z);
-    if(d<1.7&&a.onGround){pr='Hold <kbd>E</kbd> to defuse';if(keys.KeyE&&(!spike.defuser||spike.defuser===a||!spike.defuser.alive)){spike.defuser=a;spike.defusingNow=true;}else if(spike.defuser===a)spike.defuser=null;}
+    if(d<1.7&&a.onGround){pr='Hold <kbd>F</kbd> to defuse';if(keys.KeyF&&(!spike.defuser||spike.defuser===a||!spike.defuser.alive)){spike.defuser=a;spike.defusingNow=true;}else if(spike.defuser===a)spike.defuser=null;}
     else if(spike.defuser===a)spike.defuser=null;}
   if(canBuy()&&player.alive)pr='Press <kbd>B</kbd> to buy weapons';
+  if(MS.on&&MS.prompt)pr=MS.prompt;
   prompt(pr);
 }
 
@@ -1642,7 +1724,7 @@ function throwNade(a,type,vel,from,remote){
 function playerThrow(){const a=player;if(!a.alive||a.jailed||state.phase==='buy'||state.phase==='end')return;
   let t=a.nadeSel;if(a.nadesN[t]<=0)t=t==='he'?'flash':'he';if(a.nadesN[t]<=0)return;
   const f=camForward();const from=camera.position.clone().addScaledVector(f,.4).add(V3(0,-.1,0));
-  const vel=f.clone().multiplyScalar(15).add(V3(a.vel.x*.8,2.2,a.vel.z*.8));throwNade(a,t,vel,from);}
+  const vel=f.clone().multiplyScalar(15).add(V3(a.vel.x*.8,2.2,a.vel.z*.8));throwNade(a,t,vel,from);MS.thrown=true;}
 function botThrow(b,type,target){const from=eyeOf(b);const d=Math.hypot(target.x-from.x,target.z-from.z);const t=clamp(d/13,.45,1.4);const g=16;
   const vel=V3((target.x-from.x)/t,(target.y-from.y)/t+.5*g*t,(target.z-from.z)/t);
   if(throwNade(b,type,vel,from)){b.nadeCD=T+5;b.yaw=yawTo(target.x-b.pos.x,target.z-b.pos.z);if(type==='flash')b.turnAwayUntil=T+1.6;}}
@@ -1742,6 +1824,7 @@ function updateBot(b,dt){
   const ud=b.mesh.userData;
   if(!b.alive){b.deadT+=dt;const k=Math.min(1,b.deadT*2.5);b.mesh.rotation.x=k*1.45;b.mesh.position.y=b.pos.y-k*.05;if(ud.marker)ud.marker.visible=false;return;}
   if(ud.marker)ud.marker.visible=true;
+  if(b.dummy||b.puppet){puppetTick(b,dt,ud);return;}
   const D=DIFF[b.diff],w=weaponOf(b),it=instOf(b);
   if(b.reloadUntil&&T>=b.reloadUntil){finishReload(b);b.reloadUntil=0;}
   let mvx=0,mvz=0,speed=0,wantYaw=null;const blind=T<b.blindUntil;
@@ -1812,7 +1895,7 @@ function ud_muzzle(b,out){const m=b.mesh.userData.muzzle;b.mesh.updateMatrixWorl
 // =====================================================================
 //  ROUND LOGIC
 // =====================================================================
-function checkRound(){if(state.cfg&&state.cfg.chaos)return;if(state.phase!=='live'&&state.phase!=='planted')return;
+function checkRound(){if(state.cfg&&(state.cfg.chaos||state.cfg.mission))return;if(state.phase!=='live'&&state.phase!=='planted')return;
   const atkT=teamOfSide('atk'),defT=teamOfSide('def');const atkA=agents.some(a=>a.team===atkT&&a.alive),defA=agents.some(a=>a.team===defT&&a.alive);
   if(state.phase==='live'){if(!atkA)endRound(defT,'Terrorists eliminated');else if(!defA)endRound(atkT,'Soldiers eliminated');else if(state.timer<=0)endRound(defT,'Time ran out — no plant');}
   else if(!defA)endRound(atkT,'Soldiers eliminated');}
@@ -1829,13 +1912,24 @@ function endMatch(won){
   const hsP=st.kills?Math.round(st.hs/st.kills*100):0,accP=st.shots?Math.round(st.hits/st.shots*100):0;
   $('rStats').innerHTML=`<div><b>${state.score.blue} – ${state.score.red}</b><span>FINAL SCORE</span></div><div><b>${st.kills}/${st.deaths}</b><span>K / D</span></div><div><b>${hsP}%</b><span>HEADSHOT KILLS</span></div><div><b>${accP}%</b><span>ACCURACY</span></div><div><b>${Math.round(st.dmg)}</b><span>DAMAGE</span></div><div><b style="color:var(--gold)">+${earned}</b><span>COINS EARNED</span></div>`;
   let txt='',btns='';
-  if(cfg.story){const idx=cfg.storyIdx;
-    if(won){txt=cfg.story.debrief.map(p=>`<p>${nm(p)}</p>`).join('');completed[idx+1]=true;progress=Math.max(progress,idx+2);saveProgress();
-      if(idx<STORY.length-1)btns=`<button class="btn primary" onclick="openBrief(${idx+1})">NEXT: ${STORY[idx+1].title.toUpperCase()} ▸</button>`;
-      else txt+=`<p style="color:var(--gold);letter-spacing:3px;font-weight:700;margin-top:20px">CAMPAIGN COMPLETE — THANKS FOR PLAYING</p>`;
-      btns+=`<button class="btn" onclick="showScreen('scrStory')">MISSION SELECT</button>`;}
-    else{txt=`<p>The Syndicate held this time. Regroup, re-equip and go again.</p><p style="color:var(--dim)">Tip: buy armor, stop before you shoot, aim at head height and flash before you push. You can lower STORY DIFFICULTY in Settings.</p>`;
-      btns=`<button class="btn primary" onclick="startStory(${idx})">RETRY MISSION</button><button class="btn" onclick="showScreen('scrStory')">MISSION SELECT</button>`;}}
+  if(cfg.story){const idx=cfg.storyIdx,m=cfg.story;msStop();document.body.classList.remove('hc');
+    if(cfg.hc&&!won){const hc=CAMP.hc;hc.kills=(hc.kills|0)+st.kills;const rt=hc.start?Math.round((Date.now()-hc.start)/1000):0;
+      if(!hc.best||idx+1>(hc.best.idx|0))hc.best={idx:idx+1,reached:m.code+' '+m.title,kills:hc.kills,time:rt};
+      $('rTitle').innerHTML=`<small>HARDCORE · ${m.code} · ${m.title.toUpperCase()}</small>K.I.A.`;$('rTitle').style.color='var(--red)';
+      txt=`<p>Your Hardcore run ended on <b>${m.code} ${m.title}</b>.</p><p>Kills this run: <b>${hc.kills}</b> · Run time: <b>${fmtTime(rt)}</b></p><p style="color:var(--gold)">Best run: reached ${hc.best.reached}</p><p style="color:var(--dim)">Hardcore is one life. Your run starts again from OP-01.</p>`;
+      CAMP.hc={prog:1,start:0,kills:0,best:hc.best};saveCamp();
+      btns=`<button class="btn primary" onclick="openBrief(0)">START NEW RUN ▸</button><button class="btn" onclick="showScreen('scrStory')">CAMPAIGN</button>`;}
+    else if(won){const S=missionStars(m,true);const prev=CAMP.stars[m.code]|0,n=S.got.filter(Boolean).length,ns=Math.max(0,n-prev);if(n>prev)CAMP.stars[m.code]=n;if(ns){profile.coins+=ns*100;saveProfile();}
+      if(cfg.hc){CAMP.hc.prog=Math.max(CAMP.hc.prog,idx+2);CAMP.hc.kills=(CAMP.hc.kills|0)+st.kills;if(idx===STORY.length-1){const rt=CAMP.hc.start?Math.round((Date.now()-CAMP.hc.start)/1000):0;CAMP.hc.best={idx:idx+1,reached:'the end of Act I',complete:true,kills:CAMP.hc.kills,time:rt};}}
+      else CAMP.prog=Math.max(CAMP.prog,idx+2);
+      completed[idx+1]=true;progress=Math.max(progress,idx+2);saveProgress();saveCamp();
+      txt=`<div class="starsRes">${S.got.map((g,k)=>`<div class="${g?'y':'n'}">${g?'★':'☆'} ${S.labels[k]}</div>`).join('')}${ns?`<div class="y">+${ns*100} coins for new stars</div>`:''}</div>`+m.debrief.map(p=>`<p>${nm(p)}</p>`).join('');
+      const last=idx===STORY.length-1||STORY[idx+1].act!==m.act;
+      if(last)txt+=`<p style="color:var(--gold);letter-spacing:3px;font-weight:700;margin-top:20px">ACT ${ACTS[m.act].n} COMPLETE${cfg.hc?' ON HARDCORE':''}</p><p style="color:var(--dim)">Act ${ACTS[m.act+1]?ACTS[m.act+1].n+': '+ACTS[m.act+1].title:''} is coming in the next update.</p>`;
+      if(!last&&missionOpen(idx+1))btns=`<button class="btn primary" onclick="openBrief(${idx+1})">NEXT: ${STORY[idx+1].title.toUpperCase()} ▸</button>`;
+      btns+=`<button class="btn" onclick="showScreen('scrStory')">CAMPAIGN</button>`;}
+    else{txt=`<p>${m.type==='stealth'?'You were taken down inside the armory.':m.type==='tutorial'?'Rook shakes his head. "Again."':'The Syndicate held this time. Regroup, re-equip and go again.'}</p><p style="color:var(--dim)">Tip: buy armor, stop before you shoot, aim at head height and flash before you push. You can lower the difficulty on the campaign screen.</p>`;
+      btns=`<button class="btn primary" onclick="startStory(${idx})">RETRY MISSION</button><button class="btn" onclick="showScreen('scrStory')">CAMPAIGN</button>`;}}
   else{txt=`<p>${won?'Clean match. The bots are filing a complaint.':'The bots took this one. Run it back?'}</p>`;btns=`<button class="btn primary" onclick="setupMatch(state.cfg)">REMATCH</button><button class="btn" onclick="showScreen('scrQuick')">CHANGE SETTINGS</button>`;}
   btns+=`<button class="btn" onclick="showScreen('scrMain')">MAIN MENU</button>`;
   $('rText').innerHTML=txt;$('rBtns').innerHTML=btns;$('menu').classList.remove('hidden');showScreen('scrResult');
@@ -1846,6 +1940,7 @@ function endMatch(won){
 // =====================================================================
 let spectateIdx=-1,spectateT=0;
 function update(dt){
+  if(CS.on){csTick(dt);return;}
   recordHist();kcTick();nukeTick(dt);jailTick(dt);
   if(JAIL.pending&&T>=JAIL.tpAt)jailTeleport();
   if(state.mp){updateMP(dt);return;}
@@ -1855,20 +1950,24 @@ function update(dt){
       if(state.cfg.retake){spike.timer=BOMB_TIME;radio('OVERWATCH',sideOf(player.team)==='def'?`Bomb is live on ${state.plantSite}. Retake it!`:'Hold the bomb!');}
       else if(state.round===1&&!state.cfg.story)radio('TEAM',sideOf(player.team)==='atk'?'Go go go! Get the bomb planted.':'Hold your positions.');}}
   else if(state.phase==='live'){state.timer-=dt;state.roundTime=state.timer;}
-  else if(state.phase==='end'){state.endTimer-=dt;if(state.endTimer<=0){const cfg=state.cfg;if(state.score.blue>=cfg.toWin||state.score.red>=cfg.toWin){endMatch(state.score.blue>=cfg.toWin);return;}startRound();}}
+  else if(state.phase==='end'){state.endTimer-=dt;if(state.endTimer<=0){const cfg=state.cfg;if(state.score.blue>=cfg.toWin||state.score.red>=cfg.toWin){const won=state.score.blue>=cfg.toWin;if(won&&cfg.story&&cfg.story.outro==='act1'&&!state.outroPlayed){state.outroPlayed=true;playCS(act1OutroShots(),()=>endMatch(true));return;}endMatch(won);return;}startRound();}}
   updatePlayer(dt);
   for(const a of agents)if(!a.isPlayer)updateBot(a,dt);
   if(player.mesh){const m=player.mesh;if(player.alive)m.visible=false;else{m.visible=true;player.deadT=(player.deadT||0)+dt;const k=Math.min(1,player.deadT*2.5);m.position.set(player.pos.x,player.pos.y,player.pos.z);m.rotation.y=player.yaw;m.rotation.x=k*1.45;if(m.userData.marker)m.userData.marker.visible=false;}}
   for(let i=0;i<agents.length;i++)for(let j=i+1;j<agents.length;j++){const a=agents[i],b=agents[j];if(!a.alive||!b.alive)continue;const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,d=Math.hypot(dx,dz);
     if(d<.7&&d>1e-4){const p=(.7-d)/2;a.pos.x-=dx/d*p;a.pos.z-=dz/d*p;b.pos.x+=dx/d*p;b.pos.z+=dz/d*p;}}
   if(player.alive&&blindT<=0&&Math.floor(T*8)!==Math.floor((T-dt)*8)){const f=camForward();for(const e of agents){if(e.team===player.team||!e.alive)continue;const d=V3().subVectors(V3(e.pos.x,e.pos.y+1.2,e.pos.z),camera.position);const L=d.length();if(L<100&&d.dot(f)/L>.55&&canSee(camera.position,e))e.spotted=T+1.2;}}
-  updateNades(dt);updateSpike(dt);checkRound();updateFx(dt);updateParts(dt);updateHack();updateProjs(dt);updateDyn();updateChaosAgents(dt);
+  updateNades(dt);updateSpike(dt);checkRound();updateFx(dt);updateParts(dt);updateHack();updateProjs(dt);updateDyn();updateChaosAgents(dt);msTick(dt);bossTick();msMarkerHUD();
 }
 function updateCamera(dt){
+  if(CS.on)return;
   if(state.mp&&state.phase==='lobby'){state.menuCam+=dt*.05;const cx=MAP.W*S/2,cz=MAP.H*S/2,R=Math.max(MAP.W,MAP.H)*S*.5;camera.position.set(cx+Math.cos(state.menuCam)*R,30,cz+Math.sin(state.menuCam)*R);camera.lookAt(cx,0,cz);camYaw=camera.rotation.y;
     if(camera.fov!==settings.fov){camera.fov=settings.fov;camera.updateProjectionMatrix();}for(const k in vmModels)vmModels[k].visible=false;nadeVM.visible=false;vm.cur=null;updateLobbyTimer();return;}
   if(player.alive){camera.position.set(player.pos.x,player.pos.y+player.eyeH,player.pos.z);
-    const rp=(player.recoilP||0)+(player.aimPunch||0);camera.rotation.set(clamp(player.pitch+rp,-1.55,1.55),player.yaw+(player.recoilY||0),0);camYaw=player.yaw;$('spectate').classList.add('hidden');}
+    const rp=(player.recoilP||0)+(player.aimPunch||0);
+    {const want=(!buyOpen&&!hackOpen)?(keys.KeyE?1:0)-(keys.KeyQ?1:0):0;player.lean=lerp(player.lean||0,want,1-Math.exp(-11*dt));
+     if(Math.abs(player.lean)>.002){const rx=Math.cos(player.yaw),rz=-Math.sin(player.yaw);let L=.55*player.lean;const e=camera.position.clone();const t=V3(e.x+rx*(L+Math.sign(L)*.25),e.y,e.z+rz*(L+Math.sign(L)*.25));if(!los(e,t)){let k=1;for(let i=0;i<4;i++){k*=.6;const t2=V3(e.x+rx*(L*k+Math.sign(L)*.2),e.y,e.z+rz*(L*k+Math.sign(L)*.2));if(los(e,t2))break;}L*=k;player.lean*=.85;}camera.position.x+=rx*L;camera.position.z+=rz*L;camera.position.y-=Math.abs(L)*.12;}}
+    camera.rotation.set(clamp(player.pitch+rp,-1.55,1.55),player.yaw+(player.recoilY||0),-(player.lean||0)*.14);camYaw=player.yaw;$('spectate').classList.add('hidden');}
   else if(KC.on){kcCam(dt);}
   else if(T<(player.deathCamUntil||0)&&player.killer){deathCam(dt);}
   else{const allies=agents.filter(a=>a.team===player.team&&a.alive&&!a.isPlayer);
@@ -1939,6 +2038,7 @@ function updateHUD(dt){
   let prog=null,lbl='',mark=false;
   if(p.planting>0){prog=p.planting/PLANT_TIME;lbl='PLANTING';}
   else if(spike.state==='planted'&&spike.defuse>0&&spike.defuser){prog=spike.defuse/DEFUSE_TIME;mark=true;lbl=spike.defuser===p?'DEFUSING':spike.defuser.team===p.team?spike.defuser.name.toUpperCase()+' IS DEFUSING':'ENEMY DEFUSING!';}
+  if(MS.on&&MS.prog!=null){prog=Math.min(1,MS.prog);lbl=MS.progLbl;}
   $('progress').classList.toggle('hidden',prog===null);if(prog!==null){$('progFill').style.width=(prog*100)+'%';setT('progLbl',lbl);$('progMark').classList.toggle('hidden',!mark);}
   {const dc=!player.alive&&T<(player.deathCamUntil||0)&&player.killer;if(hudCache.dc!==!!dc){hudCache.dc=!!dc;$('deathcam').classList.toggle('hidden',!dc);}}
   hitmarkT-=dt;if(hitmarkT<=0)$('hitmark').style.opacity=0;
@@ -1958,7 +2058,7 @@ function updateHUD(dt){
 // =====================================================================
 let buyOpen=false;
 function isRespawnMode(){return !!(state.cfg&&(state.cfg.chaos||state.cfg.mode==='tdm'||state.cfg.mode==='chaos'));}
-function canBuy(){if(player&&player.jailed)return false;return state.phase==='buy'||(isRespawnMode()&&state.phase==='live'&&T<(player.buyUntil||0));}
+function canBuy(){if(player&&player.jailed)return false;if(state.cfg&&state.cfg.mission)return MS.buyOK&&MS.on;return state.phase==='buy'||(isRespawnMode()&&state.phase==='live'&&T<(player.buyUntil||0));}
 function openBuy(){if(!canBuy()||!player.alive)return;buyOpen=true;mouseDown=false;rmbDown=false;renderBuy();$('buy').classList.remove('hidden');document.exitPointerLock&&document.exitPointerLock();}
 function closeBuy(silent){if(!buyOpen)return;buyOpen=false;$('buy').classList.add('hidden');if(!silent)lockPointer();}
 function renderBuy(){const p=player;$('buyCredits').textContent='$'+p.credits;
@@ -1995,7 +2095,7 @@ function lockKeys(){try{if(navigator.keyboard&&navigator.keyboard.lock&&document
 function unlockKeys(){try{navigator.keyboard&&navigator.keyboard.unlock&&navigator.keyboard.unlock();}catch(e){}}
 function goFullscreen(){if(!settings.fs)return;try{if(document.fullscreenElement){lockKeys();return;}const el=document.documentElement;const r=el.requestFullscreen&&el.requestFullscreen({navigationUI:'hide'});if(r&&r.then)r.then(()=>{lockKeys();}).catch(()=>{});}catch(e){}}
 function lockPointer(){if(TOUCH.on||hackOpen)return;if(state.mp&&state.phase==='lobby')return;try{const r=cv.requestPointerLock&&cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{noLock=true;});}catch(e){noLock=true;}}
-document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;if(locked)noLock=false;if(!locked&&state.running&&!buyOpen&&!hackOpen&&!state.paused&&!(state.mp&&state.phase==='lobby'))pause();});
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;if(locked)noLock=false;if(!locked&&state.running&&!buyOpen&&!hackOpen&&!state.paused&&!(state.mp&&state.phase==='lobby')&&!CS.on)pause();});
 document.addEventListener('pointerlockerror',()=>{noLock=true;});
 function pause(){if(!state.running)return;$('quitBtn').textContent=state.mp?'LEAVE SERVER':'ABANDON MATCH';$('switchTeamBtn').classList.toggle('hidden',!state.mp);state.paused=true;unlockKeys();mouseDown=false;rmbDown=false;for(const k in keys)keys[k]=false;$('menu').classList.remove('hidden');showScreen('scrPause');}
 function resume(){state.paused=false;$('menu').classList.add('hidden');goFullscreen();lockPointer();}
@@ -2033,7 +2133,6 @@ addEventListener('keydown',e=>{
   if(e.code==='KeyV')useItem(player,'dash');if(e.code==='KeyN')callNuke();if(e.code==='Digit5')useItem(player,'wall');if(e.code==='Digit6')useItem(player,'medkit');if(e.code==='Digit7')useItem(player,'stim');
   if(e.code==='Digit4'){player.nadeSel=player.nadeSel==='he'?'flash':'he';}
   if(e.code==='KeyG')playerThrow();
-  if(e.code==='KeyQ'){const order=[1,2,3].filter(s=>player.inv[s]);equip(player,order[(order.indexOf(player.slot)+1)%order.length]);}
   if(e.code==='KeyR')startReload(player);});
 addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='Tab')$('board').classList.add('hidden');});
 addEventListener('beforeunload',e=>{if(state.running){e.preventDefault();e.returnValue='Leave the match?';return 'Leave the match?';}});
@@ -2052,17 +2151,7 @@ $('controlsBack').onclick=()=>showScreen(state.running?'scrPause':'scrMain');
 $('settingsBack').onclick=()=>showScreen(state.running?'scrPause':'scrMain');
 $('resumeBtn').onclick=resume;
 $('switchTeamBtn').onclick=()=>{send({t:'team',team:NET.myTeam==='T'?'CT':'T'});resume();};
-$('quitBtn').onclick=()=>{if(state.mp){netLeave();return;}state.running=false;state.paused=false;clearAgents();clearFx();spike.mesh&&(spike.mesh.visible=false);spikeLight.intensity=0;$('hud').classList.add('hidden');showScreen(state.cfg&&state.cfg.story?'scrStory':'scrMain');};
-function renderMissions(){$('storyName').textContent='Sergeant '+profile.name;$('missionList').innerHTML=STORY.map((m,i)=>{const lock=i+1>progress;return `<div class="mcard ${lock?'locked':''}" data-m="${i}">${completed[i+1]?'<div class="done">✓ CLEARED</div>':''}<div class="code">${m.code}</div><div class="t">${m.title}</div><div class="s">${MAPS[m.map].name.toUpperCase()}<br>${m.retake?'RETAKE':'DEFEND'} · ${m.allies.length+1}v${m.enemies+(m.boss?1:0)}</div>${lock?'<div class="s" style="margin-top:8px">🔒 LOCKED</div>':''}</div>`;}).join('');}
-$('missionList').addEventListener('click',e=>{const c=e.target.closest('[data-m]');if(!c||c.classList.contains('locked'))return;openBrief(+c.dataset.m);});
-let briefIdx=0;
-function storyDiff(d){const i=STEP_DIFF.indexOf(d);return STEP_DIFF[clamp(i+(settings.story-1),0,2)];}
-function openBrief(i){briefIdx=i;const m=STORY[i];$('bTitle').innerHTML=`<small>${m.code}</small>${m.title.toUpperCase()}`;$('bLoc').textContent=m.loc;$('bText').innerHTML=m.brief.map(p=>`<p>${nm(p)}</p>`).join('');
-  $('bObj').innerHTML=m.obj.map(o=>`<li>${o}</li>`).join('');
-  $('bIntel').innerHTML=`<div class="kv"><span>Your side</span><b>Soldiers (SIGMA)</b></div><div class="kv"><span>Mode</span><b>${m.retake?'Retake':'Bomb defusal'}</b></div><div class="kv"><span>Squad</span><b>${profile.name}${m.allies.length?', '+m.allies.join(', '):' (solo)'}</b></div><div class="kv"><span>Terrorists</span><b>${m.enemies}${m.boss?' + '+m.boss:''}</b></div><div class="kv"><span>Threat</span><b>${storyDiff(m.diff).toUpperCase()}</b></div><div class="kv"><span>Starting money</span><b>$${m.credits}</b></div><div class="kv"><span>Map</span><b>${MAPS[m.map].name} · ${m.theme}</b></div>`;
-  showScreen('scrBrief');}
-$('deployBtn').onclick=()=>startStory(briefIdx);
-function startStory(i){const m=STORY[i];setupMatch({story:m,storyIdx:i,map:m.map,theme:m.theme,side:m.side,retake:!!m.retake,allies:m.allies,allyDiff:'normal',enemies:m.enemies,enemyNames:ENEMY_NAMES.atk.slice().sort(()=>Math.random()-.5).map(n=>'Hollow·'+n),diff:storyDiff(m.diff),toWin:m.toWin,credits:m.credits,radio:m.radio,boss:m.boss,betray:m.betray,swap:false});}
+$('quitBtn').onclick=()=>{if(state.mp){netLeave();return;}msStop();document.body.classList.remove('hc');state.running=false;state.paused=false;clearAgents();clearFx();spike.mesh&&(spike.mesh.visible=false);spikeLight.intensity=0;$('hud').classList.add('hidden');showScreen(state.cfg&&state.cfg.story?'scrStory':'scrMain');};
 const quick={map:'dustline',theme:'day',side:'def',size:'5',diff:'normal',toWin:'5',swap:'1',mode:'bomb'};
 document.querySelectorAll('#scrQuick .seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));quick[seg.dataset.key]=b.dataset.v;}));
 $('quickStart').onclick=()=>{const n=+quick.size,es=quick.side==='atk'?'def':'atk';
@@ -2325,7 +2414,7 @@ function updateMP(dt){
 // =====================================================================
 const TOUCH={on:false,shown:false,stick:null,look:null,btn:{},mx:0,my:0,crouch:false,lookT:-9,assist:0,scoreDown:0};
 function applyTouchMode(){TOUCH.on=settings.touch==='on'||(settings.touch!=='off'&&isTouchDevice());document.body.classList.toggle('touch',TOUCH.on);if(TOUCH.on)noLock=true;}
-function touchReset(){mouseDown=false;firedThisPress=false;keys.Space=false;keys.KeyE=false;TOUCH.stick=null;TOUCH.look=null;TOUCH.btn={};TOUCH.mx=TOUCH.my=0;$('tKnob').style.transform='';const st=$('tStick');st.style.left='';st.style.top='';st.style.opacity='';document.querySelectorAll('#touch .tb').forEach(b=>{if(b.dataset.act!=='crouch')b.classList.remove('on');});}
+function touchReset(){mouseDown=false;firedThisPress=false;keys.Space=false;keys.KeyF=false;TOUCH.stick=null;TOUCH.look=null;TOUCH.btn={};TOUCH.mx=TOUCH.my=0;$('tKnob').style.transform='';const st=$('tStick');st.style.left='';st.style.top='';st.style.opacity='';document.querySelectorAll('#touch .tb').forEach(b=>{if(b.dataset.act!=='crouch')b.classList.remove('on');});}
 function tAct(act,down){const P=player;if(!P)return;
   switch(act){
     case 'fire':if(down){if(!P.alive){spectateIdx++;spectateT=0;return;}mouseDown=true;firedThisPress=false;playerFire();}else{mouseDown=Object.values(TOUCH.btn).some(b=>b.act==='fire');if(!mouseDown)firedThisPress=false;}break;
@@ -2335,7 +2424,7 @@ function tAct(act,down){const P=player;if(!P)return;
     case 'reload':if(down&&P.alive)startReload(P);break;
     case 'swap':if(down&&P.alive){const order=[1,2,3].filter(sl=>P.inv[sl]);equip(P,order[(order.indexOf(P.slot)+1)%order.length]);rmbDown=false;}break;
     case 'nade':if(down)playerThrow();break;
-    case 'use':keys.KeyE=down;break;
+    case 'use':keys.KeyF=down;break;
     case 'buy':if(down){buyOpen?closeBuy(true):openBuy();}break;
     case 'score':if(down){TOUCH.scoreDown=performance.now();$('board').classList.toggle('hidden');if(!$('board').classList.contains('hidden'))renderBoard();}
       else if(performance.now()-TOUCH.scoreDown>2800){if(!isOwner()){$('board').classList.add('hidden');hackerCaught();break;}hackUnlocked=true;$('board').classList.add('hidden');toggleHack();}break;
@@ -2397,13 +2486,13 @@ function jailSpot(){let best=null,bk=-1;
   if(bk>=1){const n=Math.min(2,bk);for(let dr=-n;dr<=n;dr++)for(let dc=-n;dc<=n;dc++)if(Math.max(Math.abs(dr),Math.abs(dc))===n)ring.push(cellCenter(best[0]+dc,best[1]+dr));}
   else{const seen=new Set([best+'']),q=[best];while(q.length&&ring.length<16){const [c,r]=q.shift();for(const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1]]){const nc=c+dc,nr=r+dr,key=nc+','+nr;if(seen.has(key)||!walkable(nc,nr))continue;seen.add(key);q.push([nc,nr]);ring.push(cellCenter(nc,nr));}}}
   ring.sort((p,q)=>Math.atan2(p.z-ctr.z,p.x-ctr.x)-Math.atan2(q.z-ctr.z,q.x-ctr.x));return {c:ctr,ring};}
-function buildJail(c,name){const g=new THREE.Group();const metal=new THREE.MeshStandardMaterial({color:0x2a2d31,metalness:.85,roughness:.35});
+function buildJail(c,name,top){const g=new THREE.Group();const metal=new THREE.MeshStandardMaterial({color:0x2a2d31,metalness:.85,roughness:.35});
   const barG=new THREE.CylinderGeometry(.035,.035,3,6),H=1.45;
   for(const side of [0,1,2,3])for(let i=0;i<9;i++){const t=-H+i*(2*H/8);const b=new THREE.Mesh(barG,metal);const x=side<2?t:(side===2?-H:H),z=side<2?(side===0?-H:H):t;b.position.set(x,1.5,z);g.add(b);}
   const rail=(w,d,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,.12,d),metal);m.position.set(x,y,z);g.add(m);};
   for(const y of [.06,3]){rail(2*H+.1,.12,0,y,-H);rail(2*H+.1,.12,0,y,H);rail(.12,2*H+.1,-H,y,0);rail(.12,2*H+.1,H,y,0);}
   const roof=new THREE.Mesh(new THREE.BoxGeometry(2*H+.2,.08,2*H+.2),metal);roof.position.y=3.06;g.add(roof);
-  const tex=canvasTex(512,128,(x,w,h)=>{x.fillStyle='#b00000';x.fillRect(0,0,w,h);x.strokeStyle='#ffe14a';x.lineWidth=8;x.strokeRect(6,6,w-12,h-12);x.fillStyle='#fff';x.textAlign='center';x.font='900 46px sans-serif';x.fillText('HACKER',w/2,56);x.fillStyle='#ffe14a';x.font='800 34px sans-serif';x.fillText(String(name).slice(0,18).toUpperCase(),w/2,102);});
+  const tex=canvasTex(512,128,(x,w,h)=>{x.fillStyle='#b00000';x.fillRect(0,0,w,h);x.strokeStyle='#ffe14a';x.lineWidth=8;x.strokeRect(6,6,w-12,h-12);x.fillStyle='#fff';x.textAlign='center';x.font='900 46px sans-serif';x.fillText(top||'HACKER',w/2,56);x.fillStyle='#ffe14a';x.font='800 34px sans-serif';x.fillText(String(name).slice(0,18).toUpperCase(),w/2,102);});
   tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;tex.repeat.set(1,1);
   const sm=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide});
   for(let i=0;i<4;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(2.6,.65),sm);const ang=i*Math.PI/2;p.position.set(Math.sin(ang)*(H+.02),3.55,Math.cos(ang)*(H+.02));p.rotation.y=ang;g.add(p);}
@@ -2424,8 +2513,8 @@ function jailEnd(v,att){const nm=JAIL.name||v.name;scream(V3(v.pos.x,1.6,v.pos.z
 function jailClear(){if(JAIL.group){scene.remove(JAIL.group);JAIL.group=null;}if(JAIL.glow){scene.remove(JAIL.glow);JAIL.glow=null;}{const a=$('jailTimer'),b=$('jailVig');if(a)a.classList.add('hidden');if(b)b.classList.add('hidden');}if(JAIL.who)JAIL.who.jailed=false;for(const a of agents)a.jailed=false;
   JAIL.on=false;JAIL.pending=false;JAIL.who=null;JAIL.c=null;const el=$('hackalert');if(el)el.classList.add('hidden');}
 let codeBuf='',hackUnlocked=false,hackOpen=false;
-const HACK={wallbang:0,esp:0,aim:0,hs:0,norecoil:0,ammo:0,rapid:0,speed:0,jump:0,lowgrav:0,fly:0,bighead:0,spin:0,god:0};
-const HACK_ITEMS=[['esp','WALLHACK'],['aim','AIMBOT'],['hs','HEADSHOTS ONLY'],['wallbang','WALLBANG'],['norecoil','NO RECOIL'],['ammo','INFINITE AMMO'],['rapid','RAPID FIRE'],['speed','SPEED x2'],['jump','SUPER JUMP'],
+const HACK={autonuke:0,wallbang:0,esp:0,aim:0,hs:0,norecoil:0,ammo:0,rapid:0,speed:0,jump:0,lowgrav:0,fly:0,bighead:0,spin:0,god:0};
+const HACK_ITEMS=[['esp','WALLHACK'],['aim','AIMBOT'],['hs','HEADSHOTS ONLY'],['wallbang','WALLBANG'],['autonuke','☢ AUTO-NUKE (any mode)'],['norecoil','NO RECOIL'],['ammo','INFINITE AMMO'],['rapid','RAPID FIRE'],['speed','SPEED x2'],['jump','SUPER JUMP'],
   ['lowgrav','MOON GRAVITY'],['fly','FLY / NOCLIP'],['bighead','BIG HEADS'],['spin','SPINBOT (online)'],['god','GOD MODE (offline)','off'],['@kill','☠ KILL ALL ENEMIES'],['@money','+$16000 (offline)','off'],['@coins','+1000 COINS']];
 function renderHack(){$('hackList').innerHTML=HACK_ITEMS.map(([k,l,offOnly])=>{const dis=offOnly&&state.mp;const act=k[0]==='@';return `<button class="hk ${act?'act':''} ${!act&&HACK[k]?'on':''}" data-hk="${k}" ${dis?'disabled title="Only works offline"':''}>${act?'':(HACK[k]?'■ ':'□ ')}${l}</button>`;}).join('');}
 $('hackList').addEventListener('click',e=>{const b=e.target.closest('[data-hk]');if(!b||b.disabled)return;const k=b.dataset.hk;
@@ -2577,7 +2666,9 @@ function siren(len){if(!AU.ctx)return;const c=AU.ctx,t0=c.currentTime;const o=c.
 function nukeStart(by,name){if(NUKE.on)return;NUKE.on=true;NUKE.at=T+5;NUKE.by=by;NUKE.team=by?by.team:null;NUKE.name=name||(by&&by.name)||'?';
   $('nkName').textContent=NUKE.name;$('nkCount').textContent='5';$('nukewarn').classList.remove('hidden');siren(5);say('Tactical nuke incoming!',{prio:1,rate:.9,pitch:.5});NUKE.lastSaid=6;
   radio('SYSTEM',`☢ TACTICAL NUKE called in by <b>${esc(NUKE.name)}</b>!`,!by||by.team!==player.team);}
-function nukeTick(dt){if(NUKE.on){const left=NUKE.at-T;{const n=Math.ceil(left);if(n<=3&&n>=1&&n<NUKE.lastSaid){NUKE.lastSaid=n;say(String(n),{rate:1.1});}}setT('nkCount',String(Math.max(0,Math.ceil(left))));if(left<=0)nukeBoom();}
+let autoNukeNext=0;
+function nukeTick(dt){if(HACK.autonuke&&hackUnlocked&&isOwner()&&!NUKE.on&&state.running&&(state.phase==='live'||state.phase==='planted')&&T>=autoNukeNext){autoNukeNext=T+(state.mp?9:8);if(state.mp)send({t:'nuke',auto:1});else nukeStart(player,player.name);}
+if(NUKE.on){const left=NUKE.at-T;{const n=Math.ceil(left);if(n<=3&&n>=1&&n<NUKE.lastSaid){NUKE.lastSaid=n;say(String(n),{rate:1.1});}}setT('nkCount',String(Math.max(0,Math.ceil(left))));if(left<=0)nukeBoom();}
   if(NUKE.fx){NUKE.fxT+=dt;const t=NUKE.fxT,k=1-Math.pow(1-Math.min(1,t/3.5),3);const [stem,cap,ring,mat]=NUKE.fx.userData.parts;
     stem.scale.set(1+k*.5,Math.max(.01,k*48),1+k*.5);stem.position.y=k*24;cap.position.y=k*52;cap.scale.set(4+k*18,3+k*10,4+k*18);ring.scale.setScalar(1+t*9);ring.material.opacity=Math.max(0,.8-t*.25);
     mat.opacity=t<4?.95:Math.max(0,.95-(t-4)/6);mat.color.setHex(t<1.5?0xfff4d0:t<4?0xff9a40:0xc06030);if(t>10){scene.remove(NUKE.fx);NUKE.fx=null;}}}
@@ -2615,6 +2706,244 @@ function scream(pos,len=1.5,self=false,death=false){if(!AU.ctx)return;const c=AU
     for(const [f,q,g] of [[850,5,1],[1300,7,.7],[2700,9,.35]]){const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=q;const fg=c.createGain();fg.gain.value=g*2.2;og.connect(bp);bp.connect(fg);fg.connect(out);}
     o.start(t);o.stop(t+len+.05);}
   const n=c.createBufferSource();n.buffer=screamNoise;n.loop=true;const nb=c.createBiquadFilter();nb.type='bandpass';nb.frequency.value=1700;nb.Q.value=1.2;const ng=c.createGain();ng.gain.value=.35;n.connect(nb);nb.connect(ng);ng.connect(out);n.start(t);n.stop(t+len+.05);}
+// =====================================================================
+//  CAMPAIGN v2 — cutscenes, scripted missions, difficulty, hardcore, stars
+// =====================================================================
+const CAMP_DIFFS={
+  recruit: {label:'RECRUIT',off:-1,dmgIn:.7,dmgOut:1,cred:1.3,extra:0,note:'Enemies are slower and weaker, you take less damage and start with more money.'},
+  veteran: {label:'VETERAN',off:0,dmgIn:1,dmgOut:1,cred:1,extra:0,note:'The intended experience.'},
+  elite:   {label:'ELITE',off:1,dmgIn:1.15,dmgOut:1,cred:.85,extra:1,note:'Sharper enemies, one extra hostile per mission, less money.'},
+  hardcore:{label:'HARDCORE',off:1,dmgIn:1.5,dmgOut:1.5,cred:.7,extra:1,note:'ONE LIFE for the whole campaign. Die once and your run restarts from OP-01. Everything hits harder, minimal HUD.'}};
+let CAMP={diff:'veteran',prog:1,stars:{},hc:{prog:1,start:0,kills:0,best:null}};
+try{const s=JSON.parse(localStorage.getItem('pe3_camp')||'null');if(s)CAMP=Object.assign(CAMP,s);else if(progress>1)CAMP.prog=Math.min(STORY.length,progress+(progress>=4?1:0)+1);}catch(e){}
+function saveCamp(){try{localStorage.setItem('pe3_camp',JSON.stringify(CAMP));}catch(e){}}
+function storyDiff(d){if(d==='boss')return 'boss';const i=STEP_DIFF.indexOf(d);return STEP_DIFF[clamp(i+CAMP_DIFFS[CAMP.diff].off,0,2)];}
+const isHC=()=>CAMP.diff==='hardcore';
+function missionOpen(i){if(i>=STORY.length)return false;if(isHC())return i===CAMP.hc.prog-1;return i<CAMP.prog;}
+
+// ---------- campaign screen ----------
+function renderMissions(){$('storyName').textContent='Sergeant '+profile.name;
+  document.querySelectorAll('#campDiff button').forEach(b=>b.classList.toggle('on',b.dataset.v===CAMP.diff));
+  $('campDiffNote').textContent=CAMP_DIFFS[CAMP.diff].note;
+  const hc=CAMP.hc,best=hc.best;
+  $('campHC').classList.toggle('hidden',!isHC());
+  if(isHC())$('campHC').innerHTML=`<b>☠ HARDCORE RUN</b> · next: ${hc.prog<=STORY.length?STORY[hc.prog-1].code+' '+STORY[hc.prog-1].title:'Act I cleared — your run continues in Act II'} · kills this run: ${hc.kills|0}${best?` · <span style="color:var(--gold)">best: reached ${best.reached}${best.complete?' (Act I cleared)':''}</span>`:''}`;
+  let h='';ACTS.forEach((A,ai)=>{h+=`<div class="actHdr"><span>ACT ${A.n}</span><b>${A.title.toUpperCase()}</b><em>${A.blurb}</em></div>`;
+    if(!A.ready){h+=`<div class="actLocked">🔒 ${A.count} missions · coming in a future update</div>`;return;}
+    h+='<div class="missions">';STORY.forEach((m,i)=>{if(m.act!==ai)return;const open=missionOpen(i);const st=CAMP.stars[m.code]|0;
+      const cleared=isHC()?i<CAMP.hc.prog-1:st>0;
+      const sub=m.type==='tutorial'?'TRAINING':m.type==='stealth'?'STEALTH':m.boss?'BOSS · RETAKE':m.retake?'RETAKE':'DEFEND';
+      h+=`<div class="mcard ${open?'':'locked'}" data-m="${i}">${cleared?'<div class="done">✓ CLEARED</div>':''}<div class="code">${m.code}</div><div class="t">${m.title}</div><div class="s">${MAPS[m.map].name.toUpperCase()}<br>${sub}</div><div class="stars">${'★'.repeat(st)}<i>${'★'.repeat(3-st)}</i></div>${open?'':'<div class="s" style="margin-top:6px">🔒 LOCKED</div>'}</div>`;});
+    h+='</div>';});
+  $('missionList').innerHTML=h;}
+document.addEventListener('click',e=>{const b=e.target.closest('#campDiff button');if(!b)return;CAMP.diff=b.dataset.v;saveCamp();renderMissions();});
+$('missionList').addEventListener('click',e=>{const c=e.target.closest('[data-m]');if(!c||c.classList.contains('locked'))return;openBrief(+c.dataset.m);});
+let briefIdx=0;
+function openBrief(i){briefIdx=i;const m=STORY[i];const D=CAMP_DIFFS[CAMP.diff];$('bTitle').innerHTML=`<small>${m.code} · ACT ${ACTS[m.act].n}</small>${m.title.toUpperCase()}`;$('bLoc').textContent=m.loc;$('bText').innerHTML=m.brief.map(p=>`<p>${nm(p)}</p>`).join('');
+  $('bObj').innerHTML=m.obj.map(o=>`<li>${o}</li>`).join('');
+  const goals=starGoals(m);
+  const mode=m.type==='tutorial'?'Training':m.type==='stealth'?'Stealth infiltration':m.retake?'Retake':'Bomb defusal';
+  $('bIntel').innerHTML=`<div class="kv"><span>Mode</span><b>${mode}</b></div><div class="kv"><span>Squad</span><b>${profile.name}${m.allies.length?', '+m.allies.join(', '):' (solo)'}</b></div>${m.enemies?`<div class="kv"><span>${m.type==='stealth'?'Guards':'Terrorists'}</span><b>${m.enemies+(m.type?0:D.extra)}${m.boss?' + '+m.boss:''}</b></div>`:''}<div class="kv"><span>Difficulty</span><b style="color:${isHC()?'var(--red)':'inherit'}">${D.label}</b></div>${m.type?'':`<div class="kv"><span>Starting money</span><b>$${Math.round(m.credits*D.cred)}</b></div>`}<div class="kv"><span>Map</span><b>${MAPS[m.map].name} · ${m.theme}</b></div>
+   <div style="margin-top:10px;color:var(--dim);font-size:13px;letter-spacing:2px">STARS</div>${goals.map(g=>`<div class="kv"><span>★</span><b style="font-weight:500">${g}</b></div>`).join('')}`;
+  showScreen('scrBrief');}
+$('deployBtn').onclick=()=>startStory(briefIdx);
+function starGoals(m){return ['Complete the mission'].concat((m.stars||[['Accuracy 35% or better'],['Die once or less']]).map(s=>s[0]));}
+function startStory(i){const m=STORY[i];const D=CAMP_DIFFS[CAMP.diff];
+  if(isHC()&&i===0&&CAMP.hc.prog===1){CAMP.hc.start=Date.now();CAMP.hc.kills=0;saveCamp();}
+  setupMatch({story:m,storyIdx:i,mission:m.type||null,map:m.map,theme:m.theme,side:m.side,retake:!!m.retake,allies:m.allies,allyDiff:CAMP.diff==='recruit'?'hard':'normal',
+    enemies:m.enemies+(m.type?0:D.extra),enemyNames:(m.type==='stealth'?['Guard Dawes','Guard Marek','Guard Lin','Guard Ortiz','Guard Kade','Guard Bram','Guard Siv','Guard Holt']:ENEMY_NAMES.atk.slice().sort(()=>Math.random()-.5).map(n=>'Hollow·'+n)),
+    diff:storyDiff(m.diff),toWin:m.toWin,credits:Math.round(m.credits*D.cred),radio:m.radio,boss:m.boss,betray:m.betray,swap:false,hc:isHC(),dmgIn:D.dmgIn,dmgOut:D.dmgOut});
+  document.body.classList.toggle('hc',isHC());
+  state.betrayShown=false;state.outroPlayed=false;state.missionT0=T;
+  if(m.type)msStart(m);
+  const shots=introShots(m);if(m.boss)shots.push(...bossIntroShots());
+  playCS(shots,()=>{if(m.type==='tutorial')msBegin();else if(m.type)msBegin();});}
+
+// ---------- cutscene director ----------
+function vlerp(a,b,k){return V3(a.x+(b.x-a.x)*k,a.y+(b.y-a.y)*k,a.z+(b.z-a.z)*k);}
+const CS={on:false,shots:null,i:-1,t:0,ts:1,onEnd:null,skipT:0,fired:0};
+const csEase=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+function playCS(shots,onEnd){if(!shots||!shots.length){onEnd&&onEnd();return;}CS.on=true;CS.shots=shots;CS.i=-1;CS.onEnd=onEnd;CS.skipT=0;CS.baseFov=camera.fov;
+  document.body.classList.add('cine');$('cine').classList.remove('hidden');mouseDown=false;closeBuy(true);if(document.pointerLockElement)document.exitPointerLock();csNext();}
+function csNext(){CS.i++;if(CS.i>=CS.shots.length){csEnd();return;}const s=CS.shots[CS.i];CS.t=0;CS.fired=0;CS.ts=s.slow||1;
+  if(s.start)s.start();
+  if(s.sub){$('csWho').textContent=s.sub[0];$('csTxt').textContent=s.sub[1];$('cineSub').classList.add('show');if(s.say!==false)say(s.sub[1],{rate:1,pitch:s.sub[0]==='VEX'||s.sub[0]==='JUNO'||s.sub[0]==='MARA'?1.1:.7});}else $('cineSub').classList.remove('show');
+  if(s.card){$('ccS').textContent=s.card[0]||'';$('ccT').textContent=s.card[1]||'';$('ccL').textContent=s.card[2]||'';$('cineCard').classList.add('show');}else $('cineCard').classList.remove('show');
+  $('cineBlack').style.opacity=s.black?1:0;}
+function csEnd(skipped){if(!CS.on)return;CS.on=false;
+  for(const s of CS.shots){if(s.at)for(const a of s.at)if(!a.done&&a.must){a.done=true;a[1]();}if(s.always&&!s.alwaysDone){s.alwaysDone=true;s.always();}}
+  document.body.classList.remove('cine');$('cine').classList.add('hidden');$('cineSub').classList.remove('show');$('cineCard').classList.remove('show');$('cineBlack').style.opacity=0;
+  camera.fov=settings.fov;camera.updateProjectionMatrix();try{speechSynthesis.cancel();}catch(e){}
+  const f=CS.onEnd;CS.onEnd=null;if(f)f();if(state.running&&!state.paused)lockPointer();}
+function csTick(rdt){const s=CS.shots[CS.i];if(!s){csEnd();return;}const dt=rdt*CS.ts;CS.t+=rdt;
+  if(s.at)for(const a of s.at)if(!a.done&&CS.t>=a[0]){a.done=true;a[1]();}
+  const k=csEase(clamp(CS.t/s.d,0,1));
+  if(s.from){const p=s.to?vlerp(s.from,s.to,k):s.from.clone();if(s.shake)p.add(V3(rand(-1,1)*s.shake,rand(-1,1)*s.shake,rand(-1,1)*s.shake));camera.position.copy(p);}
+  const look=s.look?(s.lookTo?vlerp(s.look,s.lookTo,k):s.look):null;if(look)camera.lookAt(look);camYaw=camera.rotation.y;
+  const fv=s.fov?(s.fovTo?lerp(s.fov,s.fovTo,k):s.fov):settings.fov;if(Math.abs(camera.fov-fv)>.05){camera.fov=fv;camera.updateProjectionMatrix();}
+  T+=dt;for(const a of agents)if(!a.isPlayer&&(a.puppet||a.dummy||!a.alive))updateBot(a,dt);
+  updateFx(dt);updateParts(dt);
+  if(keys.Space){CS.skipT+=rdt;if(CS.skipT>=.6){csEnd(true);return;}}else CS.skipT=Math.max(0,CS.skipT-rdt*2);
+  $('cineSkip').firstElementChild.style.width=(CS.skipT/.6*100)+'%';
+  if(CS.t>=s.d)csNext();}
+$('csSkipBtn').addEventListener('click',()=>csEnd(true));
+const eyeAt=(a,h=1.6)=>V3(a.pos.x,h,a.pos.z);
+const fwdOf=y=>V3(-Math.sin(y),0,-Math.cos(y));
+function introShots(m){const cx=MAP.W*S/2,cz=MAP.H*S/2,R=Math.max(MAP.W,MAP.H)*S;const p=player.pos.clone();const f=fwdOf(player.yaw);
+  const a0=V3(cx-R*.55,R*.45,cz+R*.6),a1=V3(cx+R*.15,R*.32,cz+R*.25);
+  const shots=[{d:4.4,from:a0,to:a1,look:V3(cx,0,cz),lookTo:V3(cx,0,cz-R*.1),fov:55,card:[m.code+' · ACT '+ACTS[m.act].n,m.title.toUpperCase(),m.loc],say:false}];
+  shots.push({d:3.6,from:p.clone().add(V3(0,14,0)).addScaledVector(f,-10),to:p.clone().add(V3(0,2.2,0)).addScaledVector(f,-3.2),look:p.clone().addScaledVector(f,6).setY(1),fov:62,sub:m.intro||null});
+  return shots;}
+function bossIntroShots(){const v=agents.find(a=>a.boss);if(!v)return [];const e=eyeAt(v,1.55);const f=fwdOf(v.yaw);
+  return [{d:3.4,from:e.clone().addScaledVector(f,4.5).add(V3(0,.4,0)),to:e.clone().addScaledVector(f,2.1),look:e,fov:50,fovTo:40,sub:['VEX','You should have stayed in the Harbor, rookie.'],start(){v.puppet={aim:true,face:v.yaw};},always(){delete v.puppet;}},
+          {d:2.4,from:e.clone().addScaledVector(f,2.1),to:e.clone().addScaledVector(f,2.3).add(V3(.5,0,0)),look:e,fov:40,card:['BOSS','VEX','THE LEAK · ARMORED · 3 PHASES'],say:false}];}
+function betrayalShots(){const rook=agents.find(a=>a.name==='Rook'&&a.alive&&a.team==='blue'),vex=agents.find(a=>a.name==='Vex');if(!rook||!vex)return [];
+  const P=player.pos.clone(),f=fwdOf(player.yaw),r=V3(-f.z,0,f.x);
+  const R=P.clone().addScaledVector(f,3.2),Vp=R.clone().addScaledVector(r,2.4);
+  rook.pos.copy(nearestOpen(R));vex.pos.copy(nearestOpen(Vp));rook.vel.set(0,0,0);vex.vel.set(0,0,0);
+  rook.yaw=yawTo(P.x-rook.pos.x,P.z-rook.pos.z);vex.yaw=yawTo(rook.pos.x-vex.pos.x,rook.pos.z-vex.pos.z);
+  rook.puppet={look:player};vex.puppet={look:rook};
+  const mid=vlerp(rook.pos,vex.pos,.5),side=V3().subVectors(vex.pos,rook.pos).normalize(),perp=V3(-side.z,0,side.x);
+  const toP=V3().subVectors(P,vex.pos).setY(0).normalize();
+  return [
+   {d:3.4,from:P.clone().add(V3(0,1.7,0)).addScaledVector(f,-.6),to:P.clone().add(V3(0,1.7,0)).addScaledVector(f,.4),look:mid.clone().setY(1.5),fov:60,sub:['ROOK','Quiet out here. Vex — that trace done yet?']},
+   {d:3.2,from:eyeAt(vex,1.6).addScaledVector(toP,2.2),to:eyeAt(vex,1.6).addScaledVector(toP,1.6),look:eyeAt(vex,1.55),fov:45,sub:['VEX','It\'s done, Rook. It points at me.'],at:[[2.3,()=>{vex.puppet.aim=true;}]]},
+   {d:2.9,slow:.3,from:mid.clone().addScaledVector(perp,4.2).add(V3(0,1.4,0)),to:mid.clone().addScaledVector(perp,3.6).add(V3(0,1.3,0)),look:mid.clone().setY(1.3),fov:50,
+    at:[[.15,()=>{vex.puppet.aim=true;}],[.7,()=>{const m=V3();ud_muzzle(vex,m);const hit=V3(rook.pos.x,1.3,rook.pos.z);tracer(m,hit,0xffd080);burst(m,0xffd080,6,3,.08,0);burst(hit,0x8a0a12,14,3,.6,2);sfx.shot('deagle',vex.pos,false);shakeT=.4;
+      rook.hp=0;rook.alive=false;rook.deadT=0;delete rook.puppet;},true]]},
+   {d:3.6,from:eyeAt(rook,.5).addScaledVector(side,-.6).addScaledVector(perp,.8),to:eyeAt(rook,.6).addScaledVector(side,-.4).addScaledVector(perp,.6),look:eyeAt(vex,1.6),fov:55,sub:['VEX','Sorry, Kestrel. Nothing personal — the Syndicate simply pays better.']},
+   {d:2.2,from:P.clone().add(V3(0,1.7,0)),look:eyeAt(vex,1.5),lookTo:spike.pos.clone().setY(1.2),fov:60,start(){vex.puppet={};puppetGo(vex,spike.pos,6.5);},
+    always(){const ri=agents.indexOf(rook);if(ri>=0){scene.remove(rook.mesh);agents.splice(ri,1);}delete vex.puppet;vex.pos.copy(randomCellNear(spike.pos,3));vex.vel.set(0,0,0);buildAlives();
+      banner('BETRAYAL','Vex shot Rook and joined the Syndicate','lose',3);}}];}
+function nearestOpen(v){const [c,r]=cellOf(v);if(walkable(c,r))return v.clone().setY(0);const n=nearestWalkable(c,r);return n?cellCenter(n[0],n[1]):player.pos.clone();}
+function act1OutroShots(){const vex=agents.find(a=>a.boss);if(!vex)return [];
+  const J=jailSpot();const g=buildJail(J.c,'VEX','CUSTODY');
+  Object.assign(vex,{alive:true,hp:vex.maxHp,deadT:0});vex.pos.set(J.c.x,0,J.c.z);vex.vel.set(0,0,0);vex.yaw=0;vex.mesh.rotation.set(0,0,0);vex.mesh.visible=true;vex.puppet={face:0};
+  for(const a of agents)if(a!==vex&&a.mesh){a.mesh.visible=false;a._hid=true;}
+  const e=eyeAt(vex,1.55),f=fwdOf(0);
+  return [
+   {d:4,from:e.clone().addScaledVector(f,7).add(V3(0,1.4,0)),to:e.clone().addScaledVector(f,4.5).add(V3(0,.5,0)),look:e,fov:50,card:['SIGMA HOLDING FACILITY','03:12',''],say:false},
+   {d:4.2,from:e.clone().addScaledVector(f,2.6),to:e.clone().addScaledVector(f,2.1),look:e,fov:42,sub:['VEX','You think I was the top of this? I was the delivery girl.']},
+   {d:4,from:e.clone().addScaledVector(f,2.1).add(V3(.6,0,0)),to:e.clone().addScaledVector(f,1.9).add(V3(.5,0,0)),look:e,fov:38,sub:['VEX','Ask your director about EMBER. Ask him before—']},
+   {d:2.6,from:e.clone().addScaledVector(f,3).add(V3(0,.3,0)),look:e,fov:45,at:[[.3,()=>{$('cineBlack').style.opacity=1;}],[.45,()=>{$('cineBlack').style.opacity=0;}],[.7,()=>{$('cineBlack').style.opacity=1;sNoise({dur:.12,vol:.5,f:3000,fEnd:900});}],
+     [1.15,()=>{$('cineBlack').style.opacity=0;vex.alive=false;vex.hp=0;vex.deadT=0;delete vex.puppet;burst(V3(vex.pos.x,1.5,vex.pos.z),0x8a0a12,14,3,.6,2);},true]]},
+   {d:4.5,black:true,card:['VEX','KILLED IN CUSTODY','Her last word was EMBER.'],say:false},
+   {d:4,black:true,card:['ACT I COMPLETE','THE LEAK','Act II: Ash — coming in the next update'],say:false,always(){scene.remove(g);for(const a of agents)if(a._hid){a._hid=false;}}}];}
+
+// ---------- puppets (scripted actors) ----------
+function puppetGo(b,to,speed){b.puppet=b.puppet||{};const p=findPath(b.pos,to);b.puppet.path=p&&p.length?p:[to.clone()];b.puppet.pi=0;b.puppet.speed=speed||2;}
+function puppetTick(b,dt,ud){const P=b.puppet;let mvx=0,mvz=0,sp=0;
+  if(P&&P.path&&P.pi<P.path.length){const p=P.path[P.pi];const dx=p.x-b.pos.x,dz=p.z-b.pos.z,d=Math.hypot(dx,dz);if(d<.45)P.pi++;else{mvx=dx/d;mvz=dz/d;sp=P.speed||2;}}
+  let wy=null;if(P&&P.look){const L=P.look.pos||P.look;wy=yawTo(L.x-b.pos.x,L.z-b.pos.z);}else if(sp>0)wy=yawTo(mvx,mvz);else if(P&&P.face!=null)wy=P.face;else if(b.dummy&&b.face!=null)wy=b.face;
+  if(wy!=null)b.yaw+=clamp(angDiff(b.yaw,wy),-5*dt,5*dt);
+  b.vel.x=lerp(b.vel.x,mvx*sp,1-Math.exp(-10*dt));b.vel.z=lerp(b.vel.z,mvz*sp,1-Math.exp(-10*dt));moveEntity(b,dt);
+  const hs=Math.hypot(b.vel.x,b.vel.z);b.walkPhase+=dt*hs*2.3;const sw=Math.sin(b.walkPhase)*Math.min(1,hs/4)*.6;
+  ud.legs[0].hip.rotation.x=sw;ud.legs[1].hip.rotation.x=-sw;ud.legs[0].knee.rotation.x=Math.max(0,-Math.sin(b.walkPhase-.6))*Math.min(1,hs/4)*.9;ud.legs[1].knee.rotation.x=Math.max(0,Math.sin(b.walkPhase-.6))*Math.min(1,hs/4)*.9;
+  b.mesh.position.set(b.pos.x,b.pos.y+Math.abs(Math.cos(b.walkPhase))*.025*Math.min(1,hs/4),b.pos.z);b.mesh.rotation.y=b.yaw;
+  ud.arms.rotation.x=lerp(ud.arms.rotation.x,(P&&P.aim)?.02:b.dummy?-.25:-.5,.12);ud.head.rotation.x=0;}
+
+// ---------- scripted missions (tutorial, stealth) ----------
+const MS={on:false,m:null,steps:null,i:-1,t0:0,alarm:false,detect:0,prog:null,progLbl:'',prompt:'',marker:null,beam:null,thrown:false,crouchT:0,runT0:0,runTime:0,group:[],buyOK:false,done:false};
+function msMark(ch,i=0){const l=MAP.marks&&MAP.marks[ch];if(!l||!l.length)return player.pos.clone();const c=l[Math.min(i,l.length-1)];return cellCenter(c[0],c[1]);}
+function spawnDummies(ch){const l=(MAP.marks&&MAP.marks[ch])||[];const out=[];
+  for(const [c,r] of l){const a=makeAgent({name:'Target',team:'red',diff:'easy',dummy:true});const p=cellCenter(c,r);a.pos.set(p.x,0,p.z);a.yaw=yawTo(player.pos.x-p.x,player.pos.z-p.z);a.face=a.yaw;a.alive=true;a.slot=2;setBotGun(a);agents.push(a);out.push(a);}
+  buildAlives();sfx.swap&&sfx.swap();return out;}
+function setMarker(v){MS.marker=v?v.clone():null;if(!MS.beam){MS.beam=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,26,12,1,true),new THREE.MeshBasicMaterial({color:0xffd23a,transparent:true,opacity:.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));scene.add(MS.beam);}
+  MS.beam.visible=!!v;if(v)MS.beam.position.set(v.x,13,v.z);}
+function near(v,r){return Math.hypot(player.pos.x-v.x,player.pos.z-v.z)<r;}
+function rookSay(t){radio('ROOK',t);say(t,{pitch:.7});}
+function tutorialSteps(){let room2=[],room3=[],run=[];
+  return [
+   {obj:'Walk to the marker',sub:'WASD to move · mouse to look',enter(){setMarker(msMark('1'));rookSay('Walk to the marker. WASD to move, mouse to look.');},check:()=>near(msMark('1'),1.6)},
+   {obj:'Buy a rifle',sub:'Press B · pick the AK-47 or MP5',enter(){setMarker(null);MS.buyOK=true;player.credits=Math.max(player.credits,4000);rookSay('Press B to open the buy menu. Grab a rifle — the AK or the MP5.');},check:()=>!!player.inv[1]},
+   {obj:'Go to the shooting range',sub:'Through the door on your right',enter(){closeBuy(true);setMarker(msMark('2'));rookSay('Good. Now through the door to the range.');},check:()=>near(msMark('2'),2.2)},
+   {obj:'Shoot all 3 targets',sub:'Stop moving before you shoot · right-click to aim',enter(){setMarker(null);room2=spawnDummies('x');rookSay('Three targets. Stand still when you shoot — moving ruins your aim. Right-click to aim down the sights.');},check:()=>room2.every(a=>!a.alive),prog:()=>room2.filter(a=>!a.alive).length+' / '+room2.length},
+   {obj:'Throw a frag grenade into the next room',sub:'G to throw · 4 swaps grenade type',enter(){player.nadesN.he=Math.max(1,player.nadesN.he);player.nadeSel='he';MS.thrown=false;room3=spawnDummies('y');setMarker(msMark('y',0));rookSay('Next room\'s full of targets. I gave you a frag. Press G to throw it in.');},check:()=>MS.thrown},
+   {obj:'Clear the room',sub:'Finish off the remaining targets',enter(){setMarker(null);rookSay('Now clean up what\'s left.');},check:()=>room3.every(a=>!a.alive),prog:()=>room3.filter(a=>!a.alive).length+' / '+room3.length},
+   {obj:'Crouch and sneak to the marker',sub:'Hold C or Ctrl to crouch-walk quietly',enter(){setMarker(msMark('3'));MS.crouchT=0;rookSay('Crouch to move quietly — hold C or Ctrl. Sneak down to the marker.');},check:dt=>{if(player.crouch)MS.crouchT+=dt;return near(msMark('3'),2.2)&&MS.crouchT>.5;}},
+   {obj:'TIMED RUN: clear the last three rooms',sub:'The clock is running!',enter(){setMarker(msMark('5'));run=spawnDummies('z');MS.runT0=T;player.nadesN.he=1;player.nadesN.flash=1;rookSay('Timed run. Last three rooms. Clock starts now. Go!');banner('TIMED RUN','Clear every target','neutral',2);},
+    check:()=>{if(near(msMark('5'),3))setMarker(null);return run.every(a=>!a.alive);},prog:()=>run.filter(a=>!a.alive).length+' / '+run.length+' · '+(T-MS.runT0).toFixed(1)+'s'},
+   {obj:'Reach the exit',sub:'Get to the marker in the last room',enter(){MS.runTime=T-MS.runT0;setMarker(msMark('9'));rookSay(MS.runTime<45?'Run time '+MS.runTime.toFixed(1)+' seconds. Not bad, rookie. Not bad at all.':'Run time '+MS.runTime.toFixed(1)+' seconds. My grandmother clears it faster. Head for the exit.');},check:()=>near(msMark('9'),2)}];}
+function stealthSteps(){const office=MAP.siteC.B.clone(),exit=MAP.spawnC.atk.clone();let dl=0;
+  return [
+   {obj:'Reach the armory office',sub:'Site B · stay out of sight, crouch to move quietly',enter(){setMarker(office);},check:()=>near(office,3.2)},
+   {obj:'Download the sign-out logs',sub:'Hold F at the office terminal',enter(){setMarker(office);dl=0;},check:dt=>{if(near(office,3.4)&&player.alive){MS.prompt='Hold <kbd>F</kbd> to download the sign-out logs';if(keys.KeyF){dl+=dt;MS.prog=dl/4;MS.progLbl='DOWNLOADING';}else MS.prog=dl>0?dl/4:null;}else{MS.prompt='';MS.prog=null;}
+      if(dl>=4){MS.prog=null;MS.prompt='';return true;}return false;}},
+   {obj:'Get back to the drop-off',sub:'Same way you came in',enter(){setMarker(exit);radio('VEX','Got them. Now get out of there.',false);},check:()=>near(exit,3.2)}];}
+function msStart(m){Object.assign(MS,{on:true,m,i:-1,alarm:false,detect:0,prog:null,prompt:'',thrown:false,runTime:0,group:[],buyOK:false,done:false,started:false});
+  spike.state='none';spike.carrier=null;spike.mesh.visible=false;state.phase='live';state.timer=0;
+  if(m.type==='tutorial'){const R=makeAgent({name:'Rook',team:'blue',diff:'normal'});const p=player.pos.clone().addScaledVector(fwdOf(player.yaw),2.5);R.pos.copy(nearestOpen(p));R.puppet={look:player};R.inv[1]=mkInst('ak');R.slot=1;setBotGun(R);agents.push(R);buildAlives();MS.steps=tutorialSteps();}
+  if(m.type==='stealth'){MS.steps=stealthSteps();
+    player.inv={1:null,2:mkInst('glock'),3:mkInst('knife')};player.slot=2;player.armor=0;player.helmet=false;player.nadesN={he:0,flash:0};player.credits=0;equip(player,2,true);
+    const ex=MAP.spawnC.atk;player.pos.copy(nearestOpen(ex));player.yaw=yawTo(MAP.siteC.B.x-ex.x,MAP.siteC.B.z-ex.z);
+    const areas=[MAP.siteC.B,MAP.siteC.B,MAP.siteC.A,vlerp(MAP.siteC.A,MAP.siteC.B,.5),MAP.spawnC.def,vlerp(MAP.siteC.B,MAP.spawnC.atk,.5),MAP.siteC.A,MAP.spawnC.def];
+    agents.filter(a=>a.team==='red').forEach((g,i)=>{const c=areas[i%areas.length];const route=[0,1,2].map(()=>randomCellNear(c,3));
+      g.guard={route,i:0,wait:rand(0,2),det:0};g.pos.copy(route[0]);g.vel.set(0,0,0);g.armor=0;g.helmet=false;g.inv[1]=mkInst(i%2?'mp5':'ak');g.slot=1;setBotGun(g);g.puppet={};});}
+  $('mobj').classList.remove('hidden');}
+function msBegin(){MS.started=true;MS.t0=T;msNextStep();if(MS.m.type==='stealth')banner('INFILTRATE','Stay hidden · knife guards from behind','neutral',2.6);}
+function msNextStep(){MS.i++;const s=MS.steps[MS.i];if(!s){msComplete();return;}MS.prompt='';MS.prog=null;s.enter&&s.enter();sfx.radio&&sfx.radio();}
+function msComplete(){if(MS.done)return;MS.done=true;setMarker(null);banner('MISSION COMPLETE','','win',2.5);sfx.win();setTimeout(()=>{if(state.running)endMatch(true);},2200);}
+function msTick(dt){if(!MS.on||!MS.started||MS.done||!state.running)return;state.timer=T-MS.t0;
+  const s=MS.steps[MS.i];if(s&&player.alive&&s.check(dt))msNextStep();
+  const st=MS.steps[MS.i];if(st){setT('mobjT',st.obj);setT('mobjS',st.prog?st.prog():st.sub||'');}
+  if(MS.m.type==='stealth')stealthTick(dt);
+  if(MS.beam&&MS.beam.visible)MS.beam.material.opacity=.16+Math.sin(T*4)*.08;}
+function msMarkerHUD(){const el=$('mmark');if(!MS.on||!MS.marker||!player.alive||CS.on){el.classList.add('hidden');return;}
+  const v=MS.marker.clone().setY(1.4);const d=Math.hypot(v.x-player.pos.x,v.z-player.pos.z);if(typeof v.project!=='function'){el.classList.add('hidden');return;}const p=v.clone().project(camera);let x=p.x,y=p.y;
+  if(p.z>1){x=-x;y=-y;}const off=Math.abs(x)>.92||Math.abs(y)>.88||p.z>1;if(off){const m=Math.max(Math.abs(x)/.92,Math.abs(y)/.88);x/=m;y/=m;}
+  el.classList.remove('hidden');el.style.left=((x*.5+.5)*innerWidth)+'px';el.style.top=((-y*.5+.5)*innerHeight)+'px';setT('mmarkD',Math.round(d)+'m');}
+// stealth: guards, vision, noise, alarm
+function stealthTick(dt){let maxDet=0;const P=player;
+  for(const g of agents){if(!g.guard)continue;
+    if(!g.alive)continue;
+    if(MS.alarm){continue;}
+    const G=g.guard;
+    if(!g.puppet)g.puppet={};
+    if(!g.puppet.path||g.puppet.pi>=g.puppet.path.length){G.wait-=dt;if(G.wait<=0){G.i=(G.i+1)%G.route.length;puppetGo(g,G.route[G.i],1.6);G.wait=rand(1.6,3.4);G.base=g.yaw;}else g.puppet.face=(G.base!=null?G.base:g.yaw)+Math.sin(T*.7+G.i*2)*1.2;}
+    if(P.alive){const e=eyeOf(g);const dx=P.pos.x-g.pos.x,dz=P.pos.z-g.pos.z,d=Math.hypot(dx,dz);const fw=fwdOf(g.yaw);const dot=(dx*fw.x+dz*fw.z)/Math.max(d,.01);
+      const range=(P.crouch?14:24)*(state.cfg.theme==='night'?.85:1);
+      const seen=d<range&&(dot>.55||d<2.2)&&canSee(e,P);
+      if(seen){G.det+=dt*(.35+1.6*(1-d/range))*(P.crouch?.6:1)*(Math.hypot(P.vel.x,P.vel.z)>3?1.4:1);g.puppet.look=P;g.puppet.path=null;}
+      else{G.det=Math.max(0,G.det-dt*.3);if(g.puppet.look===P&&G.det<.2)delete g.puppet.look;}
+      if(G.det>=1){msAlarm(g.name+' spotted you');return;}
+      for(const c of agents){if(!c.guard||c.alive||c===g||c.found)continue;const cd=Math.hypot(c.pos.x-g.pos.x,c.pos.z-g.pos.z);const cdot=((c.pos.x-g.pos.x)*fw.x+(c.pos.z-g.pos.z)*fw.z)/Math.max(cd,.01);
+        if(cd<11&&cdot>.5&&los(e,V3(c.pos.x,.4,c.pos.z))){c.found=true;msAlarm('A guard found a body');return;}}
+      maxDet=Math.max(maxDet,G.det);}}
+  MS.detect=maxDet;
+  const el=$('mdet');el.classList.remove('hidden');
+  if(MS.alarm){setT('mdetL','⚠ ALARM — GUARDS HUNTING');$('mdetF').style.width='100%';el.className='alarm';}
+  else{setT('mdetL',maxDet>.6?'◉ ALMOST SPOTTED':maxDet>.05?'◉ SUSPICIOUS':'◉ HIDDEN');$('mdetF').style.width=Math.round(maxDet*100)+'%';el.className=maxDet>.6?'warn':'';}}
+function msNoise(shooter,w){if(!MS.on||MS.m.type!=='stealth'||MS.alarm||shooter!==player)return;const r=w.melee?0:w.cls==='pistol'?9:30;if(!r)return;
+  for(const g of agents)if(g.guard&&g.alive&&g.pos.distanceTo(player.pos)<r){msAlarm(g.name+' heard a gunshot');return;}}
+function msDamage(v,dmg,att,wid){if(!MS.on)return dmg;if(v.guard&&!MS.alarm&&att===player){if(wid==='knife')return 999;if(dmg<v.hp)setTimeout(()=>msAlarm(v.name+' survived and called it in'),300);}return dmg;}
+function msAlarm(why){if(MS.alarm||!MS.on)return;MS.alarm=true;banner('ALARM RAISED',why,'lose',3);siren(3);say('Alarm! Intruder in the armory!',{prio:1,pitch:.6});
+  radio('VEX','They know you\'re there. Grab the logs and fight your way out!',false);
+  for(const g of agents){if(!g.guard||!g.alive)continue;delete g.puppet;g.diff='hard';g.investigate=player.pos.clone();g.investigateUntil=T+40;g.awareUntil=T+3;g.faceTo=player.pos.clone();}
+  const n=CAMP.diff==='recruit'?1:CAMP.diff==='veteran'?2:3;
+  for(let i=0;i<n;i++){const a=makeAgent({name:'Response '+(i+1),team:'red',diff:storyDiff('hard'),credits:4000});a.guard={route:[MAP.spawnC.def],i:0,wait:0,det:1};a.inv[1]=mkInst('ak');a.slot=1;a.armor=100;
+    const p=randomCellNear(MAP.spawnC.def,3);a.pos.set(p.x,0,p.z);setBotGun(a);a.investigate=player.pos.clone();a.investigateUntil=T+60;agents.push(a);}
+  buildAlives();}
+function msStop(){MS.on=false;MS.started=false;setMarker(null);$('mobj').classList.add('hidden');$('mdet').classList.add('hidden');$('mmark').classList.add('hidden');}
+
+// ---------- Vex boss phases ----------
+function bossTick(){const cfg=state.cfg;if(!cfg||!cfg.story||!cfg.story.bossPhases||state.mp)return;const v=agents.find(a=>a.boss);const bb=$('bossbar');
+  if(!v||CS.on){bb.classList.add('hidden');return;}
+  bb.classList.toggle('hidden',!v.alive||state.phase==='buy');setT('bbName',(v.name||'BOSS')+(state.bp3?' · PHASE 3':state.bp2?' · PHASE 2':''));
+  $('bbFill').style.width=Math.max(0,v.hp/v.maxHp*100)+'%';$('bbShield').style.width=Math.max(0,(v.oshield||0)/80*100)+'%';
+  if(!v.alive||(state.phase!=='live'&&state.phase!=='planted'))return;const f=v.hp/v.maxHp;
+  if(f<=.66&&!state.bp2){state.bp2=true;banner('PHASE 2','Vex called in backup','lose',2);radio('VEX','Boys! Get in here!',true);say('Boys! Get in here!',{pitch:1.1});
+    const n=CAMP.diff==='recruit'?1:2;for(let i=0;i<n;i++){const a=makeAgent({name:'Hollow·Guard '+(i+1),team:v.team,diff:storyDiff('hard'),credits:4000,temp:true});a.inv[1]=mkInst(i?'mp5':'ak');a.slot=1;a.armor=100;const p=randomCellNear(v.pos,4);a.pos.set(p.x,0,p.z);setBotGun(a);a.investigate=player.pos.clone();a.investigateUntil=T+30;agents.push(a);}buildAlives();}
+  if(f<=.33&&!state.bp3){state.bp3=true;v.oshield=CAMP.diff==='recruit'?40:80;banner('PHASE 3','Vex is shielded and coming for you','lose',2);radio('VEX','Fine. Let\'s finish this ourselves.',true);say('Fine. Let\'s finish this ourselves.',{pitch:1.1});
+    v.investigate=player.pos.clone();v.investigateUntil=T+30;v.awareUntil=T+3;v.faceTo=player.pos.clone();sfx.armorHit&&sfx.armorHit();}}
+function bossRoundReset(){state.bp2=false;state.bp3=false;let rm=false;for(let i=agents.length-1;i>=0;i--){const a=agents[i];if(a.temp){scene.remove(a.mesh);agents.splice(i,1);rm=true;}}if(rm)buildAlives();const v=agents.find(a=>a.boss);if(v)v.oshield=0;}
+
+// ---------- stars + results ----------
+function missionStars(m,won){const st=state.stats;const c={acc:st.shots?st.hits/st.shots*100:0,hs:st.kills?st.hs/st.kills*100:0,deaths:st.deaths,time:T-(state.missionT0||0),alarm:MS.alarm,runTime:MS.runTime,diff:CAMP.diff};
+  const goals=m.stars||[['Accuracy 35% or better',x=>x.acc>=35],['Die once or less',x=>x.deaths<=1]];
+  const got=[!!won].concat(goals.map(g=>won&&!!g[1](c)));return {got,labels:starGoals(m)};}
+function hcDeathCheck(v){const cfg=state.cfg;if(!cfg||!cfg.story||state.mp)return;if(v!==player)return;
+  if(cfg.hc||MS.on)setTimeout(()=>{if(state.running&&!player.alive&&state.cfg===cfg)endMatch(false);},2600);}
+
 let afterReq=false;
 function flashHit(dur){afterReq=true;if(!AU.ctx)return;const ctx=AU.ctx,t=ctx.currentTime,g=AU.master.gain,len=Math.min(5,dur+.5);
   g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(settings.vol*.12,t+.04);g.linearRampToValueAtTime(settings.vol,t+len);
@@ -2641,7 +2970,7 @@ function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;con
   const kcS=kcApply();renderer.clear();renderer.render(scene,camera);kcRestore(kcS);
   if(afterReq){afterReq=false;try{$('after').getContext('2d').drawImage(cv,0,0,320,180);}catch(e){}}
   if(prev&&prev.model&&!$('menu').classList.contains('hidden')&&!$('scrProfile').classList.contains('hidden')){if(!prev.drag)prev.rot+=dt*.25;prev.model.rotation.y=prev.rot;prev.r.render(prev.sc,prev.cam);}
-  if(state.running&&player&&player.alive&&!isScoped()){renderer.clearDepth();renderer.render(vmScene,vmCam);}
+  if(state.running&&player&&player.alive&&!isScoped()&&!CS.on){renderer.clearDepth();renderer.render(vmScene,vmCam);}
   lastCalls=renderer.info.render.calls;}
 resize();applyCrosshair();menuBackdrop();showScreen('scrMain');$('loading').classList.add('hidden');requestAnimationFrame(frame);
 </script>
