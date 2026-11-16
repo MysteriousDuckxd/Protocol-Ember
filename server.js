@@ -52,6 +52,7 @@ const W = {
 };
 const ITEMS = { wall: { cost: 800, max: 1 }, medkit: { cost: 600, max: 2 }, stim: { cost: 400, max: 1, any: 1 }, dash: { cost: 500, max: 2, any: 1 }, boots: { cost: 350, max: 1, any: 1 } };
 const resp = r => r.mode !== 'bomb';
+const OWNER_NAME = 'Ducky'; // only this username can use AUTO-NUKE online
 const NUKE_KS = process.env.NUKE_KS !== undefined ? +process.env.NUKE_KS : 7;
 const respMoney = r => r.mode === 'chaos' ? 10000 : 16000;
 const KILL_REWARD = { knife: 1500, shotgun: 900, mp5: 600, mpistol: 600 };
@@ -289,7 +290,7 @@ function tick(r) {
   const now = Date.now(), dt = TICK_MS / 1000;
   if (!humans(r).length) return;
   r.timer = Math.max(0, r.timer - dt);
-  if (r.nuke && now >= r.nuke.at) { const nk = r.nuke; r.nuke = null; const by = r.players.get(nk.by) || null; if (r.phase === 'live') for (const q of [...r.players.values()]) { if (r.phase !== 'live') break; if (q.alive && q.team !== nk.team) killPlayer(r, q, by, 'nuke', false); } }
+  if (r.nuke && now >= r.nuke.at) { const nk = r.nuke; r.nuke = null; const by = r.players.get(nk.by) || null; const okPh = () => r.phase === 'live' || r.phase === 'planted'; if (okPh()) for (const q of [...r.players.values()]) { if (!okPh()) break; if (q.alive && q.team !== nk.team) killPlayer(r, q, by, 'nuke', false); } }
   for (const p of r.players.values()) if (p.oshield > 0) p.oshield = Math.max(0, p.oshield - 5 * dt);
   // respawns (TDM / warmup)
   if (resp(r) && r.phase === 'live') for (const p of r.players.values()) if (!p.alive && p.respawnAt && now >= p.respawnAt) respawn(r, p);
@@ -433,7 +434,7 @@ function handle(c, msg) {
     case 'item': { const a = actor(r, p, m.as); if (a && !a.bot && (m.k === 'stim' || m.k === 'dash') && a.items[m.k] > 0) a.items[m.k]--; break; }
     case 'ready': if (r.phase === 'lobby') { p.ready = !!m.on; sendLobby(r); } break;
     case 'start': pickOwner(r); if (r.phase === 'lobby' && r.owner === p.id && canStart(r)) { r.forced = true; r.cdAt = Date.now() + 5000; sendLobby(r); } break;
-    case 'nuke': { if (r.mode !== 'chaos' || r.phase !== 'live' || !p.alive || r.nuke || (p.ks || 0) < NUKE_KS) break; p.ks = 0; r.nuke = { at: Date.now() + 5000, by: p.id, team: p.team }; bcast(r, { t: 'nk', i: p.id, n: p.name }); break; }
+    case 'nuke': { const auto = !!m.auto && p.name === OWNER_NAME && (r.phase === 'live' || r.phase === 'planted'); if (r.nuke) break; if (!auto && (r.mode !== 'chaos' || r.phase !== 'live' || !p.alive || (p.ks || 0) < NUKE_KS)) break; if (!auto) p.ks = 0; r.nuke = { at: Date.now() + 5000, by: p.id, team: p.team }; bcast(r, { t: 'nk', i: p.id, n: p.name }); break; }
     case 'skipkc': { if (!p.alive && p.respawnAt) p.respawnAt = Math.min(p.respawnAt, Math.max(Date.now() + 200, (p.diedAt || 0) + 1500)); break; }
     case 'hacker': { if (!p.alive || p.jailed || r.phase === 'lobby' || r.phase === 'over') break; for (const q of r.players.values()) if (q.jailed) q.jailed = false; p.jailed = true; p.protectUntil = Date.now() + 7600; bcast(r, { t: 'jail', i: p.id, n: p.name }); break; }
     case 'chat': { const txt = clean(m.msg, 120); if (txt) bcast(r, { t: 'chat', i: p.id, n: p.name, msg: txt, tm: p.team }); break; }
@@ -480,8 +481,8 @@ const server = http.createServer((req, res) => {
   if (!fp.startsWith(PUBLIC)) { res.writeHead(403); res.end(); return; }
   fs.readFile(fp, (err, data) => {
     if (err) { res.writeHead(404); res.end('not found'); return; }
-    const type = fp.endsWith('.html') ? 'text/html; charset=utf-8' : fp.endsWith('.js') ? 'text/javascript' : 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-cache' }); res.end(data);
+    const type = fp.endsWith('.html') ? 'text/html; charset=utf-8' : fp.endsWith('.js') ? 'text/javascript' : fp.endsWith('.mp3') ? 'audio/mpeg' : 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': fp.endsWith('.mp3') ? 'public, max-age=86400' : 'no-cache' }); res.end(data);
   });
 });
 server.on('upgrade', (req, sock) => {
