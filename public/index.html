@@ -2909,7 +2909,8 @@ function kill(v,att,wid,head){
   v.alive=false;v.hp=0;v.deaths++;v.planting=0;v.deadT=0;
   if(att&&att!==v&&att.team!==v.team){att.kills++;att.credits=Math.min(16000,att.credits+(wid==='knife'?1500:wid==='shotgun'?900:wid==='mp5'||wid==='mpistol'?600:300));if(head)att.hsK++;}
   if(att&&att.isPlayer&&att!==v){state.stats.kills++;if(head)state.stats.hs++;if(att.team!==v.team)state.coinsEarned+=15+(head?5:0);}
-  if(v.isPlayer){state.stats.deaths++;banner('YOU DIED',att&&att!==v?'Killed by '+att.name:'','lose',2);spectateIdx=-1;const dcLen=isRespawnMode()?2.8:3.2;spectateT=T+dcLen;player.killer=att&&att!==v?att:null;player.deathCamUntil=T+dcLen;showDeathCam(player.killer,wid,head);player.diedT=T;if(player.killer&&wid!=='nuke'&&player.killer.hist&&player.killer.hist.length>10)kcStart(player.killer);vm.cur&&(vmModels[vm.cur].visible=false);}
+  if(v.isPlayer){state.stats.deaths++;const camp=state.cfg&&state.cfg.story&&!state.mp;banner('YOU DIED',att&&att!==v?'Killed by '+att.name:'','lose',2);spectateIdx=-1;const dcLen=isRespawnMode()?2.8:3.2;spectateT=T+(camp?99:dcLen);player.diedT=T;vm.cur&&(vmModels[vm.cur].visible=false);
+    if(camp){player.killer=null;player.deathCamUntil=0;if(COOP.role==='host'&&coopSquadUp())spectateT=T+1;}else{player.killer=att&&att!==v?att:null;player.deathCamUntil=T+dcLen;showDeathCam(player.killer,wid,head);if(player.killer&&wid!=='nuke'&&player.killer.hist&&player.killer.hist.length>10)kcStart(player.killer);}}
   killfeed(att,v,wid,head);
   if(state.cfg&&state.cfg.chaos&&!state.mp){if(att&&att!==v&&att.team!==v.team)state.score[att.team]++;v.respawnAt=T+(v.isPlayer?5.6:3);}
   if(!state.mp&&spike.carrier===v&&spike.state==='carried'){spike.state='dropped';spike.carrier=null;spike.pos.set(v.pos.x,groundAtPoint(v.pos),v.pos.z);spike.mesh.visible=true;
@@ -3086,7 +3087,7 @@ function botDecide(b){
 function updateBot(b,dt){if(b.coopGuest){coopProxyTick(b,dt);return;}
   const ud=b.mesh.userData;
   if(!b.alive){b.deadT+=dt;const k=Math.min(1,b.deadT*2.5);b.mesh.rotation.x=k*1.45;b.mesh.position.y=b.pos.y-k*.05;if(ud.marker)ud.marker.visible=false;return;}
-  if(ud.marker)ud.marker.visible=true;
+  if(ud.marker)ud.marker.visible=!(state.cfg&&state.cfg.story&&!state.coopGuest);
   if(b.dummy||b.puppet){puppetTick(b,dt,ud);return;}
   const D=DIFF[b.diff],w=weaponOf(b),it=instOf(b);
   if(b.reloadUntil&&T>=b.reloadUntil){finishReload(b);b.reloadUntil=0;}
@@ -3229,6 +3230,7 @@ function update(dt){
   coopHostTick(dt);trTick(dt);updateNades(dt);updateSpike(dt);checkRound();updateFx(dt);updateParts(dt);updateHack();updateProjs(dt);updateDyn();updateChaosAgents(dt);weatherTick(dt);subTick(dt);coreTick(dt);msTick(dt);objHUD();bossTick();msMarkerHUD();
 }
 function updateCamera(dt){if(CAP.on){captureCam(dt);return;}
+  if(state.cfg&&state.cfg.story&&!state.mp&&player&&!player.alive&&state.running&&!CS.on&&!player.coopDown){camera.position.x=player.pos.x;camera.position.z=player.pos.z;camera.position.y=lerp(camera.position.y,player.pos.y+.32,1-Math.exp(-6*dt));camera.rotation.z=lerp(camera.rotation.z,.35,1-Math.exp(-5*dt));camera.rotation.x=lerp(camera.rotation.x,.15,1-Math.exp(-4*dt));$('spectate').classList.add('hidden');return;}
   if(CS.on)return;
   if(state.mp&&state.phase==='lobby'){state.menuCam+=dt*.05;const cx=MAP.W*S/2,cz=MAP.H*S/2,R=Math.max(MAP.W,MAP.H)*S*.5;camera.position.set(cx+Math.cos(state.menuCam)*R,30,cz+Math.sin(state.menuCam)*R);camera.lookAt(cx,0,cz);camYaw=camera.rotation.y;
     if(camera.fov!==settings.fov){camera.fov=settings.fov;camera.updateProjectionMatrix();}for(const k in vmModels)vmModels[k].visible=false;nadeVM.visible=false;vm.cur=null;updateLobbyTimer();return;}
@@ -3316,7 +3318,8 @@ function makeTag(a){const adm=isAdminA(a);const c=document.createElement('canvas
   const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false,sizeAttenuation:false}));
   sp.scale.set(.16,.16*c.height/256,1);sp.position.set(0,2.32,0);sp.renderOrder=11;sp.userData={name:a.name,adm};return sp;}
 function tagTick(){if(!state.running||!player)return;for(const a of agents){if(a.isPlayer||!a.mesh)continue;const ud=a.mesh.userData;
-    const ally=a.team===player.team,adm=isAdminA(a);const want=a.alive&&a.mesh.visible&&!a.dummy&&(ally||adm)&&!(CS.on);
+    const ally=a.team===player.team,adm=isAdminA(a);const camp=state.cfg&&state.cfg.story;const coopMate=a.coopGuest||(state.coopGuest&&ally&&COOP.mirror&&a.cid&&a.name&&!CHAR_LOOKS[String(a.name).toUpperCase()]&&ally);
+    const want=a.alive&&a.mesh.visible&&!a.dummy&&(ally||adm)&&!CS.on&&!CAP.on&&(!camp||coopMate);
     if(!want){if(ud.tag)ud.tag.visible=false;continue;}
     if(!ud.tag||ud.tag.userData.name!==a.name||ud.tag.userData.adm!==adm){if(ud.tag){a.mesh.remove(ud.tag);ud.tag.material.map.dispose();ud.tag.material.dispose();}ud.tag=makeTag(a);a.mesh.add(ud.tag);}
     ud.tag.visible=true;ud.tag.material.depthTest=!ally; // enemies only see an admin's tag when the admin is in sight
@@ -3706,7 +3709,7 @@ function netMsg(m){
   }}
 function updateRemote(a,dt){const ud=a.mesh.userData;
   if(!a.alive){a.deadT+=dt;const k=Math.min(1,a.deadT*2.5);a.mesh.rotation.x=k*1.45;if(ud.marker)ud.marker.visible=false;return;}
-  if(ud.marker)ud.marker.visible=true;
+  if(ud.marker)ud.marker.visible=!(state.cfg&&state.cfg.story&&!state.coopGuest);
   if(a.netT){const px=a.pos.x,pz=a.pos.z;if(a.pos.distanceTo(a.netT)>6)a.pos.copy(a.netT);else a.pos.lerp(a.netT,1-Math.exp(-14*dt));a.vel.set((a.pos.x-px)/Math.max(dt,1e-3),0,(a.pos.z-pz)/Math.max(dt,1e-3));}
   a.yaw+=angDiff(a.yaw,a.netYaw||0)*Math.min(1,dt*16);
   const hs=Math.hypot(a.vel.x,a.vel.z);a.walkPhase+=dt*hs*2.3;const sw=Math.sin(a.walkPhase)*Math.min(1,hs/4)*.6;
@@ -3828,7 +3831,12 @@ function coopHostMsg(from,d){if(!d||COOP.role!=='host')return;let g=COOP.guests.
   }}
 function coopHostTick(dt){if(COOP.role!=='host'||!COOP.guests.size||!state.running||!state.cfg||!state.cfg.story)return;
   // guest respawns
-  for(const g of COOP.guests.values()){const a=g.agent;if(!a)continue;if(!a.alive){if(!g.deadUntil)g.deadUntil=T+7;else if(T>g.deadUntil&&player.alive){const p=randomCellNear(player.pos,2);a.pos.set(p.x,0,p.z);a.netT=a.pos.clone();a.alive=true;a.hp=a.maxHp=100;a.deadT=0;a.mesh.rotation.x=0;a.mesh.visible=true;g.deadUntil=0;coopEv({k:'resp',p:arr(a.pos)},g.id);}}
+  const upMates=[player,...[...COOP.guests.values()].map(g=>g.agent)].filter(a=>a&&a.alive);
+  if(!player.alive&&player.coopDown&&!CAP.on){if(!upMates.length){player.coopDown=false;COOP.failing=true;coopEv({k:'bn',t:'SQUAD DOWN',s:'Everyone is down — you have been captured',c:'lose',d:3});const cfg=state.cfg;MS.done=MS.on?true:MS.done;
+      setTimeout(()=>{if(!state.running||state.cfg!==cfg)return;player.mesh.visible=false;$('capSub').textContent=cfg.hc?'Hardcore — your run is over.':'Retrying the mission…';captureStart(()=>{COOP.failing=false;if(state.running&&state.cfg===cfg){if(cfg.hc)endMatch(false);else{kcStop();state.quickRestart=true;state.restarts=(state.restarts|0)+1;startStory(cfg.storyIdx);}}});},1200);}
+    else if(T>player.coopDownUntil){const m0=upMates[0];const p=randomCellNear(m0.pos,2);player.pos.set(p.x,0,p.z);player.vel.set(0,0,0);player.alive=true;player.hp=player.maxHp=100;player.deadT=0;player.coopDown=false;player.deathCamUntil=0;player.mesh.visible=false;spectateIdx=-1;equip(player,player.inv[1]?1:2,true);banner('BACK IN THE FIGHT','','neutral',1.4);}}
+  for(const g of COOP.guests.values()){const a=g.agent;if(!a)continue;if(!a.alive){if(!g.deadUntil)g.deadUntil=T+7;else if(T>g.deadUntil&&upMates.length){const near=upMates.find(m=>m!==a)||upMates[0];const p=randomCellNear(near.pos,2);a.pos.set(p.x,0,p.z);a.netT=a.pos.clone();a.alive=true;a.hp=a.maxHp=100;a.deadT=0;a.mesh.rotation.x=0;a.mesh.visible=true;g.deadUntil=0;coopEv({k:'resp',p:arr(a.pos)},g.id);}}
+    // last guest standing goes down while the host is down → handled above next frame
     // guests can defuse the bomb too
     if(a.alive&&a.defuseKey&&spike.state==='planted'&&Math.hypot(a.pos.x-spike.pos.x,a.pos.z-spike.pos.z)<1.7&&(!spike.defuser||!spike.defuser.alive||spike.defuser===a))spike.defuser=a;
     else if(spike.defuser===a&&!a.defuseKey)spike.defuser=null;}
@@ -3845,7 +3853,7 @@ function coopProxyTick(a,dt){updateRemote(a,dt);}
 (function(){const wrap=(name,fn)=>{const orig=window[name];if(typeof orig!=='function')return;window[name]=function(){const r=orig.apply(this,arguments);try{if(coopActive())fn.apply(this,arguments);}catch(e){}return r;};};
   wrap('radio',(who,text,enemy)=>coopEv({k:'radio',who:String(who),text:String(text),e:!!enemy}));
   wrap('say',(text,o)=>coopEv({k:'say',text:String(text),who:(o&&o.who)||'ANNOUNCER'}));
-  wrap('banner',(t,s2,cls,dur)=>coopEv({k:'bn',t:String(t||''),s:String(s2||''),c:cls||'',d:dur||3}));
+  wrap('banner',(t,s2,cls,dur)=>{if(/^(YOU DIED|YOU WENT DOWN|BACK IN THE FIGHT|STATS RESET|BUY|DOUBLE|TRIPLE)/.test(String(t||'')))return;coopEv({k:'bn',t:String(t||''),s:String(s2||''),c:cls||'',d:dur||3});});
   wrap('tracer',(a,b,col)=>coopEv({k:'tr',a:arr(a),b:arr(b),c:col}));
   wrap('railBeam',(a,b)=>coopEv({k:'tr',a:arr(a),b:arr(b),w:'railgun'}));
   wrap('explosionFx',(p,big)=>coopEv({k:'ex',p:arr(p),b:big}));
@@ -3875,7 +3883,7 @@ function coopGuestMsg(d){if(!d)return;
       buildAlives();break;
     case 'snap':{if(!state.coopGuest||!player)break;const seen=new Set();if(d.ph)state.phase=d.ph==='planted'||d.ph==='end'?'live':d.ph;
       for(const e of d.ag){const [cid,x,y,z,yaw,pitch,al,hp,gun,fl,tm]=e;seen.add(cid);
-        if(cid===COOP.myCid){const was=player.alive;if(hp<player.hp-.5&&al){vigT=.7;sfx.hurt();}player.hp=hp;if(was&&!al){player.alive=false;state.stats.deaths++;banner('YOU WENT DOWN','You will be back in a few seconds','lose',2.4);spectateIdx=-1;spectateT=T+3;}continue;}
+        if(cid===COOP.myCid){const was=player.alive;if(hp<player.hp-.5&&al){vigT=.7;sfx.hurt();}player.hp=hp;if(was&&!al){player.alive=false;state.stats.deaths++;banner('YOU WENT DOWN',(Object.values(COOP.mirror).some(a=>a.alive&&a.team==='blue')?'Your squad is still fighting — back in a few seconds':'The whole squad is down…'),'lose',2.4);spectateIdx=-1;spectateT=T+3;}continue;}
         const a=COOP.mirror[cid];if(!a)continue;const team=tm==='b'?'blue':'red';if(a.team!==team){a.team=team;}
         if(!a.netT)a.netT=V3();a.netT.set(x,y,z);if(!a.alive&&al){a.pos.set(x,y,z);a.mesh.rotation.x=0;a.deadT=0;}a.netYaw=yaw;a.netPitch=pitch;a.alive=!!al;a.mesh.visible=true;a.hp=hp;
         a.crouch=!!(fl&1);a.kneel=!!(fl&8);a.planting=(fl&4)?1:0;a._def=!!(fl&2);if(gun&&gun!==a._gun){a._gun=gun;setNetWeapon(a,gun);}}
@@ -4531,7 +4539,18 @@ function captureCam(dt){if(CAP.cell&&CAP.useCell&&!CAP.endAt){capCellCam(dt);ret
 function captureEnd(){if(!CAP.on)return;CAP.on=false;$('capOverlay').classList.add('hidden');$('capLater').classList.add('hidden');if(bindVM)bindVM.visible=false;if(CELL.grp){scene.remove(CELL.grp);disposeGroup(CELL.grp);CELL.grp=null;}const f=CAP.end;CAP.end=null;f&&f();}
 function captureSkip(){if(CAP.on&&T>CAP.skipOK){captureEnd();}}
 
+function coopSquadUp(){return COOP.role==='host'&&[...COOP.guests.values()].some(g=>g.agent&&g.agent.alive);}
+// the escorted VIP dies: you're knocked down and captured, then the mission restarts
+function escortLost(J){if(MS.done||CAP.on)return;MS.done=true;setMarker(null);const cfg=state.cfg;
+  banner('MISSION FAILED',J.name+' was killed','lose',2.2);sfx.lose();coopEv({k:'bn',t:'MISSION FAILED',s:J.name+' was killed',c:'lose',d:2.2});
+  setTimeout(()=>{if(!state.running||state.cfg!==cfg)return;
+    // a rifle butt from behind: you drop where you stand
+    shakeT=.5;if(AU.ctx){sNoise({dur:.25,vol:.7,f:300});sTone({f:70,fEnd:30,dur:.35,vol:.5});}
+    player.alive=false;player.hp=0;player.vel.set(0,0,0);player.mesh.visible=false;vm.cur&&(vmModels[vm.cur].visible=false);closeBuy(true);
+    $('capSub').textContent=cfg.hc?'Hardcore — your run is over.':'Retrying the mission…';
+    captureStart(()=>{if(state.running&&state.cfg===cfg){if(cfg.hc)endMatch(false);else{kcStop();state.quickRestart=true;state.restarts=(state.restarts|0)+1;startStory(cfg.storyIdx);}}});},1600);}
 function hcDeathCheck(v){const cfg=state.cfg;if(!cfg||!cfg.story||state.mp)return;if(v!==player)return;
+  if(COOP.role==='host'&&COOP.guests.size){if(coopSquadUp()){player.coopDown=true;player.coopDownUntil=T+7;setTimeout(()=>{if(state.running&&!player.alive)banner('YOU WENT DOWN','Your squad is still fighting — back in a few seconds','lose',2.4);},300);return;}}
   if(cfg.hc){setTimeout(()=>{if(state.running&&!player.alive&&state.cfg===cfg){player.mesh.visible=false;$('capSub').textContent='Hardcore — your run is over.';captureStart(()=>{if(state.running&&state.cfg===cfg)endMatch(false);});}},1300);return;}
   if(MS.done)return;MS.done=MS.on?true:MS.done;
   setTimeout(()=>{if(state.running&&!player.alive&&state.cfg===cfg){player.mesh.visible=false;$('capSub').textContent='Retrying the mission…';
@@ -4616,7 +4635,7 @@ function act2Start(m){const t=m.type;MS.extra={};MS.breached=false;MS.failReason
   buildAlives();}
 // ---------- per-frame ----------
 function act2Tick(dt){const t=MS.m.type;
-  if(t==='escort'){const J=MS.vip;if(!J.alive){msFail(J.name+' was killed');return;}MS.extra.vipHp=J.hp/J.maxHp;
+  if(t==='escort'){const J=MS.vip;if(!J.alive){escortLost(J);return;}MS.extra.vipHp=J.hp/J.maxHp;
     const tgt=MS.route[Math.min(MS.ri,MS.route.length-1)];const danger=agents.some(a=>a.team==='red'&&a.alive&&a.pos.distanceTo(J.pos)<15);
     const go=J.pos.distanceTo(player.pos)<10&&!danger;
     if(go){if(!J.puppet.path||J.puppet.pi>=J.puppet.path.length||J.puppet.goal!==MS.ri){puppetGo(J,tgt,3.4);J.puppet.goal=MS.ri;}delete J.puppet.look;}
