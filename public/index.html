@@ -72,6 +72,7 @@ body.touch #trPanel{top:118px;width:180px;font-size:12px}
 #capOverlay{position:fixed;inset:0;pointer-events:none;z-index:55}#capOverlay.hidden{display:none}#capVig{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 35%,rgba(70,0,0,.55) 70%,rgba(0,0,0,.95) 100%)}#capBlack{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .35s}
 #capLater{position:absolute;left:40px;top:36px;font:700 20px Rajdhani,sans-serif;letter-spacing:6px;color:#d8d2c4;text-shadow:0 2px 6px #000}#capLater.hidden{display:none}
 #capTitle{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;color:#ece8e1}#capTitle.hidden{display:none}#capTitle small{display:block;letter-spacing:6px;color:#ff4655;font-size:14px}#capTitle b{display:block;font:700 64px Rajdhani,sans-serif;letter-spacing:10px}#capTitle span{display:block;color:var(--dim);font-size:18px;margin-top:4px}#capTitle i{display:block;margin-top:18px;font-size:13px;color:#777;font-style:normal;letter-spacing:2px}
+#gameVer{position:fixed;right:14px;bottom:10px;font:600 13px Rajdhani,sans-serif;letter-spacing:2px;color:rgba(236,232,225,.55);pointer-events:none;z-index:5}
 #coopWait{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(6,9,12,.78);z-index:60;pointer-events:auto}#coopWait.hidden{display:none}#coopWait .cwBox{max-width:520px;text-align:center;padding:26px 30px;border:1px solid rgba(236,232,225,.2);background:rgba(14,18,22,.92)}#coopWait small{letter-spacing:4px;color:var(--gold)}#coopWaitT{font:700 22px Rajdhani,sans-serif;margin:10px 0 18px}#coopWait .btn{display:inline-block;min-width:0}
 #adsDot{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:#ff2a2a;box-shadow:0 0 6px #ff2a2a}
 #hitmark{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;opacity:0}
@@ -404,6 +405,7 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
 </div>
 
 <div id="menu" class="overlay">
+  <div id="gameVer"></div>
   <div class="screen" id="scrMain">
     <h1 class="logo">PROTOCOL<span>:</span><br>EMBER</h1>
     <div class="tag">TERRORISTS VS SOLDIERS · BOMB DEFUSAL · OFFLINE</div>
@@ -593,6 +595,7 @@ function yawTo(dx,dz){return Math.atan2(-dx,-dz);}
 const V3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function hash(a,b){let h=(a*374761393+b*668265263)|0;h=(h^(h>>>13))*1274126177|0;return ((h^(h>>>16))>>>0)/4294967295;}
 
+const GAME_VERSION='v37';const GAME_BUILD='Nov 15 2026';
 const settings={perf:'auto',fpsCap:0,voxVol:1,sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',voice:1,subs:1,fs:0,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
 let firstRun=true;try{const sv=localStorage.getItem('pe2_settings');if(sv)firstRun=false;Object.assign(settings,JSON.parse(sv||'{}'));if(!localStorage.getItem('pe2_fsoff')){settings.fs=0;localStorage.setItem('pe2_fsoff','1');localStorage.setItem('pe2_settings',JSON.stringify(settings));}}catch(e){}
 const isTouchDevice=()=>(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||((navigator.maxTouchPoints||0)>1&&!(window.matchMedia&&matchMedia('(pointer: fine)').matches));
@@ -1105,7 +1108,7 @@ const STORY=[
  ,{act:1,code:'OP-08',title:'Cold Arrival',type:'escort',map:'oldtown',theme:'dusk',side:'def',allies:[],enemies:0,diff:'normal',toWin:1,credits:0,
   loc:'OLD TOWN · LISBRA · 18:40',
   intro:['JUNO','I hate field work. Just keep them off me and I\'ll walk.'],
-  brief:['Vex\'s last word was EMBER. Juno traced it to Meridian Group, a private military company based in the old city of Lisbra.','Juno has flown in to crack Meridian\'s network, but Meridian already knows she\'s here. Get her across Old Town to the safehouse alive.','She moves when you\'re close and the street is clear. Meridian will hit you at every square.'],
+  brief:['Vex\'s last word was EMBER. Juno traced it to Meridian Group, a private military company based in the old city of Lisbra.','Juno has flown in to crack Meridian\'s network, but Meridian already knows she\'s here. Get her across Old Town to the safehouse alive.','She\'ll walk the route on her own and duck for cover when they\'re close — stay with her. Meridian will hit you at every square.'],
   obj:['Escort Juno to the safehouse','Keep Juno alive','Clear the ambushes along the way'],
   stars:[['Juno above 50% health',c=>c.vipHp>=.5],['Accuracy 35% or better',c=>c.acc>=35]],
   debrief:['Juno is in. Half an hour later she has a name: Calder Hayes, CEO of Meridian Group.','Hayes is meeting a foreign delegation at the Lisbra embassy tonight — and Meridian gunmen have just taken the embassy staff hostage.','Somebody wants that meeting to happen without witnesses.']},
@@ -3493,6 +3496,7 @@ $('sVoxVol').oninput=e=>{settings.voxVol=+e.target.value;saveSettings();syncSett
 $('sVol').oninput=e=>{settings.vol=+e.target.value;if(AU.master)AU.master.gain.value=settings.vol;saveSettings();syncSettings();};
 for(const [id,k,f] of [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sVoice','voice',Number],['sSubs','subs',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number],['sPerf','perf',v=>v],['sCap','fpsCap',Number]])$(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;settings[k]=f(b.dataset.v);if(k==='xhair')applyCrosshair();if(k==='q'||k==='rs'){resScale=1;applyPR();}if(k==='perf'&&b.dataset.v==='off'){PERF.lvl=0;perfApply(true);}if(k==='touch')applyTouchMode();if(k==='fps'&&!settings.fps)$('fpsBox').textContent='';saveSettings();syncSettings();};
 // ----- profile & loadout -----
+document.getElementById('gameVer').textContent='PROTOCOL: EMBER '+GAME_VERSION+' · '+GAME_BUILD;
 function renderWho(){$('who').innerHTML=`OPERATOR <b>${profile.name.toUpperCase()}</b> · ◈ <b>${profile.coins}</b> COINS`;}
 let pSide='ct',prev=null;
 function ownedColors(){return FREE_COLORS.concat(profile.owned.colors.map(k=>PREMIUM_COLORS[k].hex));}
@@ -4595,7 +4599,7 @@ function act2Start(m){const t=m.type;MS.extra={};MS.breached=false;MS.failReason
   if(t==='escort'){const route=['1','2','3','4','5'].map(c=>msMark(c));teleportSquad(route[0]);
     const J=makeAgent({name:m.vip||'Juno',team:'blue',diff:'normal',maxHp:160,hp:160,vip:true});const jp=randomCellNear(route[0],1);J.pos.set(jp.x,0,jp.z);J.puppet={look:player};J.slot=2;setBotGun(J);agents.push(J);
     MS.vip=J;MS.route=route;MS.ri=1;MS.ambush={2:'x',3:'y',4:'z'};MS.steps=[
-     {obj:'Escort '+(m.vip||'Juno')+(m.vip?' to the cargo plane':' to the safehouse'),sub:(m.vip?'He':'She')+' moves when you are close and the way is clear',enter(){setMarker(route[1]);},prog:()=>J.name+' '+Math.max(0,Math.ceil(J.hp/J.maxHp*100))+'% · waypoint '+Math.min(MS.ri,4)+' / 4',check:()=>MS.ri>=route.length&&near(route[route.length-1],4)}];}
+     {obj:'Escort '+(m.vip||'Juno')+(m.vip?' to the cargo plane':' to the safehouse'),sub:(m.vip?'He':'She')+' walks the route alone — stops and ducks when enemies are near',enter(){setMarker(route[1]);},prog:()=>J.name+' '+Math.max(0,Math.ceil(J.hp/J.maxHp*100))+'% · waypoint '+Math.min(MS.ri,4)+' / 4',check:()=>MS.ri>=route.length&&near(route[route.length-1],4)}];}
   if(t==='hostage'){teleportSquad(MAP.spawnC.atk);const gs=marksOf('g');const n=diffCount(8);gs.slice(0,Math.min(gs.length,n)).forEach((p,i)=>spawnSentry(p,sentryName(i)));
     MS.hostages=marksOf('h').slice(0,(m.hostageNames||[1,2,3]).length).map((p,i)=>{const h=makeAgent({name:(m.hostageNames||['Aide Ferro','Clerk Ilse','Attaché Dorn'])[i%3],team:'blue',diff:'easy',noTarget:true,kneel:true});h.pos.set(p.x,0,p.z);h.puppet={};h.inv={1:null,2:null,3:mkInst('knife')};h.slot=3;setBotGun(h);agents.push(h);return h;});
     const gate=msMark('1');MS.steps=[
@@ -4637,7 +4641,7 @@ function act2Start(m){const t=m.type;MS.extra={};MS.breached=false;MS.failReason
 function act2Tick(dt){const t=MS.m.type;
   if(t==='escort'){const J=MS.vip;if(!J.alive){escortLost(J);return;}MS.extra.vipHp=J.hp/J.maxHp;
     const tgt=MS.route[Math.min(MS.ri,MS.route.length-1)];const danger=agents.some(a=>a.team==='red'&&a.alive&&a.pos.distanceTo(J.pos)<15);
-    const go=J.pos.distanceTo(player.pos)<10&&!danger;
+    const go=!danger&&!MS.pendingAmb;
     if(go){if(!J.puppet.path||J.puppet.pi>=J.puppet.path.length||J.puppet.goal!==MS.ri){puppetGo(J,tgt,3.4);J.puppet.goal=MS.ri;}delete J.puppet.look;}
     else{J.puppet.path=null;J.puppet.look=danger?null:player;J.crouch=danger;}
     if(J.pos.distanceTo(tgt)<2.2&&MS.ri<MS.route.length){const ch=MS.ambush[MS.ri];MS.ri++;if(MS.ri<MS.route.length)setMarker(MS.route[MS.ri]);
