@@ -1694,10 +1694,9 @@ function buildSkyline(LK,W,H,cx,cz){const grp=new THREE.Group();const R=Math.max
     case 'mountains':ring((x,z)=>mountain(x,z,rand(60,140),LK.snowy),26,1.3,2.6);if(LK.reservoir){const w=new THREE.Mesh(new THREE.PlaneGeometry(900,400),mm('resW',{map:MTX.water,color:0x3c7088,roughness:.15,metalness:.4}));w.rotation.x=-Math.PI/2;w.position.set(cx,.0,cz-H/2-200);grp.add(w);}break;
     case 'towers':ring((x,z)=>tower(x,z,rand(40,120)),60,.75,1.7);break;
     case 'oldtown':{const roof=mm('skyRoof',{color:0xb5532f,roughness:.9,flatShading:true}),pal=[0xf2d98a,0xe9a8a0,0x9fc3d9,0xf4efe4,0xe8c07a];
-      ring((x,z,a)=>{const w=rand(8,14),h=rand(8,16),d=rand(8,12),hill=Math.max(0,(Math.hypot(x-cx,z-cz)-R*.7)*.12);const b=box(x,z,w,h,d,mm('skyHouse'+(Math.floor(Math.random()*5)),{map:TEX.sand,color:pal[Math.floor(Math.random()*5)],roughness:1}),a);b.position.y=h/2+hill;
-        const r2=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*.72,3.5,4),roof);r2.position.set(x,h+hill+1.75,z);r2.rotation.y=a+Math.PI/4;grp.add(r2);},110,.7,1.6);
+      ring((x,z,a)=>{const w=rand(8,14),h=rand(8,16),d=rand(8,12),hill=Math.max(0,(Math.hypot(x-cx,z-cz)-R*.7)*.12);const H2=h+hill;box(x,z,w,H2,d,mm('skyHouse'+(Math.floor(Math.random()*5)),{map:TEX.sand,color:pal[Math.floor(Math.random()*5)],roughness:1}),a);
+        const r2=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*.72,3.5,4),roof);r2.position.set(x,H2+1.75,z);r2.rotation.y=a+Math.PI/4;grp.add(r2);},110,.7,1.6);
       {const cx2=cx+R*.2,cz2=cz-R*.95;const tw=box(cx2,cz2,8,40,8,mm('skyStone',{map:TEX.sand,color:0xe8dcc0,roughness:1}));const sp=new THREE.Mesh(new THREE.ConeGeometry(5.5,14,4),roof);sp.position.set(cx2,47,cz2);sp.rotation.y=Math.PI/4;grp.add(sp);}
-      {const br=box(cx-R*1.2,cz+R*.2,14,2,260,mm('skyBridge',{color:0xb8402e,roughness:.6,metalness:.4}),.3);br.position.y=30;for(const o of [-60,60]){const t=box(cx-R*1.2+Math.sin(.3)*o,cz+R*.2+Math.cos(.3)*o,4,70,4,br.material,.3);}}
       break;}
     case 'launch':{const g=new THREE.Group();g.position.set(cx+R*.95,0,cz-R*.5);grp.add(g);const body=new THREE.Mesh(new THREE.CylinderGeometry(3,3,46,16),steelW);body.position.y=23;g.add(body);
       const nose=new THREE.Mesh(new THREE.ConeGeometry(3,9,16),steelW);nose.position.y=50.5;g.add(nose);for(const a of [0,2.1,4.2]){const b=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.4,22,10),steelW);b.position.set(Math.cos(a)*4.2,11,Math.sin(a)*4.2);g.add(b);}
@@ -4198,7 +4197,7 @@ function starGoals(m){return ['Complete the mission'].concat((m.stars||[['Accura
 function startStory(i){const m=STORY[i];const D=CAMP_DIFFS[CAMP.diff];
   if(isHC()&&i===0&&CAMP.hc.prog===1){CAMP.hc.start=Date.now();CAMP.hc.kills=0;saveCamp();}
   setupMatch({story:m,storyIdx:i,mission:m.type||null,map:m.map,theme:m.theme,side:m.side,retake:!!m.retake,allies:m.allies,allyDiff:CAMP.diff==='recruit'?'hard':'normal',
-    enemies:Math.max(1,m.enemies+(m.type?0:D.extra)),enemyNames:(m.type==='stealth'?['Guard Dawes','Guard Marek','Guard Lin','Guard Ortiz','Guard Kade','Guard Bram','Guard Siv','Guard Holt']:ENEMY_NAMES.atk.slice().sort(()=>Math.random()-.5).map(n=>(m.act>=1?'Meridian·':'Hollow·')+n)),
+    enemies:m.type?m.enemies:Math.max(1,m.enemies+D.extra),enemyNames:(m.type==='stealth'?['Guard Dawes','Guard Marek','Guard Lin','Guard Ortiz','Guard Kade','Guard Bram','Guard Siv','Guard Holt']:ENEMY_NAMES.atk.slice().sort(()=>Math.random()-.5).map(n=>(m.act>=1?'Meridian·':'Hollow·')+n)),
     diff:storyDiff(m.diff),toWin:m.toWin,credits:Math.round(m.credits*D.cred),radio:m.radio,boss:m.type?null:m.boss,betray:m.betray,swap:false,hc:isHC(),dmgIn:D.dmgIn,dmgOut:D.dmgOut});
   document.body.classList.toggle('hc',isHC());
   state.betrayShown=false;state.outroPlayed=false;state.missionT0=T;state.ending=null;
@@ -4424,7 +4423,11 @@ function armBot(a,gun,armor){a.inv[1]=mkInst(gun);a.slot=1;a.armor=armor||0;a.he
 function spawnSentry(p,name,gun){return applyEnemyLook(spawnSentry0(p,name,gun));}
 function spawnSentry0(p,name,gun){const a=makeAgent({name,team:'red',diff:storyDiff('normal'),credits:3000});a.pos.set(p.x,0,p.z);a.guard={route:[p.clone()],i:0,wait:rand(0,2),det:0,sentry:true};a.puppet={};a.yaw=rand(-Math.PI,Math.PI);armBot(a,gun||pick(['ak','mp5','ak','shotgun']),CAMP.diff==='recruit'?0:50);agents.push(a);return a;}
 function spawnHunter(p,name,gun,diff){return applyEnemyLook(spawnHunter0(p,name,gun,diff));}
-function spawnHunter0(p,name,gun,diff){const a=makeAgent({name,team:'red',diff:diff||storyDiff('normal'),credits:3000,hunter:true});a.pos.set(p.x,0,p.z);armBot(a,gun||pick(['ak','mp5','ak']),CAMP.diff==='recruit'?0:100);a.investigate=huntTarget(a).clone();a.investigateUntil=T+30;a.awareUntil=T+1;agents.push(a);return a;}
+function fairSpawn(p,minD=16){const squad=agents.filter(a=>a.alive&&a.team==='blue'&&(a.isPlayer||a.coopGuest||a.vip));if(!squad.length)return p;
+  const bad=q=>squad.some(a=>{const d=Math.hypot(a.pos.x-q.x,a.pos.z-q.z);return d<minD||(d<24&&los(eyeOf(a),V3(q.x,1.5,q.z)));});if(!bad(p))return p;
+  for(let r=3;r<=9;r+=2)for(let k=0;k<14;k++){const q=randomCellNear(p,r);if(!bad(q))return q;}
+  const far=[MAP.spawnC.def,MAP.spawnC.atk,MAP.siteC.A,MAP.siteC.B].filter(Boolean).sort((a,b)=>Math.hypot(b.x-player.pos.x,b.z-player.pos.z)-Math.hypot(a.x-player.pos.x,a.z-player.pos.z))[0];return far?randomCellNear(far,2):p;}
+function spawnHunter0(p,name,gun,diff){if(state.cfg&&state.cfg.story&&!(MS.m&&MS.m.type==='waves'&&MS.spawnFree))p=fairSpawn(p);const a=makeAgent({name,team:'red',diff:diff||storyDiff('normal'),credits:3000,hunter:true});a.pos.set(p.x,0,p.z);armBot(a,gun||pick(['ak','mp5','ak']),CAMP.diff==='recruit'?0:100);a.investigate=huntTarget(a).clone();a.investigateUntil=T+30;a.awareUntil=T+1;agents.push(a);return a;}
 function huntTarget(a){let best=null,bd=1e9;for(const b of agents){if(!b.alive||b.team===a.team||b.noTarget)continue;const d=b.pos.distanceTo(a.pos);if(d<bd){bd=d;best=b;}}return best?best.pos:player.pos;}
 function teleportSquad(at){const p=nearestOpen(at);player.pos.copy(p);player.vel.set(0,0,0);let k=0;for(const a of agents)if(a.team==='blue'&&!a.isPlayer&&!a.noTarget){const q=randomCellNear(p,2);a.pos.set(q.x,0,q.z);a.vel.set(0,0,0);k++;}}
 const sentryNames=['Contractor','Merc','Gunman','Guard','Operator','Shooter'];
@@ -4560,7 +4563,7 @@ function takeCache(c){c.taken=true;scene.remove(c.mesh);MS.extra.caches=(MS.extr
   banner('CACHE',msg,'win',1.4);sfx.swap&&sfx.swap();}
 function act3Start(m){const t=m.type;if(m.weather)weatherStart(m.weather);MS.extra=Object.assign(MS.extra||{},{sigmaKills:0,caches:0});
   if(t==='escape'){const route=digitRoute();if(m.startAt==='B'){route.push(MAP.spawnC.atk.clone());teleportSquad(MAP.siteC.B);}else teleportSquad(MAP.spawnC.atk);
-    MS.route=route;MS.ci=0;MS.pT=4;MS.escT=m.escapeTime?({recruit:1.3,veteran:1,elite:.9,hardcore:.85})[CAMP.diff]*m.escapeTime:0;
+    MS.route=route;MS.ci=0;MS.pT=10;MS.escT=m.escapeTime?({recruit:1.3,veteran:1,elite:.9,hardcore:.85})[CAMP.diff]*m.escapeTime:0;
     if(m.startAt==='B'){let i=0;for(const r of route.slice(0,-1))for(let j=0;j<diffCount(2);j++)spawnSentry(randomCellNear(r,3),sentryName(i++));}
     MS.steps=[{obj:'Reach every checkpoint',sub:'Keep moving',enter(){setMarker(route[0]);},prog:()=>'Checkpoint '+Math.min(MS.ci+1,route.length)+' / '+route.length+(MS.escT?' · '+fmtTime(MS.escT)+' to detonation':''),
       check:()=>{if(near(route[MS.ci],3.2)){MS.ci++;sfx.radio&&sfx.radio();if(MS.ci<route.length)setMarker(route[MS.ci]);}return MS.ci>=route.length;}}];}
@@ -4577,7 +4580,7 @@ function act3Start(m){const t=m.type;if(m.weather)weatherStart(m.weather);MS.ext
   buildAlives();}
 function act3Tick(dt){const t=MS.m.type;
   if(t==='escape'){if(MS.escT){MS.escT-=dt;MS.extra.timeLeft=MS.escT;if(MS.escT<=0){for(let i=0;i<5;i++){const p=randomCellNear(player.pos,4);explosionFx(p,'rocket');}sfx.rocket(player.pos);shakeT=2.5;msFail('The outpost exploded');return;}}
-    if(MS.m.startAt!=='B'){MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?11:8;const alive=agents.filter(a=>a.sigma&&a.alive).length;if(alive<diffCount(3)){const back=MS.route[Math.max(0,MS.ci-2)];const p=MS.ci===0?randomCellNear(MAP.spawnC.def,2):randomCellNear(back,3);spawnSigma(p,agents.filter(a=>a.sigma).length);buildAlives();if(Math.random()<.4)radio('SIGMA',MS.m.act>=4&&Math.random()<.5?'Rogue agent spotted in Old Town! All units converge!':'Target is moving! Box them in!',true);}}}
+    if(MS.m.startAt!=='B'){MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?11:8;const alive=agents.filter(a=>a.sigma&&a.alive).length;if(alive<diffCount(3)){const back=MS.route[Math.max(0,MS.ci-2)];const p=MS.ci<=1?randomCellNear(MAP.spawnC.def,2):randomCellNear(back,3);spawnSigma(p,agents.filter(a=>a.sigma).length);buildAlives();if(Math.random()<.4)radio('SIGMA',MS.m.act>=4&&Math.random()<.5?'Rogue agent spotted in Old Town! All units converge!':'Target is moving! Box them in!',true);}}}
     else{MS.pT-=dt;if(MS.pT<=0){MS.pT=10;if(agents.filter(a=>a.hunter&&a.alive).length<diffCount(2)){spawnHunter(randomCellNear(pick(marksOf('w')),2),'Meridian·Cleaner '+(agents.length));buildAlives();}}}
     sentryTick(dt);}
   if(t==='survival'){MS.sT-=dt;for(const c of MS.caches)if(!c.taken){c.mesh.rotation.y+=dt;if(near(c.pos,1.4)&&player.alive)takeCache(c);}
