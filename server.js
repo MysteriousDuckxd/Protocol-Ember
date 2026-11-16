@@ -49,6 +49,7 @@ const W = {
   railgun: { dmg: 95, head: 1.6, pen: 1, rate: .85, cost: 3200, slot: 1, chaos: 1, multi: 4 },
   plasma: { dmg: 44, pen: .8, rate: 7, cost: 2500, slot: 1, chaos: 1, multi: 3 },
   katana: { dmg: 180, pen: .9, rate: 2, cost: 1500, slot: 2 },
+  admin: { dmg: 250, head: 2, pen: 1, rate: 8, cost: 0, slot: 1, multi: 6, admin: 1 },
 };
 const ITEMS = { wall: { cost: 800, max: 1 }, medkit: { cost: 600, max: 2 }, stim: { cost: 400, max: 1, any: 1 }, dash: { cost: 500, max: 2, any: 1 }, boots: { cost: 350, max: 1, any: 1 } };
 const resp = r => r.mode !== 'bomb';
@@ -61,6 +62,8 @@ const BOT_NAMES = ['Ash', 'Grim', 'Shade', 'Brand', 'Cinder', 'Wraith', 'Soot', 
 const PATS = ['solid', 'woodland', 'digital', 'desert', 'urban', 'arctic', 'tiger', 'carbon'];
 
 const clean = (s, n) => String(s || '').replace(/[<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
+const ADMIN_CODE = 'pirate token';
+function isAdminCode(v) { return typeof v === 'string' && v.trim().toLowerCase().replace(/\s+/g, ' ') === ADMIN_CODE; }
 function cleanOutfit(o) {
   const out = {}; if (!o || typeof o !== 'object') return null;
   for (const side of ['ct', 't']) {
@@ -68,6 +71,7 @@ function cleanOutfit(o) {
     for (const k of ['top', 'pants', 'vest', 'head', 'gloves', 'boots']) d[k] = /^#[0-9a-f]{6}$/i.test(src[k]) ? src[k] : null;
     for (const k of ['topPat', 'pantsPat']) d[k] = PATS.includes(src[k]) ? src[k] : 'solid';
     if (Object.values(d).some(v => v === null)) return null;
+    d.body = src.body === 'f' ? 'f' : 'm'; d.hair = /^#[0-9a-f]{6}$/i.test(src.hair) ? src.hair : '#3a2416';
     out[side] = d;
   }
   return out;
@@ -337,7 +341,7 @@ function handle(c, msg) {
   if (!m || typeof m.t !== 'string') return;
   const p = c.player, r = c.room;
   switch (m.t) {
-    case 'hello': c.name = clean(m.name, 16) || 'Player'; c.outfit = cleanOutfit(m.outfit); c.send({ t: 'welcome', rooms: [...rooms.values()].map(roomInfo) }); return;
+    case 'hello': c.admin = isAdminCode(m.code); c.name = clean(m.name, 16) || 'Player'; c.outfit = cleanOutfit(m.outfit); c.send({ t: 'welcome', rooms: [...rooms.values()].map(roomInfo) }); return;
     case 'list': c.send({ t: 'L', rooms: [...rooms.values()].map(roomInfo) }); return;
     case 'pi': c.send({ t: 'po', c: m.c }); return;
     case 'create': {
@@ -359,6 +363,7 @@ function handle(c, msg) {
       if (!a || !v || !w || !v.alive) break;
       if (!a.alive && !['he', 'rpg', 'plasma'].includes(m.w)) break;
       if (w.chaos && r.mode !== 'chaos') break;
+      if (w.admin && !a.admin) break;
       if (Date.now() < (v.protectUntil || 0)) break;
       if (a.team === v.team && a !== v && !v.jailed) break;
       if (a.jailed && a !== v) break;
@@ -381,7 +386,7 @@ function handle(c, msg) {
       if (!inBuy || !p.alive) break;
       const it = m.item;
       if (W[it] && it !== 'knife' && it !== 'he') {
-        const w = W[it]; if (w.chaos && r.mode !== 'chaos') break; if (p.inv[w.slot] === it) break;
+        const w = W[it]; if (w.chaos && r.mode !== 'chaos') break; if (w.admin && !p.admin) break; if (p.inv[w.slot] === it) break;
         const tok = buyTok(r, p); p.bought = p.bought || {};
         const refund = (p.bought[w.slot] && p.bought[w.slot].tok === tok && p.bought[w.slot].id === p.inv[w.slot] && W[p.inv[w.slot]]) ? W[p.inv[w.slot]].cost : 0;
         if (p.money + refund < w.cost) break; p.money += refund - w.cost; p.inv[w.slot] = it; p.bought[w.slot] = { id: it, tok };
@@ -395,6 +400,7 @@ function handle(c, msg) {
       bcast(r, { t: 'lo', i: p.id, w: p.inv[1] || p.inv[2] }, p);
       break;
     }
+    case 'admin': { if (isAdminCode(m.code)) { p.admin = true; c.admin = true; } break; }
     case 'sell': {
       // full refund, only for a gun bought during this round (or this life in respawn modes)
       const inBuy = r.mode === 'bomb' ? r.phase === 'buy' : (r.phase === 'live' && Date.now() < (p.buyUntil || 0));
@@ -461,7 +467,7 @@ function joinRoom(c, r) {
   if (resp(r)) p.money = respMoney(r);
   // make the name unique in the room
   let base = p.name, n = 2; while ([...r.players.values()].some(q => q.name === p.name)) p.name = base + ' ' + (n++);
-  r.players.set(p.id, p); p.room = r; c.player = p; c.room = r;
+  r.players.set(p.id, p); p.room = r; p.admin = !!c.admin; c.player = p; c.room = r;
   bcast(r, { t: 'pj', p: pubP(p) }, p);
   balanceBots(r); pickHost(r); pickOwner(r);
   if (r.phase === 'lobby' && r.persistent && !r.autoAt) r.autoAt = Date.now() + 45000;
