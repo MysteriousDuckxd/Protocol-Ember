@@ -216,6 +216,7 @@ html{touch-action:manipulation}
 #rotate{display:none;position:fixed;inset:0;z-index:30;background:#11161c;color:var(--paper);align-items:center;justify-content:center;font-size:22px;letter-spacing:2px;text-align:center;padding:24px;flex-direction:column;gap:10px}
 @media (orientation:portrait){body.touch.ingame #rotate{display:flex}}
 body.touch #minimap{width:118px;height:118px;left:calc(10px + env(safe-area-inset-left));top:8px}
+body.touch #mobj{top:134px;left:calc(10px + env(safe-area-inset-left));width:170px;padding:5px 9px}body.touch #mobjT{font-size:13px}body.touch #mobjS{font-size:11px}body.touch #mobjL{display:none}
 body.touch #topbar{transform:translateX(-50%) scale(.72);transform-origin:top center;top:4px}
 body.touch #vitals{left:50%;bottom:6px;transform:translateX(-108%)}
 body.touch #hpNum{font-size:32px;min-width:56px}body.touch #hpNum:before{font-size:16px}body.touch #armorNum{font-size:20px}
@@ -260,7 +261,8 @@ body.touch #spectate{bottom:60px;font-size:14px}
 #cineBlack{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .3s;z-index:1}
 #cineCard{z-index:2}
 body.cine #hud{display:none!important}
-#mobj{position:absolute;left:18px;top:200px;max-width:310px;background:linear-gradient(90deg,rgba(10,14,18,.85),rgba(10,14,18,0));padding:8px 14px;border-left:3px solid var(--gold)}#mobj.hidden{display:none}
+#mobj{position:absolute;left:16px;top:246px;width:220px;box-sizing:border-box;background:linear-gradient(90deg,rgba(10,14,18,.85),rgba(10,14,18,0));padding:8px 14px;border-left:3px solid var(--gold)}#mobj.hidden{display:none}
+#mobjL{margin:6px 0 0;padding:0;list-style:none;font-size:12px;color:var(--dim)}#mobjL li{margin:2px 0}#mobjL li::before{content:'▸ ';color:var(--gold)}
 #mobj small{display:block;font-size:11px;letter-spacing:3px;color:var(--gold)}#mobjT{font-size:17px;font-weight:700;letter-spacing:1px}#mobjS{font-size:13px;color:var(--dim);margin-top:2px}
 #mmark{position:absolute;transform:translate(-50%,-100%);color:#ffd23a;font-size:18px;text-align:center;text-shadow:0 0 6px #000;pointer-events:none}#mmark span{display:block;font-size:12px;letter-spacing:1px;color:#fff}#mmark.hidden{display:none}
 #mdet{position:absolute;left:50%;top:84px;transform:translateX(-50%);text-align:center;font-size:12px;letter-spacing:3px;font-weight:700;color:#cfe}#mdet.hidden{display:none}
@@ -269,7 +271,7 @@ body.cine #hud{display:none!important}
 #bossbar{position:absolute;left:50%;top:70px;transform:translateX(-50%);width:min(520px,70vw);text-align:center;font-size:13px;letter-spacing:4px;font-weight:800;color:#ffb0a0}#bossbar.hidden{display:none}
 #bossbar i{display:block;position:relative;height:9px;background:rgba(0,0,0,.55);border:1px solid rgba(255,120,100,.5);margin-top:4px}#bossbar b{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#c0281c,#ff5a3a)}#bossbar em{position:absolute;left:0;top:0;height:3px;background:#7fd8ff}
 body.hc #killfeed,body.hc #alivesR{display:none}
-#gsub{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);max-width:min(760px,80vw);text-align:center;font-size:clamp(15px,1.6vw,20px);background:rgba(0,0,0,.55);padding:6px 16px;border-radius:4px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:38;text-shadow:0 1px 3px #000}#gsub.show{opacity:1}#gsub b{color:var(--gold);letter-spacing:2px;margin-right:10px;font-size:.85em}
+#gsub{position:fixed;left:50%;bottom:22vh;transform:translateX(-50%);max-width:min(760px,80vw);text-align:center;font-size:clamp(16px,1.8vw,24px);background:rgba(0,0,0,.62);padding:6px 16px;border-radius:4px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:38;text-shadow:0 1px 3px #000}#gsub.show{opacity:1}#gsub b{color:var(--gold);letter-spacing:2px;margin-right:10px;font-size:.85em}
 body.cine #gsub{display:none}body.touch #gsub{bottom:120px;font-size:14px}
 #lightning{position:fixed;inset:0;background:#dfe8ff;opacity:0;pointer-events:none;z-index:37}
 body.slowmo #hud::after{content:'';position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 180px 60px rgba(120,170,255,.35)}
@@ -335,7 +337,7 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
   <canvas id="after" width="320" height="180"></canvas>
   <div id="blind"></div>
   <div id="spectate" class="hidden"></div>
-  <div id="mobj" class="hidden"><small>OBJECTIVE</small><div id="mobjT"></div><div id="mobjS"></div></div><div id="mmark" class="hidden">▼<span id="mmarkD"></span></div><div id="mdet" class="hidden"><span id="mdetL">◉ HIDDEN</span><i><b id="mdetF"></b></i></div><div id="bossbar" class="hidden"><span id="bbName"></span><i><b id="bbFill"></b><em id="bbShield"></em></i></div>
+  <div id="mobj" class="hidden"><small id="mobjH">OBJECTIVE</small><div id="mobjT"></div><div id="mobjS"></div><ul id="mobjL"></ul></div><div id="mmark" class="hidden">▼<span id="mmarkD"></span></div><div id="mdet" class="hidden"><span id="mdetL">◉ HIDDEN</span><i><b id="mdetF"></b></i></div><div id="bossbar" class="hidden"><span id="bbName"></span><i><b id="bbFill"></b><em id="bbShield"></em></i></div>
   <div id="deathcam" class="hidden"></div>
   <div id="cine" class="hidden"><div class="cb top"></div><div class="cb bot"></div><div id="cineCard"><small id="ccS"></small><b id="ccT"></b><span id="ccL"></span></div><div id="cineSub"><b id="csWho"></b><span id="csTxt"></span></div><div id="cineSkip"><i></i>HOLD <kbd>SPACE</kbd> TO SKIP</div><button id="csSkipBtn" type="button">SKIP ▸▸</button><div id="endChoice" class="hidden"><h3>THE EMBER CORE IS EXPOSED</h3><p>What do you do?</p><button type="button" onclick="pickEnding('burn')"><b>🔥 BURN IT</b><span>Plant a charge and destroy EMBER by hand. Right now.</span></button><button type="button" onclick="pickEnding('trust')"><b>💻 TRUST JUNO</b><span>Hold the line while she uploads the kill code.</span></button></div><div id="cineBlack"></div></div>
   <div id="killcam" class="hidden"><div class="kcTop"><span class="kcRec">◉ KILLCAM</span><span id="kcWho"></span></div><div class="kcX"></div><div id="kcBar"><i></i></div><button id="kcSkip" type="button">SKIP ▶▶ <small>SPACE / CLICK</small></button></div>
@@ -2404,7 +2406,7 @@ function update(dt){
   if(CS.on){csTick(dt);return;}
   recordHist();kcTick();nukeTick(dt);jailTick(dt);
   if(JAIL.pending&&T>=JAIL.tpAt)jailTeleport();
-  if(state.mp){updateMP(dt);return;}
+  if(state.mp){updateMP(dt);subTick(dt);objHUD();return;}
   T+=dt;
   if(state.cfg.chaos){if(chaosTick(dt))return;}
   else if(state.phase==='buy'){state.timer-=dt;if(state.timer<=0){state.phase=state.cfg.retake?'planted':'live';state.timer=state.roundTime;closeBuy(true);
@@ -2418,7 +2420,7 @@ function update(dt){
   for(let i=0;i<agents.length;i++)for(let j=i+1;j<agents.length;j++){const a=agents[i],b=agents[j];if(!a.alive||!b.alive)continue;const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,d=Math.hypot(dx,dz);
     if(d<.7&&d>1e-4){const p=(.7-d)/2;a.pos.x-=dx/d*p;a.pos.z-=dz/d*p;b.pos.x+=dx/d*p;b.pos.z+=dz/d*p;}}
   if(player.alive&&blindT<=0&&Math.floor(T*8)!==Math.floor((T-dt)*8)){const f=camForward();for(const e of agents){if(e.team===player.team||!e.alive)continue;const d=V3().subVectors(V3(e.pos.x,e.pos.y+1.2,e.pos.z),camera.position);const L=d.length();if(L<100&&d.dot(f)/L>.55&&canSee(camera.position,e))e.spotted=T+1.2;}}
-  updateNades(dt);updateSpike(dt);checkRound();updateFx(dt);updateParts(dt);updateHack();updateProjs(dt);updateDyn();updateChaosAgents(dt);weatherTick(dt);subTick(dt);coreTick(dt);msTick(dt);bossTick();msMarkerHUD();
+  updateNades(dt);updateSpike(dt);checkRound();updateFx(dt);updateParts(dt);updateHack();updateProjs(dt);updateDyn();updateChaosAgents(dt);weatherTick(dt);subTick(dt);coreTick(dt);msTick(dt);objHUD();bossTick();msMarkerHUD();
 }
 function updateCamera(dt){
   if(CS.on)return;
@@ -3391,6 +3393,13 @@ function msAlarm(why){if(MS.alarm||!MS.on)return;MS.alarm=true;banner('ALARM RAI
   for(let i=0;i<n;i++){const a=makeAgent({name:'Response '+(i+1),team:'red',diff:storyDiff('hard'),credits:4000});a.guard={route:[MAP.spawnC.def],i:0,wait:0,det:1};a.inv[1]=mkInst('ak');a.slot=1;a.armor=100;
     const p=randomCellNear(MAP.spawnC.def,3);a.pos.set(p.x,0,p.z);setBotGun(a);a.investigate=player.pos.clone();a.investigateUntil=T+60;agents.push(a);}
   buildAlives();}
+function objHUD(){const el=$('mobj');if(!state.running||!state.cfg||CS.on){return;}if(MS.on&&MS.started){el.classList.remove('hidden');setT('mobjH',MS.m?MS.m.code+' · '+MS.m.title.toUpperCase():'OBJECTIVE');setH('mobjL','');return;}
+  const cfg=state.cfg,m=cfg.story;let T1='',T2='';const side=player&&sideOf(player.team);
+  if(state.mp&&state.phase==='lobby'){el.classList.add('hidden');return;}
+  if(cfg.chaos||cfg.mode==='chaos'||cfg.mode==='tdm'){T1='First team to '+cfg.killLimit+' kills';T2='Score '+state.score.blue+' – '+state.score.red+(cfg.chaos||cfg.mode==='chaos'?' · 7-kill streak = nuke (N)':'');}
+  else{const ph=state.phase;if(ph==='planted'||(ph==='buy'&&cfg.retake)){T1=side==='def'?'Retake site '+(state.plantSite||'')+' and defuse (hold F)':'Defend the planted bomb';}else if(ph==='buy'){T1='Buy phase — press B';}else{T1=side==='def'?'Defend sites A and B':(spike.carrier===player?'Plant the bomb (hold F on a site)':'Get the bomb planted');}
+    T2='Round '+state.round+' · '+state.score.blue+' – '+state.score.red+' · first to '+cfg.toWin;}
+  el.classList.remove('hidden');setT('mobjH',m?m.code+' · '+m.title.toUpperCase():'OBJECTIVE');setT('mobjT',T1);setT('mobjS',T2);setH('mobjL',m&&m.obj?m.obj.map(o=>`<li>${o}</li>`).join(''):'');}
 function msStop(){if(MS.m){act2Cleanup();act3Cleanup();}TS_UNTIL=0;document.body.classList.remove('slowmo');MS.on=false;MS.started=false;setMarker(null);$('mobj').classList.add('hidden');$('mdet').classList.add('hidden');$('mmark').classList.add('hidden');}
 
 // ---------- Vex boss phases ----------
