@@ -69,6 +69,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#11161c;font-family:
 #trPanel{position:absolute;right:16px;top:188px;width:250px;background:linear-gradient(270deg,rgba(10,14,18,.86),rgba(10,14,18,.2));border-right:3px solid var(--gold);padding:8px 14px;font-size:14px}#trPanel.hidden{display:none}#trPanel small{letter-spacing:3px;color:var(--gold)}#trStats div,#trKeys div{display:flex;justify-content:space-between;gap:8px;margin:2px 0}#trStats span{color:var(--dim)}#trKeys{margin-top:8px;padding-top:6px;border-top:1px solid rgba(236,232,225,.15);color:var(--dim)}#trKeys b{color:var(--paper)}
 #trDmg{position:absolute;left:50%;top:calc(50% + 34px);transform:translate(-50%,0);font:700 18px Rajdhani,sans-serif;letter-spacing:1px;text-shadow:0 1px 3px #000;opacity:0;pointer-events:none}
 body.touch #trPanel{top:118px;width:180px;font-size:12px}
+.kbBtn{font:inherit;font-size:14px;letter-spacing:1px;min-width:64px;padding:3px 10px;margin-left:10px;float:right;background:rgba(255,255,255,.08);color:var(--paper);border:1px solid rgba(255,255,255,.25);border-radius:4px;cursor:pointer}.kbBtn:hover{border-color:var(--gold);color:var(--gold)}.kbBtn.wait{background:var(--gold);color:#111;animation:kbP .8s infinite alternate}.kbBtn.chg{border-color:#5fff8a}@keyframes kbP{to{opacity:.55}}#kbGrid>div{overflow:hidden}
 #ptFlash{position:fixed;inset:0;pointer-events:none;z-index:53;opacity:0;mix-blend-mode:screen}
 #ptTitle{position:fixed;left:50%;top:16%;transform:translateX(-50%);text-align:center;z-index:54;pointer-events:none;animation:ptIn .6s ease-out}#ptTitle.hidden{display:none}#ptTitle small{display:block;letter-spacing:6px;color:#ffd86a;font-size:14px}#ptTitle b{display:block;font:700 64px Rajdhani,sans-serif;letter-spacing:10px;color:#ffd86a;text-shadow:0 0 24px #ffb020,0 0 60px #ff9a00,0 3px 0 #6a4206}#ptTitle span{display:block;color:#f2e6c4;font-size:16px;letter-spacing:2px}@keyframes ptIn{from{transform:translateX(-50%) scale(.6);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
 #capOverlay{position:fixed;inset:0;pointer-events:none;z-index:55}#capOverlay.hidden{display:none}#capVig{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 35%,rgba(70,0,0,.55) 70%,rgba(0,0,0,.95) 100%)}#capBlack{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .35s}
@@ -486,16 +487,9 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
   </div>
   <div class="screen hidden" id="scrControls">
     <h2><small>FIELD MANUAL</small>CONTROLS</h2>
-    <div class="ctrl">
-      <div>Move<kbd>W A S D</kbd></div><div>Look<kbd>MOUSE</kbd></div>
-      <div>Fire<kbd>LEFT CLICK</kbd></div><div>Aim down sights / sniper scope<kbd>HOLD RIGHT CLICK</kbd></div>
-      <div>Walk (quiet, accurate)<kbd>SHIFT</kbd></div><div>Crouch<kbd>C or CTRL</kbd></div>
-      <div>Jump<kbd>SPACE</kbd></div><div>Reload<kbd>R</kbd></div>
-      <div>Primary / Pistol / Knife<kbd>1 2 3</kbd></div><div>Throw grenade<kbd>G</kbd></div>
-      <div>Switch grenade (Frag ↔ Flash)<kbd>4</kbd></div><div>Plant / Defuse / Use (hold)<kbd>F</kbd></div><div>Lean left / right<kbd>Q / E</kbd></div>
-      <div>Buy menu (15s buy phase)<kbd>B</kbd></div><div>Scoreboard<kbd>TAB</kbd></div>
-      <div>Dash pack / jump boots (double jump)<kbd>V / SPACE×2</kbd></div><div>Chaos: call in nuke (7-kill streak)<kbd>N</kbd></div><div>Shield wall / medkit / stim<kbd>5 6 7</kbd></div><div>Pause<kbd>ESC</kbd></div><div>Next spectate target<kbd>CLICK</kbd></div>
-    </div>
+    <div class="note" style="margin:-6px 0 10px">Click a key to change it, then press the new key. <b>Esc</b> cancels. Taking a key that's already used swaps the two.</div>
+    <div class="ctrl" id="kbGrid"></div>
+    <div style="display:flex;gap:10px;margin:10px 0 4px"><button class="btn small" id="kbReset">RESET TO DEFAULTS</button></div>
     <p style="color:var(--dim);font-size:17px;max-width:740px;line-height:1.5"><b style="color:var(--paper)">Rules:</b> Terrorists plant the bomb on Site A or B (hold E for 3.2s). Once planted it explodes after 40 seconds unless a Soldier defuses it (hold E for 7s, progress saved halfway). Wiping out the enemy team also wins — but a planted bomb must still be defused. <b style="color:var(--paper)">Retake:</b> the bomb is already planted; Soldiers must retake the site. Stop moving before you shoot, aim for the head, and don't look at flashbangs.</p>
     <button class="btn small" id="controlsBack">← BACK</button>
   </div>
@@ -598,12 +592,41 @@ function yawTo(dx,dz){return Math.atan2(-dx,-dz);}
 const V3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function hash(a,b){let h=(a*374761393+b*668265263)|0;h=(h^(h>>>13))*1274126177|0;return ((h^(h>>>16))>>>0)/4294967295;}
 
-const GAME_VERSION='v41';const GAME_BUILD='Nov 15 2026';
+const GAME_VERSION='v43';const GAME_BUILD='Nov 17 2026';
 const settings={perf:'auto',fpsCap:0,voxVol:1,sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',voice:1,subs:1,fs:0,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
 let firstRun=true;try{const sv=localStorage.getItem('pe2_settings');if(sv)firstRun=false;Object.assign(settings,JSON.parse(sv||'{}'));if(!localStorage.getItem('pe2_fsoff')){settings.fs=0;localStorage.setItem('pe2_fsoff','1');localStorage.setItem('pe2_settings',JSON.stringify(settings));}}catch(e){}
 const isTouchDevice=()=>(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||((navigator.maxTouchPoints||0)>1&&!(window.matchMedia&&matchMedia('(pointer: fine)').matches));
 if(firstRun&&isTouchDevice())settings.q=0;
 function saveSettings(){try{localStorage.setItem('pe2_settings',JSON.stringify(settings));}catch(e){}}
+
+// ---- custom keybinds: physical key -> the action's default code, so gameplay code reads defaults ----
+const KB_ACTIONS=[['fwd','Move forward','KeyW'],['back','Move back','KeyS'],['left','Strafe left','KeyA'],['right','Strafe right','KeyD'],['jump','Jump / double jump','Space'],['crouch','Crouch','KeyC'],['walk','Walk (quiet, accurate)','ShiftLeft'],['use','Plant / Defuse / Use (hold)','KeyF'],['reload','Reload','KeyR'],['leanL','Lean left','KeyQ'],['leanR','Lean right','KeyE'],['prim','Primary weapon','Digit1'],['sec','Pistol','Digit2'],['knife','Knife','Digit3'],['throw','Throw grenade','KeyG'],['nade','Switch grenade (Frag / Flash)','Digit4'],['dash','Dash pack','KeyV'],['wall','Shield wall','Digit5'],['medkit','Medkit','Digit6'],['stim','Stim','Digit7'],['buy','Buy menu','KeyB'],['board','Scoreboard','Tab'],['chat','Chat (Enter also works)','KeyY'],['nuke','Chaos: call in nuke','KeyN']];
+const KB_DEF={};for(const [id,,c] of KB_ACTIONS)KB_DEF[id]=c;
+const KB_LOCK=new Set(['Escape','Enter','Backquote','F5','F11','F12','MetaLeft','MetaRight']);
+const KB={map:{},dead:new Set(),wait:null};
+function kbBinds(){const b=Object.assign({},KB_DEF,(settings.binds&&typeof settings.binds==='object')?settings.binds:{});return b;}
+function kbBuild(){const b=kbBinds();KB.map={};KB.dead=new Set();for(const id in KB_DEF){KB.map[b[id]]=KB_DEF[id];}for(const id in KB_DEF){const d=KB_DEF[id];if(!(d in KB.map)||KB.map[d]!==d){if(!Object.values(b).includes(d))KB.dead.add(d);}}
+  if(KB.map.ShiftLeft==='ShiftLeft'&&!('ShiftRight' in KB.map))KB.map.ShiftRight='ShiftRight';}
+function kbMap(code){if(code in KB.map)return KB.map[code];if(KB.dead.has(code))return '_unbound';if(code==='ShiftRight'&&kbBinds().walk!=='ShiftLeft')return '_unbound';return code;}
+function kbName(code){if(!code)return '—';const n={Space:'SPACE',ShiftLeft:'L-SHIFT',ShiftRight:'R-SHIFT',ControlLeft:'L-CTRL',ControlRight:'R-CTRL',AltLeft:'L-ALT',AltRight:'R-ALT',Tab:'TAB',CapsLock:'CAPS',Backspace:'BKSP',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',Minus:'-',Equal:'=',BracketLeft:'[',BracketRight:']',Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/',Backslash:'\\',Mouse3:'MOUSE 3',Mouse4:'MOUSE 4',Mouse5:'MOUSE 5'};
+  if(n[code])return n[code];if(code.startsWith('Key'))return code.slice(3);if(code.startsWith('Digit'))return code.slice(5);if(code.startsWith('Numpad'))return 'NUM '+code.slice(6);return code.toUpperCase();}
+function kbL(id){return kbName(kbBinds()[id]);}
+function kbSet(id,code){const b=kbBinds(),old=b[id];if(code===old)return;const other=Object.keys(b).find(k=>k!==id&&b[k]===code);if(other)b[other]=old;b[id]=code;
+  const out={};for(const k in b)if(b[k]!==KB_DEF[k])out[k]=b[k];settings.binds=out;saveSettings();kbBuild();renderKB();}
+function renderKB(){const g=document.getElementById('kbGrid');if(!g)return;const b=kbBinds();
+  let h='<div>Look<kbd>MOUSE</kbd></div><div>Fire<kbd>LEFT CLICK</kbd></div><div>Aim down sights / scope<kbd>HOLD RIGHT CLICK</kbd></div><div>Pause<kbd>ESC</kbd></div>';
+  for(const [id,label] of KB_ACTIONS){const ch=b[id]!==KB_DEF[id];h+='<div>'+label+'<button class="kbBtn'+(KB.wait===id?' wait':'')+(ch?' chg':'')+'" data-kb="'+id+'">'+(KB.wait===id?'PRESS A KEY…':kbName(b[id]))+'</button></div>';}
+  g.innerHTML=h;g.querySelectorAll('[data-kb]').forEach(el=>el.onclick=ev=>{ev.stopPropagation();KB.wait=KB.wait===el.dataset.kb?null:el.dataset.kb;renderKB();});}
+addEventListener('keydown',e=>{if(!KB.wait)return;e.preventDefault();e.stopImmediatePropagation();const id=KB.wait;KB.wait=null;
+  if(e.code==='Escape'){renderKB();return;}if(KB_LOCK.has(e.code)){renderKB();toastKB(kbName(e.code)+' is reserved');return;}kbSet(id,e.code);},true);
+function kbMouse(btn){return btn===1?'Mouse3':btn===3?'Mouse4':btn===4?'Mouse5':null;}
+addEventListener('mousedown',e=>{if(!KB.wait)return;const mb=kbMouse(e.button);if(!mb)return;e.preventDefault();e.stopImmediatePropagation();const id=KB.wait;KB.wait=null;kbSet(id,mb);},true);
+addEventListener('mousedown',e=>{if(KB.wait||!state.running)return;const mb=kbMouse(e.button);if(mb&&kbMap(mb)!==mb){e.preventDefault();dispatchEvent(new KeyboardEvent('keydown',{code:mb}));}});
+function kbGuard(){const c=document.getElementById('scrControls');return state.running||KB.wait||(c&&!c.classList.contains('hidden'));}
+addEventListener('auxclick',e=>{if(kbGuard())e.preventDefault();});
+addEventListener('mouseup',e=>{if((e.button===3||e.button===4)&&kbGuard())e.preventDefault();},true);
+addEventListener('mousedown',e=>{if((e.button===3||e.button===4)&&kbGuard())e.preventDefault();},true);
+function toastKB(t){const g=document.getElementById('kbGrid');if(!g)return;const d=document.createElement('div');d.style.cssText='color:#ff8a5f;grid-column:1/-1';d.textContent=t;g.prepend(d);setTimeout(()=>d.remove(),1800);}
 let progress=1,completed={};
 try{progress=Math.max(1,+(localStorage.getItem('pe2_progress')||1));completed=JSON.parse(localStorage.getItem('pe2_done')||'{}');}catch(e){}
 function saveProgress(){try{localStorage.setItem('pe2_progress',progress);localStorage.setItem('pe2_done',JSON.stringify(completed));}catch(e){}}
@@ -3243,11 +3266,11 @@ function updatePlayer(dt){
   // objectives
   let pr='';
   if(state.phase==='live'&&sideOf(a.team)==='atk'&&spike.carrier===a){const s=siteAt(a.pos);
-    if(s&&a.onGround){pr='Hold <kbd>F</kbd> to plant the bomb';if(keys.KeyF){a.planting+=dt;if(a.planting>=PLANT_TIME){plantSpike(a);a.planting=0;}}else a.planting=0;}
+    if(s&&a.onGround){pr='Hold <kbd>'+kbL('use')+'</kbd> to plant the bomb';if(keys.KeyF){a.planting+=dt;if(a.planting>=PLANT_TIME){plantSpike(a);a.planting=0;}}else a.planting=0;}
     else{a.planting=0;pr='<span style="color:var(--gold)">▣ BOMB</span> — get to Site A or B';}}
   else a.planting=0;
   if(state.phase==='planted'&&sideOf(a.team)==='def'){const d=Math.hypot(a.pos.x-spike.pos.x,a.pos.z-spike.pos.z);
-    if(d<1.7&&a.onGround){pr='Hold <kbd>F</kbd> to defuse';if(keys.KeyF&&(!spike.defuser||spike.defuser===a||!spike.defuser.alive)){spike.defuser=a;spike.defusingNow=true;}else if(spike.defuser===a)spike.defuser=null;}
+    if(d<1.7&&a.onGround){pr='Hold <kbd>'+kbL('use')+'</kbd> to defuse';if(keys.KeyF&&(!spike.defuser||spike.defuser===a||!spike.defuser.alive)){spike.defuser=a;spike.defusingNow=true;}else if(spike.defuser===a)spike.defuser=null;}
     else if(spike.defuser===a)spike.defuser=null;}
   if(canBuy()&&player.alive)pr='Press <kbd>B</kbd> to buy weapons';
   if(MS.on&&MS.prompt)pr=MS.prompt;
@@ -3714,11 +3737,11 @@ cv.addEventListener('mousedown',e=>{initAudio();if(!state.running||state.paused)
   if(!player.alive){if(e.button===0){spectateIdx++;spectateT=0;}return;}
   if(e.button===0){mouseDown=true;firedThisPress=false;playerFire();}
   if(e.button===2){rmbDown=true;if(weaponOf(player).melee)knifeAttack(true);}});
-addEventListener('mouseup',e=>{if(e.button===0){mouseDown=false;firedThisPress=false;}if(e.button===2)rmbDown=false;});
+addEventListener('mouseup',e=>{const mb=kbMouse(e.button);if(mb)dispatchEvent(new KeyboardEvent('keyup',{code:mb}));if(e.button===0){mouseDown=false;firedThisPress=false;}if(e.button===2)rmbDown=false;});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('contextmenu',e=>{if(state.running)e.preventDefault();});
 addEventListener('wheel',e=>{if(!state.running||state.paused||!player.alive||buyOpen)return;const order=[1,2,3].filter(s=>player.inv[s]);let i=order.indexOf(player.slot);i=(i+(e.deltaY>0?1:-1)+order.length)%order.length;equip(player,order[i]);},{passive:true});
-addEventListener('keydown',e=>{
+addEventListener('keydown',e=>{const ec=kbMap(e.code);
   if(CAP.on&&(e.code==='Space'||e.code==='Enter')){captureSkip();e.preventDefault();return;}
   if(state.running&&e.key&&e.key.length===1&&!(document.activeElement&&document.activeElement.tagName==='INPUT')){codeBuf=(codeBuf+e.key.toLowerCase()).slice(-24);if(codeBuf.endsWith(SECRET_CODE)){codeBuf='';if(!isOwner()){hackerCaught();e.preventDefault();return;}hackUnlocked=true;toggleHack();e.preventDefault();return;}}
   if(hackUnlocked&&state.running&&e.code==='Backquote'){toggleHack();e.preventDefault();return;}
@@ -3726,34 +3749,35 @@ addEventListener('keydown',e=>{
   if(state.mp&&state.phase==='lobby'&&state.running){if(e.code==='Enter'){$('lbChatIn').focus();e.preventDefault();}return;}
   if(document.activeElement===$('chatIn')){if(e.code==='Enter'){const v=$('chatIn').value.trim();if(v&&v.toLowerCase()==='/piratetoken'){pirateTokenCmd();closeChat();e.preventDefault();return;}if(v&&!state.mp&&!(COOP.role==='host'&&COOP.guests.size)){chatAdd({n:profile.name,msg:v.slice(0,120),adm:!!profile.adminSkin});}else if(v){if(COOP.role==='host'&&!state.mp){const line={n:profile.name,msg:v.slice(0,120),adm:!!profile.adminSkin};chatAdd(line);coopEv(Object.assign({k:'chat'},line));}else send({t:'chat',msg:v});}closeChat();e.preventDefault();}else if(e.code==='Escape'){closeChat();e.preventDefault();}return;}
   if(document.activeElement&&document.activeElement.tagName==='INPUT'&&!state.running)return;
-  if((state.mp||(COOP.role==='host'&&COOP.guests.size)||(state.cfg&&state.cfg.duel))&&state.running&&!state.paused&&(e.code==='Enter'||e.code==='KeyY')&&!buyOpen){e.preventDefault();openChat();return;}
-  if(state.running&&!state.paused&&(e.ctrlKey||e.metaKey||e.altKey||['Tab','Space','KeyB','KeyG','F1','F3','F5','F6','F7'].includes(e.code)))e.preventDefault();
-  if(e.code==='Escape'&&state.running&&!state.paused&&locked){document.exitPointerLock();return;}
-  keys[e.code]=true;if(!state.running||state.paused)return;
-  if(!e.repeat&&trKey(e.code))return;
-  if(e.code==='KeyB'){buyOpen?closeBuy():openBuy();return;}
-  if(e.code==='Escape'&&hackOpen){toggleHack();return;}
-  if(e.code==='Escape'){if(buyOpen){closeBuy();return;}if(!locked){pause();return;}}
-  if(e.code==='Tab'){$('board').classList.remove('hidden');renderBoard();}
+  if((state.mp||(COOP.role==='host'&&COOP.guests.size)||(state.cfg&&state.cfg.duel))&&state.running&&!state.paused&&(e.code==='Enter'||ec==='KeyY')&&!buyOpen){e.preventDefault();openChat();return;}
+  if(state.running&&!state.paused&&(e.ctrlKey||e.metaKey||e.altKey||['Tab','Space','KeyB','KeyG','F1','F3','F5','F6','F7'].includes(ec)))e.preventDefault();
+  if(ec==='Escape'&&state.running&&!state.paused&&locked){document.exitPointerLock();return;}
+  keys[ec]=true;if(!state.running||state.paused)return;
+  if(!e.repeat&&trKey(ec))return;
+  if(ec==='KeyB'){buyOpen?closeBuy():openBuy();return;}
+  if(ec==='Escape'&&hackOpen){toggleHack();return;}
+  if(ec==='Escape'){if(buyOpen){closeBuy();return;}if(!locked){pause();return;}}
+  if(ec==='Tab'){$('board').classList.remove('hidden');renderBoard();}
   if(!player.alive||e.repeat)return;
-  if(e.code==='Digit1')equip(player,1);if(e.code==='Digit2')equip(player,2);if(e.code==='Digit3')equip(player,3);
-  if(e.code==='KeyV')useItem(player,'dash');if(e.code==='KeyN')callNuke();if(e.code==='Digit5')useItem(player,'wall');if(e.code==='Digit6')useItem(player,'medkit');if(e.code==='Digit7')useItem(player,'stim');
-  if(e.code==='Digit4'){player.nadeSel=player.nadeSel==='he'?'flash':'he';}
-  if(e.code==='KeyG')playerThrow();
-  if(e.code==='KeyR')startReload(player);});
-addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='Tab')$('board').classList.add('hidden');});
+  if(ec==='Digit1')equip(player,1);if(ec==='Digit2')equip(player,2);if(ec==='Digit3')equip(player,3);
+  if(ec==='KeyV')useItem(player,'dash');if(ec==='KeyN')callNuke();if(ec==='Digit5')useItem(player,'wall');if(ec==='Digit6')useItem(player,'medkit');if(ec==='Digit7')useItem(player,'stim');
+  if(ec==='Digit4'){player.nadeSel=player.nadeSel==='he'?'flash':'he';}
+  if(ec==='KeyG')playerThrow();
+  if(ec==='KeyR')startReload(player);});
+addEventListener('keyup',e=>{const ec=kbMap(e.code);keys[ec]=false;if(ec==='Tab')$('board').classList.add('hidden');});
 addEventListener('beforeunload',e=>{if(state.running){e.preventDefault();e.returnValue='Leave the match?';return 'Leave the match?';}});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseDown=false;rmbDown=false;});
 
 // =====================================================================
 //  MENUS
 // =====================================================================
-function showScreen(id){document.querySelectorAll('#menu .screen').forEach(s=>s.classList.toggle('hidden',s.id!==id));$('menu').classList.remove('hidden');if(id==='scrStory')renderMissions();if(id==='scrSettings')syncSettings();if(id==='scrMain')renderWho();if(id==='scrProfile')renderProfile();if(id==='scrShop')renderShop();if(id==='scrMP')openMPScreen();if(id==='scrAccount'){acctStatus('');acctRender();}
+function showScreen(id){document.querySelectorAll('#menu .screen').forEach(s=>s.classList.toggle('hidden',s.id!==id));$('menu').classList.remove('hidden');if(id==='scrStory')renderMissions();if(id==='scrSettings')syncSettings();if(id==='scrControls'){KB.wait=null;renderKB();}if(id==='scrMain')renderWho();if(id==='scrProfile')renderProfile();if(id==='scrShop')renderShop();if(id==='scrMP')openMPScreen();if(id==='scrAccount'){acctStatus('');acctRender();}
   if((id==='scrMain'||id==='scrStory'||id==='scrQuick')&&!state.running)menuBackdrop();}
 const goMap={mp:'scrMP',main:'scrMain',story:'scrStory',quick:'scrQuick',settings:'scrSettings',controls:'scrControls',profile:'scrProfile',shop:'scrShop',account:'scrAccount'};
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{initAudio();showScreen(goMap[b.dataset.go]);}));
 $('pauseSettings').onclick=()=>showScreen('scrSettings');
 $('pauseControls').onclick=()=>showScreen('scrControls');
+$('kbReset').onclick=()=>{settings.binds={};saveSettings();kbBuild();renderKB();};kbBuild();
 $('controlsBack').onclick=()=>showScreen(state.running?'scrPause':'scrMain');
 $('settingsBack').onclick=()=>showScreen(state.running?'scrPause':'scrMain');
 $('resumeBtn').onclick=resume;
@@ -4633,7 +4657,7 @@ function tutorialSteps(){let room2=[],room3=[],run=[];
 function stealthSteps(){const office=MAP.siteC[MS.m.stealthTarget||'B'].clone(),exit=MAP.spawnC.atk.clone();let dl=0;const X=MS.m.stealthText||['Reach the armory office','Download the sign-out logs','Get back to the drop-off','DOWNLOADING','Got them. Now get out of there.'];
   return [
    {obj:X[0],sub:'Stay out of sight · crouch to move quietly',enter(){setMarker(office);},check:()=>near(office,3.2)},
-   {obj:X[1],sub:'Hold F at the terminal',enter(){setMarker(office);dl=0;},check:dt=>{if(near(office,3.4)&&player.alive){MS.prompt='Hold <kbd>F</kbd> to '+X[1].toLowerCase();if(keys.KeyF){dl+=dt;MS.prog=dl/4;MS.progLbl=X[3];}else MS.prog=dl>0?dl/4:null;}else{MS.prompt='';MS.prog=null;}
+   {obj:X[1],sub:'Hold F at the terminal',enter(){setMarker(office);dl=0;},check:dt=>{if(near(office,3.4)&&player.alive){MS.prompt='Hold <kbd>'+kbL('use')+'</kbd> to '+X[1].toLowerCase();if(keys.KeyF){dl+=dt;MS.prog=dl/4;MS.progLbl=X[3];}else MS.prog=dl>0?dl/4:null;}else{MS.prompt='';MS.prog=null;}
       if(dl>=4){MS.prog=null;MS.prompt='';return true;}return false;}},
    {obj:X[2],sub:'Same way you came in',enter(){setMarker(exit);radio(MS.m.stealthVoice||(MS.m.act?'JUNO':'VEX'),X[4],false);},check:()=>near(exit,3.2)}];}
 function msStart(m){Object.assign(MS,{on:true,m,i:-1,alarm:false,detect:0,prog:null,prompt:'',thrown:false,runTime:0,group:[],buyOK:false,done:false,started:false});
@@ -4945,7 +4969,7 @@ function act2Start(m){const t=m.type;MS.extra={};MS.breached=false;MS.failReason
     for(const p of marksOf('x').concat(marksOf('y')))spawnSentry(p,sentryName(i++));
     MS.steps=[{obj:ups.length>2?'Shut down all three uplinks':'Defuse both bombs',sub:'Hold F at each '+(ups.length>2?'uplink':'bomb'),enter(){setMarker(MS.bombs[0].pos);},prog:()=>MS.bombs.filter(b=>!b.done).length+' left · '+fmtTime(MS.bombT),
       check:dt=>{let near1=null;for(const b of MS.bombs){if(b.done)continue;if(near(b.pos,1.9))near1=b;}
-        if(near1&&player.alive){MS.prompt='Hold <kbd>F</kbd> to defuse';if(keys.KeyF){near1.t+=dt;MS.prog=near1.t/5;MS.progLbl='DEFUSING';if(near1.t>=5){near1.done=true;near1.mesh.material.emissive.setHex(0x10ff40);sfx.defused();MS.prog=null;MS.prompt='';}}else{MS.prog=near1.t>0?near1.t/5:null;}}else{MS.prompt='';MS.prog=null;}
+        if(near1&&player.alive){MS.prompt='Hold <kbd>'+kbL('use')+'</kbd> to defuse';if(keys.KeyF){near1.t+=dt;MS.prog=near1.t/5;MS.progLbl='DEFUSING';if(near1.t>=5){near1.done=true;near1.mesh.material.emissive.setHex(0x10ff40);sfx.defused();MS.prog=null;MS.prompt='';}}else{MS.prog=near1.t>0?near1.t/5:null;}}else{MS.prompt='';MS.prog=null;}
         const nx=MS.bombs.find(b=>!b.done);if(nx)setMarker(nx.pos);return !nx;}}];}
   if(t==='boss'){teleportSquad(MAP.spawnC.def);const gs=marksOf('g');gs.forEach((p,i)=>spawnSentry(p,sentryName(i)));
     const B=makeAgent({name:m.boss,team:'red',diff:'boss',boss:true,scale:1.08,maxHp:Math.round(320*CAMP_DIFFS[CAMP.diff].bossHp),hp:Math.round(320*CAMP_DIFFS[CAMP.diff].bossHp),credits:16000,noFlash:true});
@@ -5242,9 +5266,13 @@ function frame(now){requestAnimationFrame(frame);if(settings.fpsCap&&now-last<10
   lastCalls=renderer.info.render.calls;}
 /* ===================== ACCOUNTS / CLOUD SAVE ===================== */
 const ACCT_KEYS=['pe2_profile','pe2_settings','pe2_progress','pe2_done','pe3_camp'];
-const ACCT={token:'',user:'',last:0,busy:false,t:null};
-try{const a=JSON.parse(localStorage.getItem('pe3_acct')||'null');if(a){ACCT.token=a.token||'';ACCT.user=a.user||'';ACCT.last=a.last||0;}}catch(e){}
-function acctPersist(){try{localStorage.setItem('pe3_acct',JSON.stringify({token:ACCT.token,user:ACCT.user,last:ACCT.last}));}catch(e){}}
+const ACCT={token:'',user:'',last:0,busy:false,t:null,rec:null};
+try{const a=JSON.parse(localStorage.getItem('pe3_acct')||'null');if(a){ACCT.token=a.token||'';ACCT.user=a.user||'';ACCT.last=a.last||0;ACCT.rec=a.rec||null;}}catch(e){}
+function acctPersist(){try{localStorage.setItem('pe3_acct',JSON.stringify({token:ACCT.token,user:ACCT.user,last:ACCT.last,rec:ACCT.rec}));}catch(e){}}
+// If the server forgot this account (e.g. its disk was wiped on redeploy), rebuild it from this device's backup record.
+async function acctRestore(){if(!ACCT.rec)return false;
+  try{const j=await acctApi('/api/restore','POST',{rec:ACCT.rec,save:acctCollect()});ACCT.token=j.token;ACCT.user=j.user;ACCT.rec=j.rec||ACCT.rec;ACCT.last=j.updated||Date.now();acctPersist();return j;}
+  catch(e){ACCT.token='';acctPersist();return false;}}
 function acctBase(){
   if(/^https?:$/.test(location.protocol)&&!/claude|anthropic|usercontent/.test(location.host))return location.origin;
   let a='';try{a=localStorage.getItem('pe2_server')||'';}catch(e){}a=a.trim().replace(/\/+$/,'');if(!a)return '';
@@ -5266,7 +5294,7 @@ function acctRender(){const inn=!!ACCT.token;$('acctOut').classList.toggle('hidd
   const l=$('acctWhoLink');if(l)l.onclick=e=>{e.preventDefault();showScreen('scrAccount');};}
 async function acctUpload(quiet){if(!ACCT.token||ACCT.busy)return;ACCT.busy=true;
   try{const j=await acctApi('/api/save','POST',{save:acctCollect()});ACCT.last=j.updated||Date.now();acctPersist();if(!quiet)acctStatus('Progress saved to your account.');}
-  catch(e){if(e.status===401){ACCT.token='';acctPersist();}if(!quiet)acctStatus(e.message,true);}
+  catch(e){if(e.status===401){const r=await acctRestore();if(r){if(!r.restored){setTimeout(()=>acctUpload(quiet),0);return;}if(!quiet)acctStatus('Account restored and progress saved.');return acctRender();}}if(!quiet)acctStatus(e.message,true);}
   finally{ACCT.busy=false;if($('scrAccount')&&!$('scrAccount').classList.contains('hidden'))acctRender();}}
 function acctQueue(){acctMarkLocal();if(!ACCT.token)return;clearTimeout(ACCT.t);ACCT.t=setTimeout(()=>acctUpload(true),4000);}
 // After logging in: whichever copy is newer wins.
@@ -5275,12 +5303,12 @@ function acctMerge(j){const cloud=j.save,cloudT=cloud&&cloud._t||0,localT=acctLo
   acctUpload(false);}
 async function acctAuth(kind){const user=$('acctUser').value.trim(),pass=$('acctPass').value;if(!user||!pass)return acctStatus('Enter a username and password.',true);
   acctStatus(kind==='register'?'Creating account…':'Logging in…');
-  try{const j=await acctApi('/api/'+kind,'POST',{user,pass});ACCT.token=j.token;ACCT.user=j.user;ACCT.last=j.updated||0;acctPersist();$('acctPass').value='';
+  try{const j=await acctApi('/api/'+kind,'POST',{user,pass});ACCT.token=j.token;ACCT.user=j.user;ACCT.rec=j.rec||null;ACCT.last=j.updated||0;acctPersist();$('acctPass').value='';
     if(kind==='register'||!j.save){acctStatus('Account ready. Uploading this device\'s progress…');acctUpload(false);}else acctMerge(j);acctRender();}
   catch(e){acctStatus(e.message,true);}}
 async function acctPull(){acctStatus('Downloading…');try{const j=await acctApi('/api/save','GET');if(!j.save)return acctStatus('Nothing saved on this account yet.');
-  acctApply(j.save);acctStatus('Loaded. Reloading…');setTimeout(()=>location.reload(),600);}catch(e){if(e.status===401){ACCT.token='';acctPersist();acctRender();}acctStatus(e.message,true);}}
-async function acctLogout(){try{await acctApi('/api/logout','POST');}catch(e){}ACCT.token='';ACCT.user='';ACCT.last=0;acctPersist();acctStatus('Logged out. Progress on this device is kept.');acctRender();}
+  acctApply(j.save);acctStatus('Loaded. Reloading…');setTimeout(()=>location.reload(),600);}catch(e){if(e.status===401){const r=await acctRestore();acctRender();if(r)return r.restored?acctStatus('Account restored from this device.'):acctPull();}acctStatus(e.message,true);}}
+async function acctLogout(){try{await acctApi('/api/logout','POST');}catch(e){}ACCT.token='';ACCT.user='';ACCT.last=0;ACCT.rec=null;acctPersist();acctStatus('Logged out. Progress on this device is kept.');acctRender();}
 // Hook every save function so changes upload automatically.
 ['saveSettings','saveProfile','saveProgress','saveCamp'].forEach(n=>{const f=window[n];if(typeof f!=='function')return;window[n]=function(){const r=f.apply(this,arguments);acctQueue();return r;};});
 $('acctLogin').onclick=()=>acctAuth('login');$('acctReg').onclick=()=>acctAuth('register');
@@ -5288,7 +5316,7 @@ $('acctPass').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Ent
 $('acctSync').onclick=()=>acctUpload(false);$('acctPullB').onclick=acctPull;$('acctOutB').onclick=acctLogout;
 window.addEventListener('pagehide',()=>{if(ACCT.token&&ACCT.t){clearTimeout(ACCT.t);try{const b=acctBase();if(b)fetch(b+'/api/save',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:'Bearer '+ACCT.token},body:JSON.stringify({save:acctCollect()})});}catch(e){}}});
 // Pull newer cloud progress on startup (e.g. you played on another device).
-if(ACCT.token)setTimeout(async()=>{try{const j=await acctApi('/api/save','GET');if(j.save&&(j.save._t||0)>acctLocalTime()+2000&&!state.running){acctApply(j.save);location.reload();}}catch(e){if(e.status===401){ACCT.token='';acctPersist();}}acctRender();},1200);
+if(ACCT.token)setTimeout(async()=>{try{const j=await acctApi('/api/save','GET');if(j.rec){ACCT.rec=j.rec;acctPersist();}if(j.save&&(j.save._t||0)>acctLocalTime()+2000&&!state.running){acctApply(j.save);location.reload();}}catch(e){if(e.status===401){const r=await acctRestore();if(r&&!r.restored)acctUpload(true);}}acctRender();},1200);
 acctRender();
 
 resize();applyCrosshair();menuBackdrop();showScreen('scrMain');$('loading').classList.add('hidden');requestAnimationFrame(frame);

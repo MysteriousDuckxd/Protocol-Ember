@@ -562,6 +562,8 @@ async function kv(cmd) {
 const kvGet = async k => { const v = await kv(['GET', k]); return v == null ? null : JSON.parse(v); };
 const kvSet = (k, v) => kv(['SET', k, JSON.stringify(v)]);
 const kvDel = k => kv(['DEL', k]);
+if (!KV_URL) console.log('!!! WARNING: UPSTASH_REDIS_REST_URL/TOKEN not set. Accounts are stored on local disk, which Render wipes on every redeploy. See DEPLOY.md.');
+const acctRec = a => ({ user: a.user, salt: a.salt, hash: a.hash, created: a.created || 0 });
 const hashPass = (pass, salt) => crypto.scryptSync(pass, salt, 32).toString('hex');
 const loginHits = new Map();
 function rateOk(ip) { const now = Date.now(); const h = (loginHits.get(ip) || []).filter(t => now - t < 60000); h.push(now); loginHits.set(ip, h); return h.length <= 12; }
@@ -582,11 +584,26 @@ async function handleApi(req, res, url) {
       else { if (!a || !crypto.timingSafeEqual(Buffer.from(hashPass(pass, a.salt), 'hex'), Buffer.from(a.hash, 'hex'))) return jsonRes(res, 401, { error: 'Wrong username or password' }); }
       const tok = crypto.randomBytes(24).toString('hex'); a.tokens = (a.tokens || []).concat(tok); while (a.tokens.length > 8) { const old = a.tokens.shift(); await kvDel('tok:' + old); }
       await kvSet(key, a); await kvSet('tok:' + tok, user.toLowerCase());
-      return jsonRes(res, 200, { token: tok, user: a.user, save: a.save, updated: a.updated || 0 });
+      return jsonRes(res, 200, { token: tok, user: a.user, save: a.save, updated: a.updated || 0, rec: acctRec(a) });
+    }
+    // Self-heal: if the server lost an account (disk wiped on redeploy), the player's device re-creates it
+    // from its backup record (same username + same password hash) and re-uploads its progress.
+    if (url === '/api/restore') {
+      if (req.method !== 'POST') return jsonRes(res, 405, { error: 'POST only' });
+      if (!rateOk(ip)) return jsonRes(res, 429, { error: 'Too many tries. Wait a minute.' });
+      const b = await readBody(req, 300000), r = b.rec || {};
+      const user = String(r.user || ''), salt = String(r.salt || ''), hash = String(r.hash || '');
+      if (!/^[A-Za-z0-9_]{3,16}$/.test(user) || !/^[a-f0-9]{32}$/.test(salt) || !/^[a-f0-9]{64}$/.test(hash)) return jsonRes(res, 400, { error: 'Bad backup' });
+      const key = 'acct:' + user.toLowerCase(); let a = await kvGet(key), restored = false;
+      if (a) { if (a.salt !== salt || a.hash !== hash) return jsonRes(res, 409, { error: 'That username is taken' }); }
+      else { a = { user, salt, hash, tokens: [], save: (b.save && typeof b.save === 'object') ? b.save : null, updated: Date.now(), created: +r.created || Date.now() }; restored = true; console.log(`[restore] ${user}`); }
+      const tok = crypto.randomBytes(24).toString('hex'); a.tokens = (a.tokens || []).concat(tok); while (a.tokens.length > 8) { const old = a.tokens.shift(); await kvDel('tok:' + old); }
+      await kvSet(key, a); await kvSet('tok:' + tok, user.toLowerCase());
+      return jsonRes(res, 200, { token: tok, user: a.user, save: a.save, updated: a.updated || 0, rec: acctRec(a), restored });
     }
     if (url === '/api/save') {
       const au = await authUser(req); if (!au) return jsonRes(res, 401, { error: 'Please log in again' });
-      if (req.method === 'GET') return jsonRes(res, 200, { user: au.a.user, save: au.a.save, updated: au.a.updated || 0 });
+      if (req.method === 'GET') return jsonRes(res, 200, { user: au.a.user, save: au.a.save, updated: au.a.updated || 0, rec: acctRec(au.a) });
       if (req.method === 'POST') { const b = await readBody(req, 300000); if (!b || typeof b.save !== 'object') return jsonRes(res, 400, { error: 'No save data' });
         au.a.save = b.save; au.a.updated = Date.now(); await kvSet('acct:' + au.a.user.toLowerCase(), au.a); return jsonRes(res, 200, { ok: true, updated: au.a.updated }); }
       return jsonRes(res, 405, { error: 'GET or POST' });
