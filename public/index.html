@@ -50,6 +50,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#11161c;font-family:
 #hpNum.low{color:var(--red)}
 #armorNum{font-size:34px;font-weight:700;color:#bcd3e6;line-height:1}
 #hpBar{width:220px;height:6px;background:rgba(255,255,255,.15);margin-top:6px}
+body.flashback canvas{filter:sepia(.5) saturate(.75) contrast(1.05)}
 #hpFill{height:100%;background:var(--paper);width:100%;transition:width .15s}
 #credits{font-family:'Share Tech Mono',monospace;color:#7fe08a;font-size:20px;margin-top:6px}
 #ammoBox{position:absolute;right:26px;bottom:22px;text-align:right}
@@ -592,7 +593,7 @@ function yawTo(dx,dz){return Math.atan2(-dx,-dz);}
 const V3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function hash(a,b){let h=(a*374761393+b*668265263)|0;h=(h^(h>>>13))*1274126177|0;return ((h^(h>>>16))>>>0)/4294967295;}
 
-const GAME_VERSION='v43';const GAME_BUILD='Nov 17 2026';
+const GAME_VERSION='v44';const GAME_BUILD='Nov 18 2026';
 const settings={perf:'auto',fpsCap:0,voxVol:1,sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',voice:1,subs:1,fs:0,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
 let firstRun=true;try{const sv=localStorage.getItem('pe2_settings');if(sv)firstRun=false;Object.assign(settings,JSON.parse(sv||'{}'));if(!localStorage.getItem('pe2_fsoff')){settings.fs=0;localStorage.setItem('pe2_fsoff','1');localStorage.setItem('pe2_settings',JSON.stringify(settings));}}catch(e){}
 const isTouchDevice=()=>(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||((navigator.maxTouchPoints||0)>1&&!(window.matchMedia&&matchMedia('(pointer: fine)').matches));
@@ -685,6 +686,161 @@ const nm=s=>String(s).replace(/Kestrel/g,profile.name||'Kestrel');
 
 /*MAPS*/
 const MAPS={
+ neon:{name:'Neon District',style:'urban',rows:[
+'################################################',
+'################################################',
+'##............................................##',
+'##..w..........................w..........ddd.##',
+'##............c..........C.............c..ddd.##',
+'##..............^.............................##',
+'##.....#########..############..#########.....##',
+'##.....#......##..##.......###..##......#.....##',
+'##...c.#......##..##.......###..##......#.....##',
+'##.....#..k...##.g##.......###..##......#.....##',
+'##.....#......##..##.......###..##......#..c..##',
+'##.....#......##..##.......###..##......#.....##',
+'##.....###..####..#####.######..####..###.....##',
+'##.....###..####..#####.######..####..###.....##',
+'##........^...................................##',
+'##...2......g.......c.......C.^.............w.##',
+'##.......c......3.........g......c............##',
+'##...................................c........##',
+'##.....#########..############..#########.C...##',
+'##.g...#########..#.....C....#..##.....##.....##',
+'##.....#########..#.e.......c#.g##.....##...o.##',
+'##....o#########..#..AAAAA...#..##.....##.....##',
+'##.....#########.4#..AAAAA...#..##.....##.BBBB##',
+'##.....#########..#..AAAAA...#..##.....##.BBBB##',
+'##..1..#########..#c...5.....#..####.####.BBBB##',
+'##.........................................8..##',
+'##.aaa.........o..g...c.......6..x.......^....##',
+'##.aaa.C....c..............c..........7.......##',
+'##.waa.............................o....y...w.##',
+'##............................................##',
+'################################################',
+'################################################']},
+ prison:{name:'Blackwater Prison',style:'urban',rows:[
+'##############################################',
+'###.##.##.##.##.##.###########################',
+'##............aaaaa.......................####',
+'##.1..........aaaaa...........w...........####',
+'##........................................####',
+'##########.^.########.....................####',
+'##########...########.....................####',
+'##########...########.^#######################',
+'##########.2.#...........w................####',
+'##########...#.g........................g.####',
+'##########...#..C...y..................C..####',
+'##########...#...c...............c........####',
+'###..o................c...................####',
+'###.....c..........o......................####',
+'###.............c........AAAAA.....c......####',
+'###.........3.^..........AAAAA............####',
+'###...x..............C...AAAAA...........w####',
+'###......................AAAAA..C.........####',
+'##############............................####',
+'##############w......................c....####',
+'##############.............c..4...........####',
+'##############......c.....................####',
+'##############..C.......c..............C..####',
+'##############.g....................z...g.####',
+'##############.................c..........####',
+'##############################.............o.#',
+'##############################.dddd...BBBBBB.#',
+'##############################.dddd...BBB5BB.#',
+'##############################...............#',
+'##############################~~~~~~~~~~~~~~~#']},
+ jungle:{name:'Tinder Site',style:'desert',rows:[
+'##############################################',
+'#.....................w......................#',
+'#...######################################...#',
+'#...#.AAAAAAA..............g.....BBBBBBB.#...#',
+'#...#.AoAAAAA.g....C.............BBoBBBB.#...#',
+'#.....AAAAcAA.........k........C.BBBBBBB.....#',
+'#.....AAAAAAA...c............c...BBBBBBB.....#',
+'#...#.AAAAAAA.........1..........BBBBBBB.#...#',
+'#P..#....g..............c.....g..........#...#',
+'#...#.............g..................g...#..P#',
+'#...####..###########..#############..####...#',
+'#................P...........................#',
+'#.w....P.............C......#.........C....w.#',
+'#.............###.....2.....#..P.............#',
+'#...........................#..........P.....#',
+'#.P...###...........dddddd..#................#',
+'#...................dddddd..........###......#',
+'#..............c....dddddd.c.................#',
+'#...........3.....................P..........#',
+'#..P......................P...............P..#',
+'#........c...P.....P...........P.....c.......#',
+'#............................................#',
+'~~~~~~~~~~...~~~~~~~~~~~~~~~~~~~~...~~~~~~~~~~',
+'~~~~~~~~~~...~~~~~~~~~~~~~~~~~~~~...~~~~~~~~~~',
+'#P.........4................................P#',
+'#.....c..............P.................o.....#',
+'#.......P.........#.......c..###.............#',
+'#.aaaa..........5.#.................P......w.#',
+'#.aaaa........C...#.........P................#',
+'#.aaaa..................6........c......e....#',
+'#............P............................P..#',
+'##############################################']},
+ metro:{name:'Halcyon Metro',style:'urban',rows:[
+'################################################',
+'##...###########################################',
+'##...###########################################',
+'#....C.....C.....C.....C.....C.....C.....C.....#',
+'#.........g.......AAAAAA...........c...........#',
+'#..1........w.....AAAAAA.....................5.#',
+'#......c..........AAAAAA....g..................#',
+'#....C.....C.....C.....C.....C.....C.....C.....#',
+'########..##############..##############..######',
+'########..##############..##############..z#####',
+'#..........................c................o..#',
+'#.w..........c..2...x............g..4.........w#',
+'#...o..................................c.......#',
+'########..##############..##############..######',
+'########..##############..##############..######',
+'#....C.....C.....C.....C.....C.....C.....C.....#',
+'#aaa.....c........................g...BBBBBBddd#',
+'#aaa......................3....y......BBBBBBddd#',
+'#aaa..........g......c........w.......BBBBBBddd#',
+'#....C.....C.....C.....C.....C.....C.....C.....#',
+'###########################################...##',
+'###########################################.w.##',
+'###########################################...##',
+'################################################']},
+ rig:{name:'The Leviathan',style:'urban',rows:[
+'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+'~~~......................................~~~',
+'~~~.########..........w......o.#########.~~~',
+'~~~.#......#...................#.BBBBBB#.~~~',
+'~~~.#.h..h.#..KKKKK.....KKKK...#.BBBBBB#.~~~',
+'~~~.#............................BBBBBB#.~~~',
+'~~~.#......#.g.................#.BBBBBB#.~~~',
+'~~~.#......#............y......#.BBBBBB#.~~~',
+'~~~.########...................#########.~~~',
+'~~~........................g.............~~~',
+'~~~......g......g....C.............c.....~~~',
+'~~~...............c.......c.........g....~~~',
+'~~~.....c...2.................z..........~~~',
+'~~~..w................k...............w..~~~',
+'~~~......................................~~~',
+'~~~.......C..c...........................~~~',
+'~~~...g...........c.e.....c....KKKKK.....~~~',
+'~~~....................C....g............~~~',
+'~~~.....KKK............................c.~~~',
+'~~~..o......g.................c..........~~~',
+'~~~...........###.####....HHHH...........~~~',
+'~~~...........#AAAAAA#...........dddddd..~~~',
+'~~~.....1.....#AAAAAA#...g.......dddddd..~~~',
+'~~~.aaaa......#AAAAAA#.c.........dddddd..~~~',
+'~~~.aaaa..x...#AAAAAA#...........dddddd..~~~',
+'~~~.aaaa......########...w............o..~~~',
+'~~~......................................~~~',
+'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~']},
  cove:{name:'Pirate Cove',style:'desert',duel:1,rows:[
 '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
 '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
@@ -1529,6 +1685,7 @@ function groundHeight(e,rad){let gh=0;const c0=Math.floor((e.pos.x-rad)/S),c1=Ma
   for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++){const bx=cellBoxes(c,r);if(!bx)continue;for(const b of bx){if(b.y1>e.pos.y+.36||b.y0>.01)continue;
     if(e.pos.x+rad*.7<b.x0||e.pos.x-rad*.7>b.x1||e.pos.z+rad*.7<b.z0||e.pos.z-rad*.7>b.z1)continue;if(b.y1>gh)gh=b.y1;}}return gh;}
 function moveEntity(e,dt,rad=.35){
+  if(e.hover!=null&&e.alive){e.pos.x+=e.vel.x*dt;resolveCollision(e,rad);e.pos.z+=e.vel.z*dt;resolveCollision(e,rad);e.vel.y=0;e.pos.y=e.hover+Math.sin(T*2.2+(e.bob||0))*.12;e.onGround=true;return;}
   e.pos.x+=e.vel.x*dt;resolveCollision(e,rad);e.pos.z+=e.vel.z*dt;resolveCollision(e,rad);
   e.vel.y-=(e.isPlayer&&HACK.lowgrav?5:20)*dt;e.pos.y+=e.vel.y*dt;
   // ceiling (tunnels/arches)
@@ -3496,7 +3653,8 @@ function endMatch(won){if(state.cfg&&state.cfg.duel&&!state.mp&&!state.duelFinal
       completed[idx+1]=true;progress=Math.max(progress,idx+2);saveProgress();saveCamp();
       txt=`<div class="starsRes">${S.got.map((g,k)=>`<div class="${g?'y':'n'}">${g?'★':'☆'} ${S.labels[k]}</div>`).join('')}${ns?`<div class="y">+${ns*100} coins for new stars</div>`:''}</div>`+m.debrief.map(p=>`<p>${nm(p)}</p>`).join('');
       const last=idx===STORY.length-1||STORY[idx+1].act!==m.act;
-      if(m.finale){const EN={burn:['BURN IT','Kestrel destroyed EMBER by hand.'],trust:['TRUST JUNO','Juno shut EMBER down for good.'],secret:['OUT OF THE FIRE','The secret Hardcore ending.']}[state.ending||'trust'];txt+=`<p style="color:var(--gold);letter-spacing:3px;font-weight:700;margin-top:16px">ENDING: ${EN[0]}</p><p>${EN[1]}</p><p style="color:var(--gold);letter-spacing:3px;font-weight:700">CAMPAIGN COMPLETE — THANKS FOR PLAYING</p>`;CAMP.endings=Object.assign(CAMP.endings||{},{[state.ending||'trust']:1});if(cfg.hc){profile.coins+=2000;saveProfile();txt+='<p class="y" style="color:var(--gold)">+2000 coins for beating Hardcore</p>';}saveCamp();}
+      if(m.finale2){const EN=(EXP_ENDINGS[state.ending]||EXP_ENDINGS.truth).label;txt+=`<p style="color:var(--gold);letter-spacing:3px;font-weight:700;margin-top:16px">ENDING: ${EN[0]}</p><p>${EN[1]}</p><p style="color:var(--gold);letter-spacing:3px;font-weight:700">CAMPAIGN COMPLETE — THANKS FOR PLAYING</p>`;CAMP.endings2=Object.assign(CAMP.endings2||{},{[state.ending||'truth']:1});if(cfg.hc){profile.coins+=3000;saveProfile();txt+='<p class="y" style="color:var(--gold)">+3000 coins for beating Hardcore</p>';}saveCamp();}
+      else if(m.finale){const EN={burn:['BURN IT','Kestrel destroyed EMBER by hand.'],trust:['TRUST JUNO','Juno shut EMBER down for good.'],secret:['OUT OF THE FIRE','The secret Hardcore ending.']}[state.ending||'trust'];txt+=`<p style="color:var(--gold);letter-spacing:3px;font-weight:700;margin-top:16px">ENDING: ${EN[0]}</p><p>${EN[1]}</p><p style="color:var(--gold);letter-spacing:3px;font-weight:700">THE EMBER STORY IS OVER · ACT VI IS WAITING</p>`;CAMP.lastEnding=state.ending||'trust';CAMP.endings=Object.assign(CAMP.endings||{},{[state.ending||'trust']:1});if(cfg.hc){profile.coins+=2000;saveProfile();txt+='<p class="y" style="color:var(--gold)">+2000 coins for beating Hardcore</p>';}saveCamp();}
       if(last)txt+=`<p style="color:var(--gold);letter-spacing:3px;font-weight:700;margin-top:20px">ACT ${ACTS[m.act].n} COMPLETE${cfg.hc?' ON HARDCORE':''}</p>${ACTS[m.act+1]&&!ACTS[m.act+1].ready?`<p style="color:var(--dim)">Act ${ACTS[m.act+1].n}: ${ACTS[m.act+1].title} is coming in the next update.</p>`:''}`;
       if(missionOpen(idx+1))btns=`<button class="btn primary" onclick="openBrief(${idx+1})">NEXT: ${last?'ACT '+ACTS[STORY[idx+1].act].n+' · ':''}${STORY[idx+1].title.toUpperCase()} ▸</button>`;
       btns+=`<button class="btn" onclick="showScreen('scrStory')">CAMPAIGN</button>`;}
@@ -3634,7 +3792,7 @@ function updateHUD(dt){buyZoneTick();tagTick();
   setT('phaseLbl',phaseLabel());
   setT('spikeIcon',sideOf(player.team)==='atk'?(spike.carrier===player?'▣ YOU HAVE THE BOMB':spike.state==='dropped'?'▣ BOMB DROPPED':''):'');
   if(hudSlow===0)updateAlives();
-  const p=player;setT('hpNum',Math.max(0,Math.ceil(p.hp)));$('hpNum').classList.toggle('low',p.hp<=30);$('hpFill').style.width=Math.max(0,p.hp)+'%';
+  const p=player;setT('hpNum',Math.max(0,Math.ceil(p.hp)));$('hpNum').classList.toggle('low',p.hp<=30);$('hpFill').style.width=Math.min(100,Math.max(0,p.hp/(p.maxHp||100)*100))+'%';
   setT('armorNum',(p.oshield>0?'◆'+Math.ceil(p.oshield)+'  ':'')+(p.armor>0?(p.helmet?'⛑ ':'⛨ ')+Math.ceil(p.armor):''));setT('credits','$'+p.credits);
   const it=instOf(p),w=WEAPONS[it.id];
   if(w.melee)setH('ammo','—');else setH('ammo',`${it.mag}<span> / ${it.reserve}</span>`);
@@ -4513,17 +4671,17 @@ function renderMissions(){$('storyName').textContent='Sergeant '+profile.name;
     if(!A.ready){h+=`<div class="actLocked">🔒 ${A.count} missions · coming in a future update</div>`;return;}
     h+='<div class="missions">';STORY.forEach((m,i)=>{if(m.act!==ai)return;const open=missionOpen(i);const st=CAMP.stars[m.code]|0;
       const cleared=isHC()?i<CAMP.hc.prog-1:st>0;
-      const sub=({tutorial:'TRAINING',stealth:'STEALTH',escort:'ESCORT',hostage:'HOSTAGE RESCUE',waves:'HOLD OUT',defuse2:'DOUBLE DEFUSE',boss:'BOSS',assault:'ASSAULT',escape:'ESCAPE',survival:'SURVIVAL',sniper:'SNIPER',hackdefend:'HACK & DEFEND'})[m.type]||(m.boss?'BOSS · RETAKE':m.retake?'RETAKE':'DEFEND');
+      const sub=({tutorial:'TRAINING',stealth:'STEALTH',escort:'ESCORT',hostage:'HOSTAGE RESCUE',waves:'HOLD OUT',defuse2:'DOUBLE DEFUSE',boss:'BOSS',assault:'ASSAULT',escape:'ESCAPE',survival:'SURVIVAL',sniper:'SNIPER',hackdefend:'HACK & DEFEND',swarm:'SWARM DEFENSE',tail:'TAIL',chase:'CHASE',sabotage:'SABOTAGE',countersnipe:'COUNTER-SNIPER',capture:'CAPTURE',run:m.flashback?'FLASHBACK':'ESCAPE'})[m.type]||(m.boss?'BOSS · RETAKE':m.retake?'RETAKE':'DEFEND');
       h+=`<div class="mcard ${open?'':'locked'}" data-m="${i}">${cleared?'<div class="done">✓ CLEARED</div>':''}<div class="code">${m.code}</div><div class="t">${m.title}</div><div class="s">${MAPS[m.map].name.toUpperCase()}<br>${sub}</div><div class="stars">${'★'.repeat(st)}<i>${'★'.repeat(3-st)}</i></div>${open?'':'<div class="s" style="margin-top:6px">🔒 LOCKED</div>'}</div>`;});
     h+='</div>';});
   $('missionList').innerHTML=h;}
 document.addEventListener('click',e=>{const b=e.target.closest('#campDiff button');if(!b)return;CAMP.diff=b.dataset.v;saveCamp();renderMissions();});
 $('missionList').addEventListener('click',e=>{const c=e.target.closest('[data-m]');if(!c||c.classList.contains('locked'))return;openBrief(+c.dataset.m);});
 let briefIdx=0;
-function openBrief(i){briefIdx=i;const m=STORY[i];const D=CAMP_DIFFS[CAMP.diff];$('bTitle').innerHTML=`<small>${m.code} · ACT ${ACTS[m.act].n}</small>${m.title.toUpperCase()}`;$('bLoc').textContent=m.loc;$('bText').innerHTML=m.brief.map(p=>`<p>${nm(p)}</p>`).join('');
+function openBrief(i){briefIdx=i;const m=STORY[i];const D=CAMP_DIFFS[CAMP.diff];$('bTitle').innerHTML=`<small>${m.code} · ACT ${ACTS[m.act].n}</small>${m.title.toUpperCase()}`;$('bLoc').textContent=m.loc;$('bText').innerHTML=(m.endNote&&m.endNote[expEnding()]?[m.endNote[expEnding()]]:[]).concat(m.brief).map(p=>`<p>${nm(p)}</p>`).join('');
   $('bObj').innerHTML=m.obj.map(o=>`<li>${o}</li>`).join('');
   const goals=starGoals(m);
-  const mode=({tutorial:'Training',stealth:'Stealth infiltration',escort:'Escort',hostage:'Hostage rescue',waves:'Hold out ('+m.waves+' waves)',defuse2:'Two bombs, one clock',boss:'Boss fight',assault:'Assault',escape:m.escapeTime?'Timed escape':'Escape',survival:'Survival',sniper:'Sniper overwatch',hackdefend:'Hack and defend'})[m.type]||(m.retake?'Retake':'Bomb defusal');
+  const mode=({tutorial:'Training',stealth:'Stealth infiltration',escort:'Escort',hostage:'Hostage rescue',waves:'Hold out ('+m.waves+' waves)',defuse2:'Two bombs, one clock',boss:'Boss fight',assault:'Assault',escape:m.escapeTime?'Timed escape':'Escape',survival:'Survival',sniper:'Sniper overwatch',hackdefend:'Hack and defend',swarm:'Swarm defense ('+m.waves+' waves)',tail:'Tail a target',chase:'Chase',sabotage:'Sabotage',countersnipe:'Counter-sniper',capture:'Capture the points',run:m.flashback?'Flashback escape':'Escape'})[m.type]||(m.retake?'Retake':'Bomb defusal');
   $('bIntel').innerHTML=`<div class="kv"><span>Mode</span><b>${mode}</b></div><div class="kv"><span>Squad</span><b>${profile.name}${m.allies.length?', '+m.allies.join(', '):' (solo)'}</b></div>${m.enemies?`<div class="kv"><span>${m.type==='stealth'?'Guards':'Terrorists'}</span><b>${m.enemies+(m.type?0:D.extra)}${m.boss?' + '+m.boss:''}</b></div>`:''}<div class="kv"><span>Difficulty</span><b style="color:${isHC()?'var(--red)':'inherit'}">${D.label}</b></div>${m.type?'':`<div class="kv"><span>Starting money</span><b>$${Math.round(m.credits*D.cred)}</b></div>`}<div class="kv"><span>Map</span><b>${MAPS[m.map].name} · ${m.theme}</b></div>
    <div style="margin-top:10px;color:var(--dim);font-size:13px;letter-spacing:2px">STARS</div>${goals.map(g=>`<div class="kv"><span>★</span><b style="font-weight:500">${g}</b></div>`).join('')}`;
   showScreen('scrBrief');}
@@ -4532,7 +4690,7 @@ function starGoals(m){return ['Complete the mission'].concat((m.stars||[['Accura
 function startStory(i){const m=STORY[i];const D=CAMP_DIFFS[CAMP.diff];
   if(isHC()&&i===0&&CAMP.hc.prog===1){CAMP.hc.start=Date.now();CAMP.hc.kills=0;saveCamp();}
   setupMatch({story:m,storyIdx:i,mission:m.type||null,map:m.map,theme:m.theme,side:m.side,retake:!!m.retake,allies:m.allies,allyDiff:CAMP.diff==='recruit'?'hard':'normal',
-    enemies:m.type?m.enemies:Math.max(1,m.enemies+D.extra),enemyNames:(m.type==='stealth'?['Guard Dawes','Guard Marek','Guard Lin','Guard Ortiz','Guard Kade','Guard Bram','Guard Siv','Guard Holt']:ENEMY_NAMES.atk.slice().sort(()=>Math.random()-.5).map(n=>(m.act>=1?'Meridian·':'Hollow·')+n)),
+    enemies:m.type?m.enemies:Math.max(1,m.enemies+D.extra),enemyNames:(m.type==='stealth'?['Guard Dawes','Guard Marek','Guard Lin','Guard Ortiz','Guard Kade','Guard Bram','Guard Siv','Guard Holt']:ENEMY_NAMES.atk.slice().sort(()=>Math.random()-.5).map(n=>(m.act>=1&&m.act<5?'Meridian·':'Hollow·')+n)),
     diff:storyDiff(m.diff),toWin:m.toWin,credits:Math.round(m.credits*D.cred),radio:m.radio,boss:m.type?null:m.boss,betray:m.betray,swap:false,hc:isHC(),dmgIn:D.dmgIn,dmgOut:D.dmgOut});
   document.body.classList.toggle('hc',isHC());
   state.betrayShown=false;state.outroPlayed=false;state.missionT0=T;state.ending=null;
@@ -4555,7 +4713,7 @@ function playCS(shots,onEnd){if(!shots||!shots.length){onEnd&&onEnd();return;}CS
   document.body.classList.add('cine');$('cine').classList.remove('hidden');mouseDown=false;closeBuy(true);if(document.pointerLockElement)document.exitPointerLock();csNext();}
 function csNext(){CS.i++;if(CS.i>=CS.shots.length){csEnd();return;}const s=CS.shots[CS.i];CS.t=0;CS.fired=0;CS.ts=s.slow||1;
   if(s.start)s.start();
-  if(s.sub){$('csWho').textContent=s.sub[0];$('csTxt').textContent=s.sub[1];$('cineSub').classList.add('show');if(s.say!==false)say(s.sub[1],{who:s.sub[0],rate:1,pitch:s.sub[0]==='VEX'||s.sub[0]==='JUNO'||s.sub[0]==='MARA'?1.1:.7});}else $('cineSub').classList.remove('show');
+  if(s.sub){$('csWho').textContent=s.sub[0];$('csTxt').textContent=s.sub[1];$('cineSub').classList.add('show');if(s.say!==false)say(s.sub[1],{who:s.sub[0],rate:1,pitch:s.sub[0]==='VEX'||s.sub[0]==='JUNO'||s.sub[0]==='MARA'||s.sub[0]==='LARK'?1.1:.7});}else $('cineSub').classList.remove('show');
   if(s.card){$('ccS').textContent=s.card[0]||'';$('ccT').textContent=s.card[1]||'';$('ccL').textContent=s.card[2]||'';$('cineCard').classList.add('show');}else $('cineCard').classList.remove('show');
   $('cineBlack').style.opacity=s.black?1:0;}
 function csEnd(skipped){if(!CS.on)return;CS.on=false;
@@ -4734,9 +4892,9 @@ function bossTick(){const cfg=state.cfg;if(!cfg||!cfg.story||!cfg.story.bossPhas
   bb.classList.toggle('hidden',!v.alive||state.phase==='buy');setT('bbName',(v.name||'BOSS')+(state.bp3?' · PHASE 3':state.bp2?' · PHASE 2':''));
   $('bbFill').style.width=Math.max(0,v.hp/v.maxHp*100)+'%';$('bbShield').style.width=Math.max(0,(v.oshield||0)/80*100)+'%';
   if(!v.alive||(state.phase!=='live'&&state.phase!=='planted'))return;const f=v.hp/v.maxHp;
-  if(f<=.66&&!state.bp2){state.bp2=true;banner('PHASE 2',v.name+' called in backup','lose',2);radio(v.name,'Boys! Get in here!',true);say('Boys! Get in here!',{pitch:1.1});if(state.cfg.story.fog)for(let i=0;i<8;i++)puff(V3(v.pos.x+rand(-4,4),1,v.pos.z+rand(-4,4)),6,4,4);
+  if(f<=.66&&!state.bp2){state.bp2=true;banner('PHASE 2',v.name+' called in backup','lose',2);{const L=((state.cfg.story.bossLines||[])[0]||[])[1]||'Boys! Get in here!';radio(v.name,L,true);say(L,{pitch:1.1});}if(state.cfg.story.fog)for(let i=0;i<8;i++)puff(V3(v.pos.x+rand(-4,4),1,v.pos.z+rand(-4,4)),6,4,4);
     const n=CAMP.diff==='recruit'?1:2;for(let i=0;i<n;i++){const a=makeAgent({name:(v.backupName||'Hollow·Guard')+' '+(i+1),team:v.team,diff:storyDiff('hard'),credits:4000,temp:true,forceLook:v.forceLook,sigma:!!v.nonLethal});a.inv[1]=mkInst(i?'mp5':'ak');a.slot=1;a.armor=100;const p=randomCellNear(v.pos,4);a.pos.set(p.x,0,p.z);setBotGun(a);a.investigate=player.pos.clone();a.investigateUntil=T+30;agents.push(a);}buildAlives();}
-  if(f<=.33&&!state.bp3){state.bp3=true;v.oshield=CAMP.diff==='recruit'?40:80;banner('PHASE 3',v.name+' is shielded and coming for you','lose',2);radio(v.name,'Fine. Let\'s finish this ourselves.',true);say('Fine. Let\'s finish this ourselves.',{pitch:1.1});
+  if(f<=.33&&!state.bp3){state.bp3=true;v.oshield=CAMP.diff==='recruit'?40:80;banner('PHASE 3',v.name+' is shielded and coming for you','lose',2);{const L=((state.cfg.story.bossLines||[])[1]||[])[1]||'Fine. Let\'s finish this ourselves.';radio(v.name,L,true);say(L,{pitch:1.1});}
     v.investigate=player.pos.clone();v.investigateUntil=T+30;v.awareUntil=T+3;v.faceTo=player.pos.clone();sfx.armorHit&&sfx.armorHit();}}
 function bossRoundReset(){state.bp2=false;state.bp3=false;let rm=false;for(let i=agents.length-1;i>=0;i--){const a=agents[i];if(a.temp){scene.remove(a.mesh);agents.splice(i,1);rm=true;}}if(rm)buildAlives();const v=agents.find(a=>a.boss);if(v)v.oshield=0;}
 
@@ -4949,14 +5107,14 @@ function act2Start(m){const t=m.type;MS.extra={};MS.breached=false;MS.failReason
   if(t==='escort'){const route=['1','2','3','4','5'].map(c=>msMark(c));teleportSquad(route[0]);
     const J=makeAgent({name:m.vip||'Juno',team:'blue',diff:'normal',maxHp:160,hp:160,vip:true});const jp=randomCellNear(route[0],1);J.pos.set(jp.x,0,jp.z);J.puppet={look:player};J.slot=2;setBotGun(J);agents.push(J);
     MS.vip=J;MS.route=route;MS.ri=1;MS.ambush={2:'x',3:'y',4:'z'};MS.steps=[
-     {obj:'Escort '+(m.vip||'Juno')+(m.vip?' to the cargo plane':' to the safehouse'),sub:(m.vip?'He':'She')+' walks the route alone — stops and ducks when enemies are near',enter(){setMarker(route[1]);},prog:()=>J.name+' '+Math.max(0,Math.ceil(J.hp/J.maxHp*100))+'% · waypoint '+Math.min(MS.ri,4)+' / 4',check:()=>MS.ri>=route.length&&near(route[route.length-1],4)}];}
+     {obj:'Escort '+(m.vip||'Juno')+' to '+(m.escortTo||(m.vip?'the cargo plane':'the safehouse')),sub:((m.vipShe||!m.vip)?'She':'He')+' walks the route alone — stops and ducks when enemies are near',enter(){setMarker(route[1]);},prog:()=>J.name+' '+Math.max(0,Math.ceil(J.hp/J.maxHp*100))+'% · waypoint '+Math.min(MS.ri,4)+' / 4',check:()=>MS.ri>=route.length&&near(route[route.length-1],4)}];}
   if(t==='hostage'){teleportSquad(MAP.spawnC.atk);const gs=marksOf('g');const n=diffCount(8);gs.slice(0,Math.min(gs.length,n)).forEach((p,i)=>spawnSentry(p,sentryName(i)));
     MS.hostages=marksOf('h').slice(0,(m.hostageNames||[1,2,3]).length).map((p,i)=>{const h=makeAgent({name:(m.hostageNames||['Aide Ferro','Clerk Ilse','Attaché Dorn'])[i%3],team:'blue',diff:'easy',noTarget:true,kneel:true});h.pos.set(p.x,0,p.z);h.puppet={};h.inv={1:null,2:null,3:mkInst('knife')};h.slot=3;setBotGun(h);agents.push(h);return h;});
     const gate=msMark('1');MS.steps=[
      {obj:'Get into the courtyard',sub:'Quietly if you can — crouch past the gate',enter(){setMarker(msMark('2'));},check:()=>near(msMark('2'),4)||MS.breached},
      {obj:'Kill every guard',sub:'Hostages are on the upper floor',enter(){setMarker(null);},prog:()=>agents.filter(a=>a.guard&&a.alive).length+' guards left',check:()=>!agents.some(a=>a.guard&&a.alive)},
-     {obj:'Lead the hostages out to the gate',sub:'Get close — they will follow you',enter(){setMarker(MS.hostages[0].pos);for(const h of MS.hostages){h.kneel=false;}radio('ROOK','Clear! Get them moving to the gate.');},
-      check:()=>{const alive=MS.hostages.filter(h=>h.alive);if(alive.some(h=>h.following))setMarker(gate);for(const h of alive)if(!h.following&&h.pos.distanceTo(player.pos)<4){h.following=true;radio(h.name.toUpperCase(),'Thank god. We\'re right behind you.');}
+     {obj:'Lead the hostages out to the gate',sub:'Get close — they will follow you',enter(){setMarker(MS.hostages[0].pos);for(const h of MS.hostages){h.kneel=false;}radio(m.clearVoice||'ROOK',m.clearLine||'Clear! Get them moving to the gate.');},
+      check:()=>{const alive=MS.hostages.filter(h=>h.alive);if(alive.some(h=>h.following))setMarker(gate);for(const h of alive)if(!h.following&&h.pos.distanceTo(player.pos)<4){h.following=true;radio(h.name.toUpperCase(),m.hostageLine||'Thank god. We\'re right behind you.');}
         return alive.length&&alive.every(h=>h.following&&Math.hypot(h.pos.x-gate.x,h.pos.z-gate.z)<6)&&near(gate,6);}}];}
   if(t==='waves'){MS.wave=0;MS.waves=m.waves+(CAMP.diff==='elite'||CAMP.diff==='hardcore'?1:0);MS.waveT=4;MS.spawned=false;MS.allies=agents.filter(a=>a.team==='blue'&&!a.isPlayer);MS.extra.alliesTotal=MS.allies.length;
     const ex=m.extract?msMark('1'):null;MS.steps=[
@@ -4979,7 +5137,7 @@ function act2Start(m){const t=m.type;MS.extra={};MS.breached=false;MS.failReason
     if(m.enemyLook&&m.boss==='REYES'){B.forceLook='ct';B.backupName='Loyalist';rebuildMesh(B);setBotGun(B);}else if(m.boss==='HAYES')B.backupName='Meridian·Guard';
     if(m.finale)MS.core=buildCore(msMark('k'));
     if(m.fog&&scene.fog){scene.fog.near=4;scene.fog.far=42;}
-    MS.steps=[{obj:'Find and kill '+m.boss,sub:'She is somewhere in the smoke',enter(){setMarker(null);},prog:()=>m.boss+' '+Math.max(0,Math.ceil(B.hp/B.maxHp*100))+'%',check:()=>!B.alive}];}
+    MS.steps=[{obj:m.bossObj||'Find and kill '+m.boss,sub:m.bossSub||'She is somewhere in the smoke',enter(){setMarker(null);},prog:()=>m.boss+' '+Math.max(0,Math.ceil(B.hp/B.maxHp*100))+'%',check:()=>!B.alive}];}
   if(t==='assault'){teleportSquad(MAP.spawnC.atk);const gs=marksOf('g');const n=diffCount(10);gs.slice(0,n).forEach((p,i)=>spawnSentry(p,sentryName(i)));
     for(let j=0;j<diffCount(3);j++)spawnSentry(randomCellNear(MAP.siteC.B,2),'Meridian·Bodyguard '+(j+1),'ak');
     const office=msMark('k');MS.steps=[
@@ -4995,13 +5153,13 @@ function act2Tick(dt){const t=MS.m.type;
     if(go){if(!J.puppet.path||J.puppet.pi>=J.puppet.path.length||J.puppet.goal!==MS.ri){puppetGo(J,tgt,3.4);J.puppet.goal=MS.ri;}delete J.puppet.look;}
     else{J.puppet.path=null;J.puppet.look=danger?null:player;J.crouch=danger;}
     if(J.pos.distanceTo(tgt)<2.2&&MS.ri<MS.route.length){const ch=MS.ambush[MS.ri];MS.ri++;if(MS.ri<MS.route.length)setMarker(MS.route[MS.ri]);
-      if(ch){const delay={recruit:7,veteran:6,elite:4.5,hardcore:3.5}[CAMP.diff]||5;MS.pendingAmb={ch,at:T+delay,wp:MS.ri};radio(J.name.toUpperCase(),'Wait — I saw movement up ahead. Get ready!');}}
+      if(ch){const delay={recruit:7,veteran:6,elite:4.5,hardcore:3.5}[CAMP.diff]||5;MS.pendingAmb={ch,at:T+delay,wp:MS.ri};radio(J.name.toUpperCase(),(MS.m.vipWarn&&MS.m.vipWarn[1])||'Wait — I saw movement up ahead. Get ready!');}}
     if(MS.pendingAmb&&T>=MS.pendingAmb.at){const A=MS.pendingAmb;MS.pendingAmb=null;const ahead=MS.route[Math.min(A.wp,MS.route.length-1)];
       const n=Math.max(1,{recruit:2,veteran:2,elite:3,hardcore:4}[CAMP.diff]||2);let pts=marksOf(A.ch);
       // never spawn on top of the squad: push spawns out until they're at least 16 m away
       const ok=p=>p.distanceTo(player.pos)>16&&p.distanceTo(J.pos)>16;const cand=pts.filter(ok);for(let k=0;cand.length<n&&k<40;k++){const q=randomCellNear(ahead,6);if(ok(q))cand.push(q);}
       cand.slice(0,n).forEach((p,i)=>{const h=spawnHunter(p,'Meridian·Ambush '+(i+1));h.investigate=ahead.clone();h.investigateUntil=T+25;h.awareUntil=0;h.reactT=1;});
-      radio('MARA',n>2?'Contact! Multiple hostiles ahead!':'Contact ahead! Two of them.');buildAlives();}}
+      {const AL=MS.m.ambushLines;const L=AL?AL[n>2?0:1]:['MARA',n>2?'Contact! Multiple hostiles ahead!':'Contact ahead! Two of them.'];radio(L[0],L[1]);}buildAlives();}}
   if(t==='hostage'||t==='assault'||t==='boss'||t==='defuse2')sentryTick(dt);
   if(t==='hostage'){for(const h of MS.hostages){if(!h.alive){msFail(h.name+' was killed');return;}
       if(h.following){if(!h.puppet.path||h.puppet.pi>=h.puppet.path.length){h.fT=(h.fT||0)-dt;if(h.fT<=0){h.fT=.8;if(h.pos.distanceTo(player.pos)>3)puppetGo(h,player.pos,4.2);}}}}}
@@ -5017,7 +5175,7 @@ function act2Tick(dt){const t=MS.m.type;
   if(t==='defuse2'){MS.bombT-=dt;MS.extra.timeLeft=MS.bombT;if(MS.bombT<=0&&MS.bombs.some(b=>!b.done)){for(const b of MS.bombs)if(!b.done){explosionFx(b.pos,'rocket');sfx.rocket(b.pos);}shakeT=2;msFail('The bombs went off');}}
   if(t==='boss'){const B=MS.boss;if(B&&B.alive){B.reT=(B.reT||0)-dt;if(B.reT<=0){B.reT=3;if(!B.target){B.investigate=player.pos.clone();B.investigateUntil=T+8;}}}}}
 function act2Cleanup(){if(MS.core){scene.remove(MS.core);MS.core=null;}$('endChoice')&&$('endChoice').classList.add('hidden');if(MS.bombs)for(const b of MS.bombs)scene.remove(b.mesh);MS.bombs=null;MS.hostages=null;MS.vip=null;MS.boss=null;}
-function bossIntroShots2(m){const v=agents.find(a=>a.boss);if(!v||!m.bossIntro)return null;const e=eyeAt(v,1.6);const f=fwdOf(v.yaw);
+function bossIntroShots2(m){const v=agents.find(a=>a.boss);if(!v||!m.bossIntro)return null;const e=eyeAt(v,(v.pos.y||0)+1.6*(v.scale||1));const f=fwdOf(v.yaw);
   return [{d:3.4,from:e.clone().addScaledVector(f,4.5).add(V3(0,.4,0)),to:e.clone().addScaledVector(f,2.1),look:e,fov:50,fovTo:40,sub:m.bossIntro.line,start(){v.puppet={aim:true,face:v.yaw};},always(){delete v.puppet;}},
           {d:2.4,from:e.clone().addScaledVector(f,2.1),to:e.clone().addScaledVector(f,2.3).add(V3(.5,0,0)),look:e,fov:40,card:m.bossIntro.card,say:false}];}
 function act2OutroShots(){const k=msMark('k');const desk=new THREE.Group();
@@ -5073,7 +5231,7 @@ function act3Start(m){const t=m.type;if(m.weather)weatherStart(m.weather);MS.ext
     MS.vip=V;MS.route=route;MS.ri=1;MS.amb={2:'x',3:'y',4:'w',5:'x'};player.yaw=yawTo(V.pos.x-player.pos.x,V.pos.z-player.pos.z);
     MS.steps=[{obj:'Cover Mara until she reaches the drop',sub:'She stops when gunmen are near her',enter(){setMarker(route[route.length-1]);},prog:()=>'Mara '+Math.max(0,Math.ceil(V.hp/V.maxHp*100))+'% · waypoint '+Math.min(MS.ri,route.length-1)+' / '+(route.length-1),check:()=>MS.ri>=route.length&&V.pos.distanceTo(route[route.length-1])<3}];}
   if(t==='hackdefend'){teleportSquad(msMark('k'));const term=msMark('k');MS.hack=0;MS.pT=3;MS.allies=agents.filter(a=>a.team==='blue'&&!a.isPlayer);MS.extra.alliesTotal=MS.allies.length;MS.buyOK=true;setTimeout(()=>{MS.buyOK=false;},15000);
-    MS.steps=[{obj:'Hold the lab while Juno downloads',sub:'Stay within 9m of the terminal',enter(){setMarker(term);},prog:()=>'Download '+Math.floor(MS.hack*100)+'%'+(near(term,9)?'':' · STALLED — get back to the terminal'),check:()=>MS.hack>=1}];}
+    MS.steps=[{obj:m.hackObj||'Hold the lab while Juno downloads',sub:'Stay within 9m of the terminal',enter(){setMarker(term);},prog:()=>(m.hackLbl||'Download')+' '+Math.floor(MS.hack*100)+'%'+(near(term,9)?'':' · STALLED — get back to the terminal'),check:()=>MS.hack>=1}];}
   buildAlives();}
 function act3Tick(dt){const t=MS.m.type;
   if(t==='escape'){if(MS.escT){MS.escT-=dt;MS.extra.timeLeft=MS.escT;if(MS.escT<=0){for(let i=0;i<5;i++){const p=randomCellNear(player.pos,4);explosionFx(p,'rocket');}sfx.rocket(player.pos);shakeT=2.5;msFail('The outpost exploded');return;}}
@@ -5186,10 +5344,561 @@ function endingShots(k){const p=MS.core?MS.core.position.clone():player.pos.clon
     {d:4,from:e.clone().add(V3(7,2.5,7)),to:e.clone().add(V3(5,1.6,5)),look:e,fov:55,sub:['JUNO','Kestrel...? Kestrel! You\'re alive!']},
     {d:5,black:true,card:['☠ HARDCORE CAMPAIGN COMPLETE','THE SECRET ENDING','EMBER is gone, and Kestrel walked out of the fire.'],say:false}].concat(creditsShots('Ending: Out of the Fire'));}
 
+// ---- Acts VI–X: story data (lines are [WHO, text, emotion tag for the voice script]) ----
+const EXP_ACTS=[
+ {n:'VI',title:'Smoke',blurb:"Six months of peace. Then the drones came back, wearing the Hollow Syndicate's mark.",ready:true,count:5},
+ {n:'VII',title:'Backdraft',blurb:'Open the wrong door and the fire comes back for you.',ready:true,count:5},
+ {n:'VIII',title:'Wildfire',blurb:'The truth about Operation Tinder spreads faster than the fire.',ready:true,count:5},
+ {n:'IX',title:'Firebreak',blurb:'Rook is gone. Vex is loose. Halcyon is burning.',ready:true,count:5},
+ {n:'X',title:'Phoenix',blurb:'Everything burns. Something rises from it.',ready:true,count:5}];
+const EXP_STORY=[
+ // ================================================================ ACT VI — SMOKE
+ {act:5,code:'OP-37',title:'Lanterns',type:'swarm',waves:4,defendMark:'k',drones:.55,map:'neon',theme:'night',side:'def',allies:['Rook','Mara'],enemies:0,diff:'normal',toWin:1,credits:3000,captor:'HOLLOW2',
+  loc:'HALCYON CITY · NEON DISTRICT · LANTERN FESTIVAL · 22:10',
+  intro:['ROOK',"Six months without a single gunshot. I was starting to enjoy the quiet.",'dry, tired'],
+  endNote:{burn:"They pulled you out of the desert three days after the blast. Rook stopped setting out the second coffee cup.",trust:"You turned down the director's chair. Hale took it instead, and gave you a field office.",secret:"You walked out of the fire at the launch site. Nobody at SIGMA has stopped talking about it."},
+  brief:["Six months after Protocol Ember, SIGMA is rebuilding. Director Hale has opened a small field office in Halcyon's Neon District, and tonight the whole district is out for the lantern festival.","Then the lanterns start moving against the wind. They're drones, and they're heading straight for the office.","Hold the field office with Rook and Mara. Drones are fast and fragile: keep moving, aim high, and let them come to you."],
+  obj:['Defend the field office','Survive 4 waves of drones and gunmen','Buy between waves (B)'],
+  stars:[['Accuracy 35% or better',c=>c.acc>=35],['Keep Rook and Mara alive',c=>c.alliesAlive===c.alliesTotal]],
+  waveRadio:[['JUNO',"Those are EMBER drones. That's impossible. I watched it die!",'shocked'],['MARA',"Gunmen on the rooftops behind the drones. Hollow colors.",'calm'],['ROOK',"The Hollow Syndicate. Haven't seen that mark since Dustline.",'grim'],['JUNO',"Last swarm. Something's steering them from close by.",'nervous']],
+  debrief:['The last drone hits the canal and the festival goes dark.',"Every casing carries the same burned-in mark: a hollow circle. The Hollow Syndicate, the bomb-makers from your very first day, are back, and they're flying EMBER tech.","Mara saw a courier pull a controller out of the wreckage. Juno has cloned his phone. Tonight, you follow him."]},
+ {act:5,code:'OP-38',title:'Shadow',type:'tail',map:'neon',theme:'night',weather:'rain',side:'def',allies:[],enemies:0,diff:'normal',toWin:1,credits:0,captor:'HOLLOW2',
+  target:'Courier Pell',meet:'Broker',route:'12345',tailMax:36,tailVoice:'MARA',
+  loc:'HALCYON · NEON DISTRICT · RAIN · 01:20',
+  intro:['MARA',"That's him. Grey jacket, controller in the bag. Stay back, stay dark.",'quiet, focused'],
+  brief:['The courier, Pell, is carrying the drone controller to a buyer somewhere in the night market.','Follow him. Stay close enough not to lose him, and never let him see you. He stops and checks behind him, so be in cover when he does.','Syndicate lookouts watch the route. You have a pistol and a knife. Knife a lookout from behind if you must. A gunshot will spook him.'],
+  obj:['Follow the courier without being seen',"Don't fall too far behind",'Listen in on the meeting'],
+  stars:[['Stay within 20 m the whole time',c=>!c.tailFar],["Don't kill any lookout",c=>!c.lookKills]],
+  tailLines:{start:['MARA',"He's moving. Give him twenty metres.",'whispering'],look:['MARA',"He's checking his six. Get in cover!",'urgent whisper'],far:['MARA',"You're losing him. Close the gap!",'urgent'],meet:['MARA',"He's meeting someone. Get close and listen.",'whispering']},
+  outroLines:[['BROKER',"Tell Shrike his birds are ready. Forty more by the summit.",'smug, low'],['COURIER',"Shrike doesn't like waiting.",'nervous'],['BROKER',"Shrike doesn't like anything. Go.",'irritated']],
+  debrief:['The buyer is a smuggler everyone in Halcyon calls the Broker. He moves Syndicate drones to anyone who can pay.','And he answers to someone called Shrike.','Rook goes very quiet at the name. The Broker leaves the city by boat before dawn. Take him in the night market.']},
+ {act:5,code:'OP-39',title:'Night Market',type:'chase',map:'neon',theme:'night',weather:'rain',side:'def',allies:['Mara'],enemies:0,diff:'normal',toWin:1,credits:0,captor:'HOLLOW2',
+  runner:'Broker',runnerHp:260,runSpeed:4.8,startMark:'e',loadout:['mp5','glock'],
+  routeCells:[[23,24],[17,22],[16,15],[30,15],[31,24],[30,26],[38,27],[43,25]],
+  surrenderLines:[['BROKER',"Okay! Okay! I give up! Don't shoot!",'panicked'],['BROKER',"You want Shrike? Fine. I'll tell you everything. Just get that gun out of my face.",'out of breath']],
+  loc:'HALCYON · NIGHT MARKET · 03:40',
+  intro:['MARA',"He made us! He's running for the pier. Don't let him reach that boat!",'shouting'],
+  brief:["The Broker has spotted you and he's running for his boat at the east pier.","His bodyguards will try to slow you down. Don't stop to fight them all. Keep him in sight.","We need him talking. Shoot him down and he'll surrender. If he reaches the pier, he's gone."],
+  obj:['Bring the Broker down before he reaches the pier','Get past his bodyguards','Make him talk'],
+  stars:[['Catch him in under 90 seconds',c=>c.caughtT>0&&c.caughtT<90],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['The Broker talks fast once the cuffs are on.','"Shrike runs the Syndicate. Always has. The Dustline bombs, the explosives your leak signed out of your own armory? That was Shrike\'s first order."','"His oldest cache is still in Dustline, in the old fuel store. Go and look, if you\'re brave enough to go home."']},
+ {act:5,code:'OP-40',title:'Where It Began',type:'stealth',enemyLook:'t',enemyPrefix:'Hollow',stealthVoice:'JUNO',map:'dustline',theme:'overcast',side:'def',allies:[],enemies:7,diff:'normal',toWin:1,credits:0,captor:'HOLLOW2',
+  stealthText:['Reach the old fuel store office','Copy the Syndicate ledger','Get back to the drop-off','COPYING','Got it. Now get out of there, quietly.','You were caught in Dustline.'],
+  loc:'DUSTLINE · OLD FUEL STORE · 05:15',
+  intro:['JUNO',"Same office, same fuel store. Feels like your first week all over again.",'nervous, wry'],
+  brief:["The Broker's cache is in Dustline's old fuel store office, the same room where you stole the armory logs in your first week.",'Hollow gunmen guard it now. If they raise the alarm, the ledger gets burned.','Same rules as always: crouch, stay out of their sight, knife from behind.'],
+  obj:['Reach the old fuel store office (Site B)','Copy the Syndicate ledger (hold F)','Get back to the drop-off','Optional: never raise the alarm'],
+  stars:[['Ghost: never raise the alarm',c=>!c.alarm],['Finish in under 4 minutes',c=>c.time<240]],
+  debrief:['The ledger goes back nine years. Every page is signed with a little drawing of a bird: a shrike.','One entry stands out: "VEX, delivery fee." Vex was running packages for Shrike long before she betrayed SIGMA.',"Tucked in the back is an old photo of a SIGMA unit. Rook stares at it for a long time and won't say why. Then Juno intercepts a message: Shrike wants to meet you. Pier 9. Tonight."]},
+ {act:5,code:'OP-41',title:'Pier 9',type:'boss',map:'harbor',theme:'night',weather:'storm',side:'def',allies:['Rook','Mara'],enemies:0,diff:'hard',toWin:1,credits:4500,captor:'SHRIKE',
+  boss:'SHRIKE',bossHp:380,bossPhases:true,bossEscape:.35,backupName:'CINDER·Drone',bossObj:'Take down Shrike',bossSub:'He calls drones when he is hurt',
+  bossLines:[['SHRIKE',"Let's see how you do against the birds. Up!",'commanding'],['SHRIKE',"Rook taught you well. I taught myself.",'cold']],
+  bossIntro:{line:['SHRIKE',"Pier 9. Where Rook taught you to hold a line. Let's see if it holds.",'calm, menacing'],card:['BOSS','SHRIKE','HOLLOW SYNDICATE · DRONE MASTER']},
+  escapeLines:[['SHRIKE',"Not tonight. You're not the one I came for.",'calm'],['SHRIKE',"Hello, Rook. Remember Tinder? You left me in the fire.",'bitter, quiet']],
+  outroLines:[['ROOK',"...Crane? No. I buried you nine years ago.",'stunned, quiet'],['SHRIKE',"You buried an empty box, Sergeant. I kept the fire burning for you.",'cold, over radio'],{card:['SHRIKE','ELIAS CRANE',"SIGMA. Rook's first rookie. Killed in action nine years ago."]},{card:['ACT VI COMPLETE','SMOKE','Next: Act VII · Backdraft']}],
+  loc:'HARBOR · PIER 9 · STORM · 23:50',
+  intro:['ROOK',"He picked Pier 9 on purpose. He knows us. Stay sharp.",'grim'],
+  brief:['Shrike wants to meet at Pier 9, the pier where you held the line with Rook and Vex in your first month.',"It's a trap, and everyone knows it. You're going anyway, with Rook and Mara at your side.",'Shrike calls drones when he is hurt. Take them down fast, then push him.'],
+  obj:['Find Shrike on the pier','Take down his drones',"Don't let him get away"],
+  stars:[['Finish in under 4 minutes',c=>c.time<240],['Headshots 40% or better',c=>c.hs>=40]],
+  debrief:['Shrike escapes into the storm on a Syndicate speedboat.','Rook sits on the pier in the rain for a long time. "Elias Crane," he says finally. "My first rookie. Operation Tinder, nine years ago. I left him behind on orders. They told me he was dead."',"Juno pulls a name off the Broker's phone: Calder Hayes, Blackwater Prison. Shrike's people are going to kill him tonight."]},
+ // ================================================================ ACT VII — BACKDRAFT
+ {act:6,code:'OP-42',title:'Blackwater',type:'escort',vip:'Hayes',escortTo:'the boat dock',map:'prison',theme:'night',weather:'storm',side:'def',allies:[],enemies:0,diff:'normal',toWin:1,credits:0,captor:'HOLLOW2',
+  looks:{HAYES:{base:'ct',bare:1,acc:['shades'],o:{top:'#e0701c',topPat:'solid',pants:'#e0701c',pantsPat:'solid',vest:'#c4601a',head:'#c4601a',gloves:'#d9b48f',boots:'#e8e8e8',hair:'#6b6b6b'}}},
+  vipWarn:['HAYES',"Movement ahead. Do something heroic.",'dry, sarcastic'],ambushVoice:'JUNO',
+  ambushLines:[['JUNO',"Contact! Multiple hostiles ahead!",'urgent'],['JUNO',"Contact ahead! Two of them.",'urgent']],
+  loc:'BLACKWATER PRISON · CELL BLOCK C · STORM · 00:30',
+  intro:['HAYES',"Well, well. My favorite soldier. Come to gloat, or come to save me?",'smug'],
+  brief:["Shrike's Syndicate has stormed Blackwater Prison in the storm. Their target is one inmate: Calder Hayes, the Meridian CEO you put here.",'Hayes knows what Operation Tinder was, and Shrike wants him silenced. You need him talking.','Get Hayes from his cell to the boat dock. He walks on his own and ducks when it gets loud. Try not to enjoy it when he gets shot at.'],
+  obj:['Escort Hayes to the boat dock','Keep Hayes alive','Clear the Syndicate ambushes'],
+  stars:[['Hayes above 50% health',c=>c.vipHp>=.5],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['Hayes sits in the boat, dripping and handcuffed, and finally talks.','"Operation Tinder was SIGMA\'s first live test of EMBER. Nine years ago, in the jungle. The drones decided everyone was an enemy. SIGMA buried it, and Meridian bought what was left."','"One more thing, soldier. Two weeks after your little victory, my old servers pinged a live EMBER core. Somebody kept a copy." Before the boat can leave, Syndicate snipers open up from the guard towers.']},
+ {act:6,code:'OP-43',title:'Towers',type:'countersnipe',map:'prison',theme:'overcast',side:'def',allies:[],enemies:0,diff:'normal',toWin:1,credits:0,captor:'HOLLOW2',loadout:['sniper','deagle'],
+  killLines:[['JUNO',"One tower clear. Three to go.",'focused'],['JUNO',"Two down. Keep moving between shots.",'focused'],['JUNO',"One left. He's the best of them.",'tense']],
+  loc:'BLACKWATER PRISON · GUARD TOWERS · 05:50',
+  intro:['JUNO',"Four snipers in the old guard towers. Find the glint before they find you.",'tense'],
+  brief:["Shrike's snipers hold Blackwater's four guard towers. Nothing leaves the dock until they're down.",'You have a sniper rifle and a pistol. Watch for the glint of a scope: it means someone is lining up a shot on you.','Move between shots. Gunmen will come through the yard to flush you out.'],
+  obj:['Take out all four tower snipers','Watch for scope glints','Stay out of their sight lines'],
+  stars:[['Headshots 50% or better',c=>c.hs>=50],['Finish in under 3 minutes',c=>c.time<180]],
+  debrief:['The last sniper falls and the boat pulls away from Blackwater.','Juno has been silent the whole ride. When you dock, she asks to talk to you alone.','"Hayes is right," she says. "Somebody kept a copy of EMBER. It was me."']},
+ {act:6,code:'OP-44',title:'Confession',type:'hackdefend',hackTime:75,drones:.5,map:'tower',theme:'night',side:'def',allies:['Mara','Juno'],enemies:0,diff:'normal',toWin:1,credits:3000,captor:'HOLLOW2',
+  hackObj:'Hold the archive while Juno wipes the backup',hackLbl:'Wipe',
+  loc:'SIGMA TOWER · DEEP ARCHIVE · 02:10',
+  intro:['JUNO',"I kept a backup. I couldn't let it die. I'm wiping it now. I'm so sorry, Kestrel.",'tearful'],
+  brief:['Juno confessed. Before she killed EMBER, she copied its core to a hidden server in SIGMA Tower\'s deep archive. She told no one.',"Now Shrike's drones are heading for the Tower. If he gets that copy, he gets EMBER.",'Juno is wiping the backup from the archive terminal. Stay near it, because the wipe stalls if you leave, and hold off the drones and gunmen.'],
+  obj:['Stay near the archive terminal','Hold off the drones','Finish the wipe'],
+  stars:[['Accuracy 35% or better',c=>c.acc>=35],['Keep Mara and Juno alive',c=>c.alliesAlive===c.alliesTotal]],
+  debrief:['The wipe completes. The backup is gone.','Then Juno checks the access log and goes white. The backup was copied three days ago, using an old SIGMA Internal Affairs override code.','Only one Internal Affairs agent ever had that code. She was killed in custody a year ago. Her name was Vex.']},
+ {act:6,code:'OP-45',title:'Ironclad',type:'swarm',waves:5,jugg:true,drones:.7,map:'tower',theme:'dusk',side:'def',allies:['Rook','Mara'],enemies:0,diff:'normal',toWin:1,credits:2000,captor:'HOLLOW2',
+  loc:'SIGMA TOWER · LOBBY · 18:40',
+  intro:['ROOK',"Hayes's old armor, straight out of the evidence locker. Try not to scratch it.",'amused'],
+  brief:["With the stolen copy, Shrike has hijacked SIGMA's own drone fleet and sent it at SIGMA Tower.","The only thing in the building that can take that kind of punishment is Calder Hayes's prototype armor, sitting in the evidence locker since the night you beat him.","You're wearing it: four hundred health, a minigun, and the whole Syndicate coming through the doors. Hold the lobby for five waves."],
+  obj:['Hold the lobby for 5 waves','Shred the drones','Keep Rook and Mara alive'],
+  stars:[['Destroy 40 drones',c=>(c.droneKills|0)>=40],['Keep Rook and Mara alive',c=>c.alliesAlive===c.alliesTotal]],
+  waveRadio:[['MARA',"Here they come. All of them.",'calm'],null,['ROOK',"That suit looks good on you, rookie.",'amused'],null,['JUNO',"Last wave! Someone's landing on the roof!",'urgent']],
+  debrief:['The lobby is knee-deep in broken drones. The armor is smoking, but it held.','Then the roof cameras come back online. A Syndicate gunship has landed on the helipad, and the woman stepping out of it is supposed to be dead.','Vex.']},
+ {act:6,code:'OP-46',title:'Backdraft',type:'boss',nonLethal:true,bossAt:'A',bossHp:380,map:'tower',theme:'night',weather:'storm',side:'def',allies:['Rook'],enemies:0,diff:'hard',toWin:1,credits:5000,captor:'VEX2',
+  boss:'VEX',bossPhases:true,backupName:'Hollow·Guard',bossObj:'Defeat Vex without killing her',bossSub:'Take her alive. When she is down, she will talk',
+  bossIntro:{line:['VEX',"Hello again, rookie. Miss me?",'smug, sweet'],card:['BOSS','VEX','BACK FROM THE DEAD · TAKE HER ALIVE']},
+  surrenderLines:[['VEX',"Alright, alright. You win, rookie. You always do, eventually.",'out of breath, amused'],['VEX',"You want Shrike? Ask your director why Crane was left in the fire.",'cold'],['VEX',"Hale gave the order at Tinder. Hale. Not Rook.",'quiet, deliberate']],
+  outroLines:[['ROOK',"Command, on the radio. I never saw a face. I just followed the order.",'hollow, quiet'],{card:['ACT VII COMPLETE','BACKDRAFT','Next: Act VIII · Wildfire']}],
+  loc:'SIGMA TOWER · HELIPAD · STORM · 23:00',
+  intro:['ROOK',"She shot me in the chest and died in a cell. Now she's on my roof. Take her alive.",'angry, controlled'],
+  brief:["Vex, the leak, the traitor, the woman who shot Rook, is alive. Her death in custody was staged by Shrike's people.","She's on the Tower's helipad with a Syndicate crew, loading SIGMA drone codes into a gunship.",'Take her alive. She knows everything Shrike knows. When she is down, she will talk.'],
+  obj:['Stop the gunship loading','Defeat Vex without killing her','Make her talk'],
+  stars:[['Finish in under 4 minutes',c=>c.time<240],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:["Vex is in cuffs on the helipad, smiling like she's already won.","Rook won't look at anyone. Command at Tinder was a voice on the radio. Nine years later, the voice is SIGMA's director.","If Hale ordered Crane abandoned, the proof is in SIGMA's sealed records. Hale will never let you near them. So you won't ask."]},
+ // ================================================================ ACT VIII — WILDFIRE
+ {act:7,code:'OP-47',title:'Sealed',type:'stealth',enemyLook:'ct',enemyPrefix:'Archive',stealthVoice:'JUNO',map:'embassy',theme:'night',side:'def',allies:[],enemies:7,diff:'normal',toWin:1,credits:0,captor:'ARCHIVE',
+  stealthText:['Reach the sealed records room','Copy the Tinder file','Get back to the gate','COPYING','Got it. Get out before the night shift checks the vault.','You were caught in the SIGMA archive.'],
+  loc:'LISBRA · SIGMA RECORDS ANNEX · 02:40',
+  intro:['JUNO',"Our own archive, guarded by our own people. Nobody gets hurt tonight, okay?",'nervous'],
+  brief:['SIGMA keeps its sealed records in an old embassy building in Lisbra. The Tinder file is inside, and only the director can open it.',"The guards are SIGMA security. They aren't the enemy; they're doing their jobs. Knock them out from behind if you must, but don't get seen.",'Copy the Tinder file and get out the way you came in.'],
+  obj:['Reach the records room','Copy the Tinder file (hold F)','Get back to the gate','Optional: never raise the alarm'],
+  stars:[['Ghost: never raise the alarm',c=>!c.alarm],['Finish in under 5 minutes',c=>c.time<300]],
+  debrief:['The Tinder file is almost all black ink. One line survived: "ASSET CRANE: ABANDON. AUTHORIZED: COMMAND (HALE)."','Attached is the helmet-camera footage of the team leader on Tinder.','Juno presses play. The camera belongs to Rook.']},
+ {act:7,code:'OP-48',title:'Tinder',type:'run',flashback:true,drones:1,chasers:4,escapeTime:170,route:'123456',map:'jungle',theme:'day',side:'def',allies:['Crane','Finch','Lark'],enemies:0,diff:'normal',toWin:1,credits:0,captor:'TINDER',noBuy:true,loadout:['ak','glock'],
+  cpRadio:[['COMMAND',"Tinder team, EMBER has lost containment. Proceed to the LZ. Do not engage the test units.",'calm, distant radio'],['LARK',"Do not engage? They're shooting at us!",'panicked'],['FINCH',"Keep moving! The LZ is past the ridge!",'shouting'],['CRANE',"Sarge, I'm with you. Just tell me where to go.",'scared, determined']],
+  outroLines:[['CRANE',"Sarge! I'm hit, I can't get up! Don't leave me!",'desperate, pained'],['COMMAND',"Rook, lift off now. Tinder never happened. That's an order.",'cold, radio'],['ROOK',"...Copy, Command.",'broken, quiet'],['CRANE',"ROOK!",'screaming'],{card:['OPERATION TINDER','NINE YEARS AGO','Sgt. Elias Crane · killed in action · body not recovered']},{card:['','THE FOOTAGE ENDS','Rook switches it off and walks out of the room.']}],
+  loc:'OPERATION TINDER · NINE YEARS AGO · 16:20',
+  intro:['CRANE',"Sarge, the drones just turned around. They're looking at us.",'nervous, young'],
+  brief:['NINE YEARS AGO. You are Sergeant Rook, leading a four-person SIGMA team guarding the first field test of EMBER in the jungle. Codename: Tinder.',"Your rookie, Elias Crane, has never seen real combat. Today he will.",'EMBER has just marked every soldier in the jungle as an enemy. Get your team to the landing zone before the burn.'],
+  obj:['Reach the landing zone','Keep your team together','Survive the drones'],
+  stars:[['Keep Finch and Lark alive',c=>(c.fbAlive|0)>=2],['Reach the LZ with 30 seconds or more left',c=>c.timeLeft>=30]],
+  debrief:['The footage ends. Nobody in the room speaks.','Rook stands up. "He\'s right to hate me," he says. "I\'d hate me."',"Shrike's drone factory stands on the same ground, built on the ashes of the Tinder test site. Juno traced it from the drone serial numbers. You're going in."]},
+ {act:7,code:'OP-49',title:"Hornet's Nest",type:'sabotage',plants:['A','B','k'],exfil:'e',escapeTime:60,drones:.4,map:'jungle',theme:'dusk',side:'def',allies:['Mara'],enemies:0,diff:'normal',toWin:1,credits:0,captor:'SHRIKE',loadout:['ak','glock'],
+  plantNames:['the drone hangar','the fuel depot','the uplink mast'],
+  loc:"TINDER SITE · SHRIKE'S DRONE FACTORY · 19:30",
+  intro:['MARA',"Three charges: the hangar, the fuel depot and the uplink. Then we run.",'calm'],
+  brief:["Shrike built his drone factory on the ruins of the Tinder test site. Every drone in his swarm was born here.",'Plant charges on the drone hangar (A), the fuel depot (B) and the uplink mast. Each takes a few seconds: hold F.',"When the last charge is set, you have sixty seconds to reach the river boat before the whole valley goes up."],
+  obj:['Plant a charge on the drone hangar (A)','Plant a charge on the fuel depot (B)','Plant a charge on the uplink mast','Reach the boat before it blows'],
+  stars:[['Reach the boat with 20 seconds or more left',c=>c.timeLeft>=20],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['The factory goes up behind you in a fireball you can feel through the river water.','But Juno is watching the satellite feed, and something is still moving in the smoke. Something big.','"That\'s not a drone," she says. "That\'s the hive that controls them. And it\'s waking up."']},
+ {act:7,code:'OP-50',title:'The Hive',type:'boss',bossDrone:true,bossAt:'k',bossHp:540,bossScale:1.7,map:'jungle',theme:'night',side:'def',allies:['Rook','Mara'],enemies:0,diff:'hard',toWin:1,credits:5000,captor:'SHRIKE',
+  boss:'HIVE',bossPhases:true,backupName:'CINDER·Drone',bossObj:'Destroy the Hive',bossSub:'Shoot down its swarms, then break its shield',
+  bossLines:[['HIVE',"Swarm protocol engaged.",'robotic, flat'],['HIVE',"Shields online. Threat level: total.",'robotic, flat']],
+  bossIntro:{line:['HIVE',"Hostile detected. Tinder protocol: burn everything.",'robotic, flat'],card:['BOSS','THE HIVE','EMBER COMMAND DRONE · SPAWNS SWARMS']},
+  loc:'TINDER SITE · RUINS · 23:10',
+  intro:['ROOK',"Big, ugly, and flying. Shoot the glowing bits.",'dry'],
+  brief:["The Hive is Shrike's command drone: a flying fortress that controls the whole swarm.",'It launches drone swarms when it is damaged and raises a shield when it is nearly dead.','Bring it down. Every drone in the swarm goes deaf when it falls.'],
+  obj:['Destroy the Hive','Shoot down its swarms','Break its shield'],
+  stars:[['Finish in under 4 minutes',c=>c.time<240],['Destroy 15 drones',c=>(c.droneKills|0)>=15]],
+  debrief:['The Hive crashes into the Tinder ruins and the swarm drops out of the sky.',"Its memory core holds Shrike's plan: at the Halcyon summit in two days, he will turn SIGMA's hijacked fleet on SIGMA itself, live on every screen in the world, with Director Hale in the crosshairs.","But the crash woke something else. Shrike's last order to the drones: burn the valley. Run."]},
+ {act:7,code:'OP-51',title:'Wildfire',type:'run',drones:.8,chasers:4,escapeTime:120,route:'123456',map:'jungle',theme:'night',side:'def',allies:['Rook','Mara'],enemies:0,diff:'hard',toWin:1,credits:0,captor:'SHRIKE',loadout:['ak','deagle'],
+  cpRadio:[['MARA',"Fire's jumping the trail behind us!",'shouting'],['ROOK',"Keep going. Don't look back.",'grim'],['MARA',"I can see the river!",'shouting']],
+  outroLines:[['ROOK',"This is where I left him. Right here.",'quiet'],['ROOK',"This is my mess, rookie. I'm going to clean it up myself.",'resolved'],['ROOK',"Look after them for me.",'soft'],{card:['NEXT MORNING','ROOK · AWOL','His radio was found on the boat. He took a rifle and nothing else.']},{card:['ACT VIII COMPLETE','WILDFIRE','Next: Act IX · Firebreak']}],
+  loc:'TINDER SITE · WILDFIRE · 23:40',
+  intro:['MARA',"The whole valley's on fire! The boat's at the river. Go, go, go!",'shouting'],
+  brief:["Shrike's last order turned his drones into firebombers. The whole valley is burning.","Your boat is waiting at the river, at the same landing zone Rook flew out of nine years ago.","Reach every checkpoint before the fire closes in. Don't stop for anything."],
+  obj:['Reach every checkpoint','Get to the river before the fire does','Keep Rook and Mara with you'],
+  stars:[['Escape with 30 seconds or more left',c=>c.timeLeft>=30],['Keep Rook and Mara alive',c=>c.alliesAlive===c.alliesTotal]],
+  debrief:['You wake up on the boat at dawn. Rook is gone.','He left his radio on your chest, tuned to an old SIGMA channel, with one message on it: "Don\'t follow me, rookie."',"Two days later, the night before the summit, Halcyon's power grid goes dark. Rook's tracker last pinged in the city's metro."]},
+ // ================================================================ ACT IX — FIREBREAK
+ {act:8,code:'OP-52',title:'Dead Line',type:'run',dark:true,fog:true,drones:.5,chasers:3,route:'12345',map:'metro',theme:'night',side:'def',allies:['Mara'],enemies:0,diff:'normal',toWin:1,credits:0,captor:'HOLLOW2',loadout:['shotgun','glock'],
+  cpRadio:[['JUNO',"Rook's ping is stronger. Keep heading east.",'quiet'],['MARA',"Something's moving in the tunnel. Lots of somethings.",'tense'],['JUNO',"Almost there. The platform's just ahead.",'quiet']],
+  loc:'HALCYON METRO · LINE 9 · BLACKOUT · 01:00',
+  intro:['JUNO',"The whole grid's down. You've got a flashlight and Rook's last ping. Follow the tracks.",'worried'],
+  brief:["Shrike has cut Halcyon's power. The metro is pitch black, and the Syndicate is using the tunnels to move drones into position for the summit.","Rook's tracker last pinged on the far Line 9 platform. Follow the tunnels to it.",'Your flashlight shows the way, but it also shows you to them. Keep moving.'],
+  obj:["Follow the tunnels to Rook's last ping",'Survive the dark','Find Rook'],
+  stars:[['Finish in under 4 minutes',c=>c.time<240],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:["Rook isn't on the platform. His tracker is, smashed, next to a wrecked drone and a lot of blood that isn't his. He went down fighting.",'Then a phone rings in the dark. An old Internal Affairs number.','"Hello, rookie," says Vex. "Shrike tried to kill me in the prison van. I\'d like to return the favor. I\'m in the tunnels, and I\'m not alone."']},
+ {act:8,code:'OP-53',title:'Strange Bedfellows',type:'escort',vip:'Vex',vipShe:true,escortTo:'the service exit',map:'metro',theme:'night',side:'def',allies:[],enemies:0,diff:'normal',toWin:1,credits:0,captor:'HOLLOW2',
+  vipWarn:['VEX',"Company ahead. Try to keep up, rookie.",'bored, smug'],ambushVoice:'JUNO',
+  ambushLines:[['JUNO',"Contact! Multiple hostiles ahead!",'urgent'],['JUNO',"Contact ahead! Two of them.",'urgent']],
+  loc:'HALCYON METRO · LINE 9 TUNNELS · 02:15',
+  intro:['VEX',"Don't look at me like that. Get me out, and I'll give you Shrike, and your precious Rook.",'smug'],
+  brief:['Vex escaped when Shrike\'s drones attacked her prison transport. Now Shrike wants her dead, and she wants protection.',"She says she knows where Rook is being held. Juno says she's lying. Mara says shoot her. You're the one holding the gun.",'Get Vex through the tunnels to the service exit. She walks on her own, and she does not take orders.'],
+  obj:['Escort Vex to the service exit','Keep Vex alive','Clear the Syndicate ambushes'],
+  stars:[['Vex above 50% health',c=>c.vipHp>=.5],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['At the service exit, Vex keeps her word. Mostly.','"Shrike is holding Rook on the Leviathan, an old oil rig off the coast. That\'s where the EMBER copy runs. I should know. I helped him build it."','"But first he needs the city dark for the summit. Three substations in the Neon District keep the lights off. Turn them back on, and his drones go blind."']},
+ {act:8,code:'OP-54',title:'Grid',type:'capture',zones:['A','B','k'],zoneNames:['the market substation','the canal substation','the field office substation'],capTime:8,drones:.4,map:'neon',theme:'night',side:'def',allies:['Mara'],enemies:0,diff:'normal',toWin:1,credits:0,captor:'HOLLOW2',loadout:['ak','glock'],
+  capLines:[['JUNO',"One substation up. The market's getting its lights back.",'pleased'],['JUNO',"Two down. Half his drones are flying blind.",'pleased'],['JUNO',"That's the last one. Halcyon's lit up!",'excited']],
+  loc:'HALCYON · NEON DISTRICT · SUBSTATIONS · 03:30',
+  intro:['JUNO',"Three substations. Stand on each switch until it locks in, and Halcyon gets its lights back.",'focused'],
+  brief:["Shrike's people hold three substations that keep Halcyon dark.",'Capture each one by standing on its switch until it locks in. Enemies nearby stall the capture, so clear them first.','Every substation you turn on blinds more of his drones.'],
+  obj:['Capture the market substation (A)','Capture the canal substation (B)','Capture the field office substation',"Restore the city's power"],
+  stars:[['Finish in under 4 minutes',c=>c.time<240],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['One by one, the Neon District lights back up, and the drones in the sky start bumping into each other.','Shrike answers on every screen in the city: "Bright lights won\'t save you, Kestrel. At noon, SIGMA\'s own fleet comes for its director."',"The fleet's uplinks are at SIGMA's desert launch site. Shut them down before noon."]},
+ {act:8,code:'OP-55',title:'Fleet',type:'defuse2',uplinks:['A','B','k'],timeMul:1.5,drones:.45,enemyLook:'t',enemyPrefix:'Hollow',map:'launch',theme:'day',side:'def',allies:['Mara'],enemies:0,diff:'hard',toWin:1,credits:4000,captor:'SHRIKE',
+  loc:'SIGMA LAUNCH SITE · DESERT · 11:20',
+  intro:['JUNO',"Three uplinks are feeding Shrike's commands to the fleet. Shut them all down before noon!",'urgent'],
+  brief:["SIGMA's drone fleet takes its orders from three uplink masts at the desert launch site. Shrike has hijacked all three.",'Shut each one down by hand (hold F) before the fleet launches at noon.',"Hijacked SIGMA drones guard the masts. They're our drones, and they shoot just as well."],
+  obj:['Shut down uplink A (hold F)','Shut down uplink B (hold F)','Shut down the central uplink (hold F)'],
+  stars:[['Finish with 60 seconds or more left',c=>c.timeLeft>=60],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['The last mast goes dark. Most of the fleet falls out of the sky over the desert.',"Most. Twelve drones were already airborne, heading for the summit at Halcyon airport, where Director Hale's plane has just landed.",'Hale refuses to leave. "If I run, he wins," he says. "Let him come."']},
+ {act:8,code:'OP-56',title:'Firebreak',type:'swarm',waves:5,protect:'Hale',protectAt:'1',drones:.75,map:'airport',theme:'dusk',side:'def',allies:['Mara','Juno'],enemies:0,diff:'hard',toWin:1,credits:3500,captor:'SHRIKE',
+  waveRadio:[['MARA',"Drones on the runway! Keep them off the director!",'shouting'],null,['JUNO',"These ones are carrying charges. Don't let them get close!",'urgent'],null,['MARA',"Last wave. Make it count.",'calm']],
+  outroLines:[['HALE',"You saved my life knowing what I did. I owe you the truth.",'tired, sincere'],['HALE',"I gave the order at Tinder. I told myself it saved SIGMA. It only saved me.",'ashamed'],['SHRIKE',"Director. Kestrel. I have someone who wants to say hello.",'cold, broadcast'],['ROOK',"Don't come, rookie. That's an order.",'hurt, defiant'],['SHRIKE',"The Leviathan. Dawn. Come and get him, or I bring the fire to Halcyon.",'cold, broadcast'],{card:['ACT IX COMPLETE','FIREBREAK','Next: Act X · Phoenix']}],
+  loc:'HALCYON AIRPORT · SUMMIT HANGAR · 12:00',
+  intro:['HALE',"Sergeant. Whatever you've heard about me, keep me alive today. We'll settle it after.",'calm, firm'],
+  brief:["The last of Shrike's drones are heading for the summit at Halcyon airport, and Director Hale is standing in the open, refusing to hide.",'Keep him alive through five waves. If Hale dies, Shrike gets exactly the war he wants.','You know what Hale did at Tinder. Protect him anyway. That is the job.'],
+  obj:['Protect Director Hale','Survive 5 waves','Buy between waves (B)'],
+  stars:[['Hale above 50% health',c=>c.vipHp>=.5],['Accuracy 35% or better',c=>c.acc>=35]],
+  debrief:['Hale gives the order himself this time: "Get Rook back. Whatever it costs."','Vex knows the rig. Juno can blind its radar. Mara will fly you in through the storm.','One last mission. Everything ends on the Leviathan.']},
+ // ================================================================ ACT X — PHOENIX
+ {act:9,code:'OP-57',title:'Leviathan',type:'stealth',enemyLook:'t',enemyPrefix:'Hollow',stealthVoice:'VEX',map:'rig',theme:'night',weather:'storm',side:'def',allies:[],enemies:7,diff:'hard',toWin:1,credits:0,captor:'SHRIKE',
+  stealthText:['Reach the radar room',"Jam the rig's radar",'Get back to the boarding ladder','JAMMING',"Radar's dead. Not bad, rookie.",'You were caught aboard the Leviathan.'],
+  loc:'THE LEVIATHAN · OFFSHORE RIG · STORM · 04:30',
+  intro:['VEX',"Radar room's on the upper deck, east side. Go quiet. If they see you, Rook's a dead man.",'low, serious'],
+  brief:['The Leviathan is an abandoned oil rig fifty kilometres offshore. Shrike has turned it into a fortress, a drone carrier, and the home of the stolen EMBER copy.','Vex is guiding you from the boat. Get to the radar room and blind the rig so the rest of the team can land.',"If the alarm goes off, they'll kill Rook. Stay invisible."],
+  obj:['Reach the radar room (Site B)','Jam the radar (hold F)','Get back to the boarding ladder','Optional: never raise the alarm'],
+  stars:[['Ghost: never raise the alarm',c=>!c.alarm],['Finish in under 5 minutes',c=>c.time<300]],
+  debrief:['The radar dies. Mara brings the team in low over the waves.',"Vex has one last piece of news: Rook is in the brig on the lower deck, guarded by Shrike's best.",'"Go get your sergeant," Vex says. "I\'ll keep the boat warm. Probably."']},
+ {act:9,code:'OP-58',title:'Brig',type:'hostage',hostageNames:['Rook'],map:'rig',theme:'night',weather:'storm',side:'def',allies:['Mara','Juno'],enemies:0,diff:'hard',toWin:1,credits:0,captor:'SHRIKE',
+  clearVoice:'MARA',clearLine:"Clear! Get Rook moving to the ladder!",hostageLine:"Took you long enough, rookie. Give me a rifle.",
+  loc:'THE LEVIATHAN · LOWER DECK BRIG · 05:00',
+  intro:['MARA',"Rook's in the brig. Breach fast, shoot straight, bring him home.",'determined'],
+  brief:["Rook is held in the brig on the Leviathan's lower deck.",'Get onto the deck quietly if you can. When it kicks off, time slows. Make every shot count.','Clear every guard, then get Rook to the boarding ladder.'],
+  obj:['Get onto the lower deck','Kill every guard','Get Rook to the ladder'],
+  stars:[['Rescue in under 4 minutes',c=>c.time<240],['Headshots 40% or better',c=>c.hs>=40]],
+  debrief:["Rook is bruised and bleeding, and he's already checking a borrowed rifle.",'"Crane\'s on the drill deck with the EMBER copy," he says. "It runs off the rig\'s ballast pumps. Kill the pumps, the rig starts to sink, and the copy goes down with it."','"And rookie: when we find him, he\'s mine to talk to. Not to shoot. Talk."']},
+ {act:9,code:'OP-59',title:'Pull the Plug',type:'sabotage',plants:['A','B','z'],exfil:'e',escapeTime:55,drones:.5,map:'rig',theme:'night',weather:'storm',side:'def',allies:['Rook','Mara'],enemies:0,diff:'hard',toWin:1,credits:0,captor:'SHRIKE',loadout:['ak','deagle'],
+  plantNames:['ballast pump A','ballast pump B','the drone uplink'],exfilName:'the drill deck',
+  loc:'THE LEVIATHAN · BALLAST DECK · 05:30',
+  intro:['ROOK',"Two pumps and the uplink. Plant, then we go up top and finish this.",'grim'],
+  brief:["The EMBER copy runs on power from the rig's ballast pumps.",'Plant charges on both pumps and on the drone uplink. Once they blow, the Leviathan starts to sink, and EMBER cannot escape.','After the last charge, you have under a minute to reach the drill deck before the lower decks flood.'],
+  obj:['Plant a charge on pump A','Plant a charge on pump B','Plant a charge on the uplink','Reach the drill deck'],
+  stars:[['Reach the deck with 20 seconds or more left',c=>c.timeLeft>=20],['Keep Rook and Mara alive',c=>c.alliesAlive===c.alliesTotal]],
+  debrief:['The pumps blow. The whole Leviathan groans and leans ten degrees into the sea.',"On the drill deck, the EMBER copy wakes up. Shrike calls it the Pyre, and it's launching every drone it has left.",'Juno can kill it, but she has to plug in by hand, out in the open.']},
+ {act:9,code:'OP-60',title:'Pyre',type:'swarm',waves:5,protect:'Juno',protectAt:'k',protectKneel:true,drones:.8,map:'rig',theme:'dusk',side:'def',allies:['Rook','Mara','Vex'],enemies:0,diff:'hard',toWin:1,credits:4000,captor:'SHRIKE',
+  waveRadio:[['JUNO',"I'm in. Writing the kill code by hand. Don't let anything touch me!",'frantic, focused'],['VEX',"Don't thank me, rookie. I just hate losing.",'smug'],['ROOK',"Tighter, people! Keep them off her!",'shouting'],null,['JUNO',"Ten more seconds. Five. Almost there!",'frantic']],
+  loc:'THE LEVIATHAN · DRILL DECK · DAWN',
+  intro:['JUNO',"I built it, I kept it, I'll kill it. Just keep them off me for five waves!",'determined'],
+  brief:['The Pyre, the stolen copy of EMBER, is launching every drone it has.','Juno is plugged into the core, writing a kill code by hand. Protect her for five waves.','Vex came back to the fight. Nobody asked her to. Nobody trusts her. Use her anyway.'],
+  obj:['Protect Juno at the core','Survive 5 waves','Buy between waves (B)'],
+  stars:[['Juno above 50% health',c=>c.vipHp>=.5],['Destroy 40 drones',c=>(c.droneKills|0)>=40]],
+  debrief:["The Pyre's light goes out. Juno sits down on the deck and cries.","On the far side of the drill deck, Shrike waits alone, with his last drones and nowhere left to go.",'Rook checks his rifle one last time. "Let me try to talk first," he says. "Then do what you have to do."']},
+ {act:9,code:'OP-61',title:'Phoenix',type:'boss',finale2:true,nonLethal:true,bossAt:'k',bossHp:520,bossScale:1.08,map:'rig',theme:'dusk',side:'def',allies:['Rook','Mara'],enemies:0,diff:'hard',toWin:1,credits:7000,captor:'SHRIKE',
+  boss:'SHRIKE',bossPhases:true,backupName:'CINDER·Drone',bossObj:'Defeat Shrike',bossSub:'He will not go quietly',
+  bossLines:[['SHRIKE',"My birds still answer to me!",'furious'],['SHRIKE',"You want to finish it, Kestrel? Then finish it.",'cold, tired']],
+  bossIntro:{line:['SHRIKE',"Nine years I waited for Rook to come back for me. He finally did. Too late.",'bitter'],card:['FINAL BOSS','SHRIKE','ELIAS CRANE · 3 PHASES']},
+  surrenderLines:[['SHRIKE',"Go on, Kestrel. That's what SIGMA does with its mistakes.",'exhausted, defiant'],['ROOK',"No. Not this time. I'm sorry, Elias. I should have come back for you.",'emotional, quiet'],['SHRIKE',"...You're nine years late, Sarge.",'breaking']],
+  outroLines:[['JUNO',"Kestrel, I've got the Tinder file. Every second of it. One button and the whole world sees it.",'quiet, serious'],['HALE',"Sergeant, think carefully. That file will destroy SIGMA. And Rook with it.",'calm, radio'],['ROOK',"Your call, rookie. I'll stand by it either way.",'steady']],
+  loc:'THE LEVIATHAN · DRILL DECK · SUNRISE',
+  intro:['ROOK',"Crane! It's over. Put it down and come home.",'shouting, pleading'],
+  brief:['Shrike, Elias Crane, is standing on the drill deck of a sinking rig with nothing left but his last drones and his rifle.','He fights in three phases: drones, then a shield, then everything he has. Beat him, but do not kill him.','Then decide what the world gets to know about Tinder.'],
+  obj:['Defeat Shrike','Survive his last drones','Make your choice'],
+  stars:[['Finish in under 5 minutes',c=>c.time<300],['Headshots 40% or better',c=>c.hs>=40]],
+  debrief:['Shrike is in custody. The Leviathan slips under the waves at sunrise.']}];
+// endings of the expansion finale (OP-61)
+const EXP_ENDINGS={
+ truth:{label:['TELL THE WORLD','The Tinder file went public. SIGMA answered for it.'],lines:[['JUNO',"It's out. Every screen in the world.",'quiet'],['ROOK',"Good. About time somebody told the truth around here.",'relieved']],
+  cards:[['ONE MONTH LATER','THE TINDER HEARINGS','Director Hale resigned on live television.'],['','SGT. ROOK','Testified for nine hours. Then visited Crane in prison every Sunday.'],['','SIGMA','Rebuilt in the open. Its new director is still deciding whether to take the job.']],credit:'Ending: Tell the World'},
+ bury:{label:['BURY IT','The Tinder file stayed sealed. SIGMA survived.'],lines:[['HALE',"Thank you, Sergeant. SIGMA won't forget this.",'relieved, quiet'],['SHRIKE',"Neither will I.",'cold']],
+  cards:[['ONE MONTH LATER','THE LEVIATHAN','Officially: an accident at sea. No survivors.'],['','ELIAS CRANE','Moved to a SIGMA black site. His file still says: deceased.'],['','SGT. ROOK','Retired. He sets out three cups of coffee every morning.']],credit:'Ending: Bury It'},
+ phoenix:{label:['PHOENIX','The secret Hardcore ending.'],lines:[['JUNO',"File's out. And Kestrel, Crane's alive. They're bringing him home.",'emotional'],['ROOK',"Then we go home together this time. All of us.",'warm, quiet']],
+  cards:[['☠ HARDCORE CAMPAIGN COMPLETE','THE SECRET ENDING','The truth came out, and nobody was left behind.']],credit:'Ending: Phoenix'}};
+// capture-scene captors for the new acts
+const EXP_CAPTORS={
+ SHRIKE:{name:'SHRIKE',lines:[['SHRIKE',"Down you go, little bird.",'calm, cruel'],['SHRIKE',"Tie them up. Rook can watch for a change.",'cold']],cell:['SHRIKE',"Nine years I sat in the dark. Your turn.",'quiet, menacing']},
+ HOLLOW2:{name:'Hollow·Lieutenant',lines:[['HOLLOW',"Shrike said you'd come. He said you'd fall, too.",'mocking'],['HOLLOW',"Bag them. The birds can have what's left.",'rough']],cell:['HOLLOW',"Shrike will see you when he's ready.",'bored']},
+ VEX2:{name:'VEX',lines:[['VEX',"Still trusting the wrong people, rookie?",'amused'],['VEX',"Hands behind your head. You know the drill.",'cool']],cell:['VEX',"I'd say nothing personal. But it's a little personal.",'sweet, cold']},
+ ARCHIVE:{name:'Archive·Officer',lines:[['SIGMA',"Sergeant Kestrel? You're under arrest. Don't make this worse.",'firm'],['SIGMA',"The director will want to speak to you personally.",'firm']]},
+ TINDER:{name:'Crane',team:'blue',lines:[['CRANE',"Sarge! Sarge, get up! Medic!",'panicked'],['CRANE',"Stay with me, Rook. We're going home together.",'desperate']]}};
+const EXP_MISC_LINES=[['HAYES',"Wait. I saw movement up ahead. Get ready!",'nervous'],['VEX',"Wait. I saw movement up ahead. Get ready!",'calm']];
+
+
+// =====================================================================
+//  EXPANSION · ACTS VI–X  (v44)
+//  drones · swarm · tail · chase · sabotage · countersnipe · capture · run
+//  flashback / blackout / prototype armor · new bosses · finale 2
+// =====================================================================
+const EXP_TYPES=['swarm','tail','chase','sabotage','countersnipe','capture','run'];
+const EXP={droneN:0,seen:new WeakSet(),light:null,objs:[],glints:[],choiceHTML:null,mkT:0};
+// ---------- voice table (filenames are assigned in story order; the ElevenLabs script uses the same order) ----------
+function expVoxCollect(){const out=[],seen=new Set(),cnt={};
+  const add=(L,ctx)=>{if(!L||!L[0]||!L[1]||L.card)return;const who=String(L[0]).toUpperCase(),k=who+'|'+L[1];if(seen.has(k))return;seen.add(k);
+    const base=who.toLowerCase().replace(/[^a-z]/g,'');cnt[base]=(cnt[base]||0)+1;out.push([who,L[1],'x_'+base+'_'+String(cnt[base]).padStart(2,'0')+'.mp3',L[2]||'',ctx]);};
+  for(const m of EXP_STORY){const c=m.code+' '+m.title;add(m.intro,c+' · intro');if(m.bossIntro)add(m.bossIntro.line,c+' · boss intro');
+    (m.waveRadio||[]).forEach(L=>add(L,c+' · wave radio'));if(m.tailLines)for(const k of ['start','look','far','meet'])add(m.tailLines[k],c+' · radio');
+    (m.cpRadio||[]).forEach(L=>add(L,c+' · checkpoint radio'));(m.killLines||[]).forEach(L=>add(L,c+' · radio'));(m.capLines||[]).forEach(L=>add(L,c+' · radio'));
+    if(m.vipWarn)add(m.vipWarn,c+' · escort warning');(m.ambushLines||[]).forEach(L=>add(L,c+' · ambush radio'));
+    if(m.clearLine)add([m.clearVoice,m.clearLine,'shouting'],c+' · radio');if(m.hostageLine)add([m.hostageNames[0],m.hostageLine,'tired, wry'],c+' · rescued');
+    (m.bossLines||[]).forEach(L=>add(L,c+' · boss phase'));(m.escapeLines||[]).forEach(L=>add(L,c+' · cutscene'));(m.surrenderLines||[]).forEach(L=>add(L,c+' · cutscene'));
+    (m.outroLines||[]).forEach(L=>add(L,c+' · cutscene'));}
+  for(const k in EXP_ENDINGS)EXP_ENDINGS[k].lines.forEach(L=>add(L,'OP-61 ending: '+EXP_ENDINGS[k].label[0]));
+  for(const k in EXP_CAPTORS){const C=EXP_CAPTORS[k];C.lines.forEach(L=>add(L,'capture scene ('+k+')'));if(C.cell)add(C.cell,'capture cell ('+k+')');}
+  return out;}
+const EXP_VOX=expVoxCollect();
+const expFile=(who,text)=>{const r=EXP_VOX.find(v=>v[0]===who&&v[1]===text);return r?r[2]:'';};
+// ---------- data hookup ----------
+ACTS.push(...EXP_ACTS);STORY.push(...EXP_STORY);
+for(const k in EXP_CAPTORS){const C=EXP_CAPTORS[k];CAPTORS[k]={name:C.name,team:C.team,lines:C.lines.map(L=>[L[0],L[1],expFile(L[0],L[1])]),cell:C.cell?[C.cell[0],C.cell[1],expFile(C.cell[0],C.cell[1])]:undefined};}
+FEMALE_NAMES.add('Lark');
+Object.assign(CHAR_LOOKS,{
+  SHRIKE:{base:'ct',bare:1,acc:['coat','beard','headset'],beard:'#2c2622',o:{top:'#3a1416',topPat:'solid',pants:'#1c1c20',pantsPat:'solid',vest:'#25171a',head:'#25171a',gloves:'#111',boots:'#111',hair:'#2a2420'}},
+  CRANE:{base:'ct',bare:1,acc:['headset'],o:{top:'#4d5a44',topPat:'solid',pants:'#4f5a42',pantsPat:'solid',vest:'#3a4430',head:'#3a4430',gloves:'#2a2f22',boots:'#2a2620',hair:'#2a2420'}},
+  HALE:{base:'ct',bare:1,acc:['beret'],beret:'#1d3a78',o:{top:'#1c2638',topPat:'solid',pants:'#1c2638',pantsPat:'solid',vest:'#243046',head:'#243046',gloves:'#111',boots:'#111',hair:'#9a9a9a'}},
+  BROKER:{base:'ct',bare:1,acc:['shades','coat'],o:{top:'#6a2c6a',topPat:'solid',pants:'#2a2a30',pantsPat:'solid',vest:'#3a2a3a',head:'#3a2a3a',gloves:'#d9b48f',boots:'#111',hair:'#1a1410'}},
+  FINCH:{base:'ct',acc:['headset'],o:{top:'#4d5a44',topPat:'solid',pants:'#4f5a42',pantsPat:'solid',vest:'#3a4430',head:'#3a4430',gloves:'#2a2f22',boots:'#2a2620'}},
+  LARK:{base:'ct',acc:['facepaint'],o:{top:'#4d5a44',topPat:'solid',pants:'#4f5a42',pantsPat:'solid',vest:'#3a4430',head:'#3a4430',gloves:'#2a2f22',boots:'#2a2620',body:'f',hair:'#7a3a1a'}}});
+charLook=function(a){if(!a||a.isPlayer||!a.name||!state.cfg||!state.cfg.story)return null;const k=String(a.name).toUpperCase();const L=state.cfg.story.looks;return (L&&L[k])||CHAR_LOOKS[k]||null;};
+Object.assign(MDRESS,{'OP-37':['sirens','debris','smoke'],'OP-38':['puddles','lamps'],'OP-39':['puddles','lamps','tape'],'OP-40':['papers','lamps'],'OP-41':['puddles','floodlights','fire'],
+  'OP-42':['emergency','sirens','puddles'],'OP-43':['sandbags','floodlights'],'OP-44':['servers','emergency'],'OP-45':['emergency','debris','fire','smoke'],'OP-46':['emergency','puddles','fire'],
+  'OP-47':['papers','cameras','lamps'],'OP-48':['smoke','fire'],'OP-49':['charges','floodlights','sandbags'],'OP-50':['fire','smoke','scorch','debris'],'OP-51':['fire','smoke','ash','scorch'],
+  'OP-52':['debris','emergency'],'OP-53':['emergency','debris'],'OP-54':['sirens','puddles','sandbags'],'OP-55':['emergency','smoke','steam'],'OP-56':['emergency','luggage','sandbags','fire'],
+  'OP-57':['puddles','floodlights'],'OP-58':['emergency','puddles'],'OP-59':['steam','emergency','charges'],'OP-60':['fire','smoke','emergency','steam'],'OP-61':['fire','smoke','scorch','ash']});
+const EXP_LOOKS={
+  neon:()=>({floorTex:MTX.tarmac,floorCol:0x6a6f7a,wallTex:TEX.concrete,palette:[0x2a2440,0x3a2a4a,0x1f3340,0x402434,0x2b2b38,0x24384a],cap:0x15151c,skyline:'towers',deco:true}),
+  prison:()=>({water:-1.15,floorTex:TEX.concrete,floorCol:0xa9a59c,wallTex:TEX.concrete,tintA:0x9a978f,tintB:0x7d7a72,cap:0x55534e,skyline:'sea',deco:'industrial'}),
+  jungle:()=>({groundTex:TEX.dirt,floorTex:TEX.dirt,floorCol:0x7d9a55,wallTex:MTX.brick,tintA:0x7d8a66,tintB:0x5f6e4c,cap:0x4b5a3a,skyline:'mountains',deco:false}),
+  metro:()=>({floorTex:MTX.tarmac,floorCol:0x8a8a86,wallTex:TEX.concrete,tintA:0xcfc9b8,tintB:0xa9a28f,cap:0x3a3a3a,skyline:'city',rails:true,deco:false}),
+  rig:()=>({water:-1.15,floorTex:MTX.deck,floorCol:0xffffff,groundTex:MTX.deck,wallTex:MTX.hull,tintA:0x8e9aa0,tintB:0xb8902c,cap:0x3d4448,skyline:'sea',deco:'industrial'})};
+{const _ml=mapLook;mapLook=function(k,d){const b=_ml(k,d);if(EXP_LOOKS[k])Object.assign(b,EXP_LOOKS[k]());return b;};}
+// ---------- helpers ----------
+function expEnding(){if(CAMP.lastEnding)return CAMP.lastEnding;const e=CAMP.endings||{};return e.secret?'secret':e.burn?'burn':'trust';}
+function expRoute(m){if(m.routeCells)return m.routeCells.map(([c,r])=>nearestOpen(cellCenter(c,r)));return (m.route||'12345').split('').map(ch=>msMark(ch));}
+function giveLoadout(l){const P=player;P.inv={1:l[0]?mkInst(l[0]):null,2:mkInst(l[1]||'glock'),3:mkInst('knife')};P.armor=100;P.helmet=true;P.slot=l[0]?1:2;equip(P,P.slot,true);}
+function expSpawnPts(){const w=marksOf('w');if(w.length)return w;return [MAP.spawnC.atk,MAP.spawnC.def,MAP.siteC.A,MAP.siteC.B].filter(Boolean);}
+function expFarPt(){const pts=expSpawnPts().slice().sort((a,b)=>b.distanceTo(player.pos)-a.distanceTo(player.pos));return pick(pts.slice(0,Math.max(1,Math.ceil(pts.length/2))));}
+function expAdd(o){scene.add(o);EXP.objs.push(o);return o;}
+const expDur=l=>clamp(1.9+String(l).split(/\s+/).length*.34,3,7.5);
+function expHunters(dt){for(const a of agents)if(a.hunter&&a.alive&&!a.target){a.reT=(a.reT||0)-dt;if(a.reT<=0){a.reT=2.2;a.investigate=huntTarget(a).clone();a.investigateUntil=T+10;}}}
+// ---------- drones ----------
+function droneify(a,big){if(a.drone)return a;a.drone=true;a.hover=big?2.4:1.15;a.bob=Math.random()*6;
+  if(!big){a.maxHp=a.hp=Math.round(48*({recruit:.7,veteran:.85,elite:1,hardcore:1.2})[CAMP.diff]||48);a.scale=.55;a.name='CINDER·Drone '+(++EXP.droneN);}
+  a.armor=0;a.helmet=false;a.noFlash=true;a.fem=false;a.inv[1]=mkInst('plasma');a.slot=1;rebuildMesh(a);setBotGun(a);droneDress(a,big);a.pos.y=a.hover;return a;}
+function droneDress(a,big){const g=a.mesh,ud=g.userData;for(const ch of g.children)if(ch!==ud.arms)ch.visible=false;
+  if(ud.arms)for(const ch of ud.arms.children)if(ch!==ud.gunHolder)ch.visible=false;
+  const body=mm('droneBody',{color:0x2a2d33,roughness:.4,metalness:.7}),rotM=mm('droneRot',{color:0x111214,roughness:.6}),plate=mm('dronePlate',{color:big?0x6a1a14:0x8a5a1c,roughness:.5,metalness:.5});
+  const eye=new THREE.MeshBasicMaterial({color:big?0xff2a10:0xff7a1a});
+  const d=new THREE.Group();d.position.y=1.32;g.add(d);const B=(w,h,dd,m,x,y,z)=>{const me=new THREE.Mesh(new THREE.BoxGeometry(w,h,dd),m);me.position.set(x,y,z);d.add(me);return me;};
+  B(.72,.2,.72,body,0,0,0);B(.5,.12,.5,plate,0,.15,0);const rot=[];
+  for(const [sx,sz] of [[1,1],[1,-1],[-1,1],[-1,-1]]){const arm=B(.5,.06,.08,body,sx*.42,.04,sz*.42);arm.rotation.y=sx*sz>0?Math.PI/4:-Math.PI/4;
+    const r=new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.025,10),rotM);r.position.set(sx*.62,.12,sz*.62);d.add(r);rot.push(r);}
+  const e=new THREE.Mesh(new THREE.SphereGeometry(big?.16:.09,10,8),eye);e.position.set(0,-.02,-.38);d.add(e);
+  if(big){B(1.1,.1,1.1,plate,0,-.15,0);const ring=new THREE.Mesh(new THREE.TorusGeometry(.75,.05,6,24),eye);ring.rotation.x=Math.PI/2;ring.position.y=-.2;d.add(ring);}
+  ud.drone={d,rot};}
+function droneTick(){for(const a of agents){if(!a.drone||!a.mesh)continue;const ud=a.mesh.userData;
+  if(a.alive){if(ud.drone)for(const r of ud.drone.rot)r.rotation.y+=.8;a.mesh.scale.setScalar(a.scale);continue;}
+  if(!a.boomed){a.boomed=true;const p=V3(a.pos.x,a.pos.y+.75*a.scale,a.pos.z);try{explosionFx(p);burst(p,0xffa040,12,4,.5,1);if(a.boss){explosionFx(p,'rocket');sfx.rocket(p);shakeT=1.2;}}catch(e){}
+    if(MS.extra)MS.extra.droneKills=(MS.extra.droneKills|0)+1;}
+  a.mesh.visible=false;}}
+function expScan(){const m=MS.m;for(const a of agents){if(EXP.seen.has(a))continue;EXP.seen.add(a);if(a.isPlayer||a.team!=='red')continue;
+  if(/^Meridian/.test(a.name||''))a.name=a.name.replace(/^Meridian/,'Hollow');
+  if(!a.drone&&/^CINDER/.test(a.name||''))droneify(a);
+  else if(m.drones&&!a.boss&&!a.drone&&!a.nonLethal&&(a.hunter||(a.guard&&a.guard.sentry))&&!a.sniper&&Math.random()<m.drones)droneify(a);}}
+{const _md=msDamage;msDamage=function(v,dmg,att,wid){if(att&&att.drone&&v.team!==att.team)dmg*=att.boss?.55:.4;if(att&&att.sniper&&v.isPlayer)dmg*=.65;
+  if(MS.on&&MS.m&&MS.m.type==='tail'&&v===MS.tgt&&att===player){setTimeout(()=>msFail('You blew your cover'),50);}
+  return _md(v,dmg,att,wid);};}
+// ---------- start / tick / cleanup ----------
+function expStart(m){MS.failReason='';if(m.type!=='boss'){const bb=$('bossbar');if(bb)bb.classList.add('hidden');}MS.escaped=false;MS.extra=Object.assign(MS.extra||{},{droneKills:0});EXP.droneN=0;EXP.seen=new WeakSet();EXP.glints=[];EXP.mkT=0;
+  if(m.flashback)fbOn(m);if(m.dark)darkOn();if(m.loadout&&!['tail','chase'].includes(m.type))giveLoadout(m.loadout);
+  const t=m.type;
+  if(t==='swarm')swarmStart(m);else if(t==='tail')tailStart(m);else if(t==='chase')chaseStart(m);else if(t==='sabotage')sabStart(m);
+  else if(t==='countersnipe')csnStart(m);else if(t==='capture')capStart(m);else if(t==='run')runStart(m);
+  if(t==='boss'&&MS.boss){const B=MS.boss;if(m.backupName)B.backupName=m.backupName;if(m.bossDrone){B.scale=m.bossScale||1.7;droneify(B,true);}}
+  if(t==='escort'&&MS.vip&&m.vipShe)MS.vip.fem=true;
+  expScan();buildAlives();}
+function expTick(dt){const m=MS.m,t=m.type;expScan();droneTick();if(EXP.light)darkTick();
+  if(t==='swarm')swarmTick(dt);else if(t==='tail')tailTick(dt);else if(t==='chase')chaseTick(dt);else if(t==='sabotage')sabTick(dt);
+  else if(t==='countersnipe')csnTick(dt);else if(t==='capture')capTick(dt);else if(t==='run')runTick(dt);
+  if(m.bossEscape)bossEscTick();}
+function expCleanup(){for(const o of EXP.objs)scene.remove(o);EXP.objs=[];for(const g of EXP.glints)scene.remove(g.s);EXP.glints=[];
+  if(EXP.light){scene.remove(EXP.light);scene.remove(EXP.light.target);EXP.light=null;}document.body.classList.remove('flashback');
+  if(EXP.choiceHTML!=null){$('endChoice').innerHTML=EXP.choiceHTML;EXP.choiceHTML=null;}MS.tgt=null;MS.runner=null;MS.zones=null;MS.plants=null;}
+{const _s=msStart;msStart=function(m){_s(m);if(EXP_TYPES.includes(m.type)||m.act>=5)expStart(m);};}
+{const _t=msTick;msTick=function(dt){_t(dt);if(MS.on&&MS.started&&!MS.done&&state.running&&MS.m&&MS.m.act>=5)expTick(dt);else if(MS.on&&MS.m&&MS.m.act>=5)droneTick();};}
+{const _st=msStop;msStop=function(){try{expCleanup();}catch(e){console.warn(e);}_st();};}
+{const _c=msComplete;msComplete=function(){const m=MS.m;if(!MS.done&&m&&(m.finale2||(m.outroLines&&!EXP_OUTRO_OLD[m.outro]))){MS.done=true;setMarker(null);
+    playCS(m.finale2?finale2Shots():expScene(m.outroLines),()=>endMatch(true));return;}_c();};}
+const EXP_OUTRO_OLD={act2:1,act3:1,atlas:1,act4:1,finale:1};
+{const _cf=captorFor;captorFor=function(m){if(m.captor&&CAPTORS[m.captor])return CAPTORS[m.captor];return _cf(m);};}
+{const _cr=creditsShots;creditsShots=function(extra){if(MS.m&&MS.m.finale&&!MS.m.finale2&&STORY.length>36)return [{d:4.5,black:true,card:[extra||'','SIX MONTHS LATER…','The fire is out. Something survived it.'],say:false},{d:4.5,black:true,card:['ACT VI','SMOKE','The story continues on the campaign screen.'],say:false}];return _cr(extra);};}
+{const _bs=bossSurrender;bossSurrender=function(v){const L=MS.m&&MS.m.surrenderLines;if(!L)return _bs(v);
+  v.surrendered=true;v.alive=true;v.hp=1;v.noTarget=true;v.kneel=true;v.puppet={};v.oshield=0;if(MS.extra&&!MS.extra.caughtT)MS.extra.caughtT=T-MS.t0;
+  for(const a of agents)if(a.team==='red'&&a!==v&&a.alive){a.noTarget=true;a.puppet={look:v};a.target=null;}
+  const e=eyeAt(v,1.1),f=fwdOf(v.yaw),pe=player.pos.clone().add(V3(0,1.6,0));
+  playCS(L.map((l,i)=>i%2?{d:expDur(l[1]),from:pe,to:vlerp(pe,e,.3),look:e,fov:50,sub:[l[0],l[1]]}:{d:expDur(l[1]),from:e.clone().addScaledVector(f,2).add(V3(.4,.3,0)),to:e.clone().addScaledVector(f,1.6).add(V3(.3,.2,0)),look:e,fov:42,sub:[l[0],l[1]]}),()=>msComplete());};}
+{const _dm=dressMission;dressMission=function(m){_dm(m);try{if(m&&m.act>=5)expDress(m);}catch(e){console.warn(e);}};}
+// ---------- cutscene builder: [WHO,line] items frame the speaker if present, {card:[..]} items are black cards ----------
+function expScene(items){const pe=player.pos.clone(),f=fwdOf(player.yaw),shots=[];
+  for(const it of (items||[])){if(!it)continue;if(it.card){shots.push({d:it.d||4.3,black:true,card:it.card,say:false});continue;}
+    const who=String(it[0]).toUpperCase(),line=it[1];const ag=agents.find(a=>a!==player&&a.alive&&a.mesh&&a.mesh.visible!==false&&String(a.name).toUpperCase()===who);
+    if(ag){const e=V3(ag.pos.x,ag.pos.y+1.6*ag.scale,ag.pos.z);let dx=pe.x-ag.pos.x,dz=pe.z-ag.pos.z,dl=Math.hypot(dx,dz);if(dl<.1){dx=0;dz=1;dl=1;}const dir=V3(dx/dl,0,dz/dl);const side=V3(-dir.z,0,dir.x);const prev={};
+      shots.push({d:expDur(line),from:e.clone().addScaledVector(dir,2.7).addScaledVector(side,.5).add(V3(0,.15,0)),to:e.clone().addScaledVector(dir,2.2).addScaledVector(side,.4),look:e,fov:45,sub:[who,line],
+        start(){prev.p=ag.puppet;ag.puppet={look:player,face:ag.yaw};},always(){if(prev.p)ag.puppet=prev.p;else delete ag.puppet;}});}
+    else shots.push({d:expDur(line),from:pe.clone().add(V3(0,1.7,0)).addScaledVector(f,-.5),to:pe.clone().add(V3(0,1.75,0)).addScaledVector(f,.3),look:pe.clone().add(V3(0,1.55,0)).addScaledVector(f,9),fov:58,sub:[who,line]});}
+  return shots;}
+// ---------- finale 2 ----------
+function finale2Shots(){const m=MS.m;const pre=expScene(m.outroLines);
+  if(state.cfg&&state.cfg.hc)return pre.concat([{d:1.5,black:true,start(){state.ending='phoenix';},always(){if(!state.ending)state.ending='phoenix';}}]).concat(exEndShots('phoenix'));
+  const pe=player.pos.clone().add(V3(0,1.7,0)),f=fwdOf(player.yaw);
+  return pre.concat([{d:99999,noSkip:true,from:pe,look:pe.clone().addScaledVector(f,8),fov:55,start(){expShowChoice();}}]);}
+function expShowChoice(){const el=$('endChoice');if(EXP.choiceHTML==null)EXP.choiceHTML=el.innerHTML;
+  el.innerHTML='<h3>THE TINDER FILE</h3><p>One button, and the whole world sees what SIGMA did.</p><button type="button" onclick="expPick(\'truth\')"><b>📡 TELL THE WORLD</b><span>Release the file. SIGMA answers for Tinder, and so does Rook.</span></button><button type="button" onclick="expPick(\'bury\')"><b>🔒 BURY IT</b><span>Keep it sealed. SIGMA survives. The truth stays in the dark.</span></button>';
+  el.classList.remove('hidden');}
+function expPick(k){$('endChoice').classList.add('hidden');state.ending=k;CS.onEnd=null;csEnd();playCS(exEndShots(k),()=>endMatch(true));}
+function exEndShots(k){const E=EXP_ENDINGS[k]||EXP_ENDINGS.truth;return expScene(E.lines.concat(E.cards.map(c=>({card:c,d:4.6})))).concat(creditsShots(E.credit));}
+// ---------- flashback + blackout ----------
+function fbOn(m){document.body.classList.add('flashback');player.name='Rook';
+  for(const a of agents)if(a.name==='Crane'){a.noTarget=true;a.maxHp=a.hp=500;}
+  setTimeout(()=>{if(MS.on&&MS.m===m)banner('NINE YEARS AGO','Operation Tinder · you are Sergeant Rook','neutral',3.2);},400);}
+function darkOn(){if(scene.fog){scene.fog.color&&scene.fog.color.setHex&&scene.fog.color.setHex(0x030405);scene.fog.near=2;scene.fog.far=30;}
+  if(scene.background&&scene.background.setHex)scene.background.setHex(0x030405);
+  levelGroup.traverse(o=>{if(o.isHemisphereLight===true)o.intensity*=.18;else if(o.isDirectionalLight===true)o.intensity*=.06;else if(o.isPointLight===true)o.intensity*=.5;});
+  try{const L=new THREE.SpotLight(0xfff0d8,2.4,40,.42,.5,1.2);L.castShadow=false;scene.add(L);scene.add(L.target);EXP.light=L;}catch(e){EXP.light=null;}}
+function darkTick(){const L=EXP.light;if(!L||!L.position||!L.position.copy)return;L.position.copy(camera.position);const f=camForward();L.target.position.set(camera.position.x+f.x*10,camera.position.y+f.y*10,camera.position.z+f.z*10);}
+// ---------- SWARM: waves of drones + gunmen (prototype armor, protect a VIP) ----------
+function juggOn(m){const P=player;P.maxHp=P.hp=m.juggHp||400;P.armor=100;P.helmet=true;P.inv={1:mkInst('minigun'),2:mkInst('deagle'),3:mkInst('knife')};P.inv[1].reserve=999;P.slot=1;equip(P,1,true);
+  setTimeout(()=>{if(MS.on)banner('PROTOTYPE ARMOR',(m.juggHp||400)+' health · minigun · you are the wall','win',2.6);},300);}
+function swarmStart(m){MS.wave=0;MS.waves=m.waves+(CAMP.diff==='elite'||CAMP.diff==='hardcore'?1:0);MS.waveT=5;MS.spawned=false;MS.buyOK=true;
+  const at=m.defendMark?msMark(m.defendMark):m.protectAt?msMark(m.protectAt):MAP.spawnC.def;teleportSquad(at);
+  MS.allies=agents.filter(a=>a.team==='blue'&&!a.isPlayer);MS.extra.alliesTotal=MS.allies.length;
+  if(m.protect){const V=makeAgent({name:m.protect,team:'blue',diff:'normal',maxHp:240,hp:240,vip:true});const p=randomCellNear(msMark(m.protectAt||'k'),1);V.pos.set(p.x,0,p.z);V.puppet={face:0};V.kneel=!!m.protectKneel;V.inv[1]=mkInst('mp5');V.slot=1;setBotGun(V);agents.push(V);MS.vip=V;}
+  if(m.jugg)juggOn(m);
+  MS.steps=[{obj:m.protect?'Protect '+m.protect:m.jugg?'Hold the lobby':'Survive the swarm',sub:'Press B between waves to buy',enter(){setMarker(MS.vip?MS.vip.pos:m.defendMark?msMark(m.defendMark):null);},
+    prog:()=>(MS.vip?MS.vip.name+' '+Math.max(0,Math.ceil(MS.vip.hp/MS.vip.maxHp*100))+'% · ':'')+(MS.waveT>0&&MS.wave<MS.waves?'Wave '+(MS.wave+1)+' in '+Math.ceil(MS.waveT)+'s · buy with B':'Wave '+MS.wave+' / '+MS.waves+' · '+agents.filter(a=>a.hunter&&a.alive).length+' left'),
+    check:()=>MS.wave>=MS.waves&&MS.spawned&&!agents.some(a=>a.hunter&&a.alive)}];}
+function swarmTick(dt){const m=MS.m;MS.extra.alliesAlive=MS.allies.filter(a=>a.alive).length;
+  if(MS.vip){if(!MS.vip.alive){msFail(MS.vip.name+' was killed');return;}MS.extra.vipHp=MS.vip.hp/MS.vip.maxHp;}
+  const alive=agents.some(a=>a.hunter&&a.alive);
+  if(!alive&&MS.wave<MS.waves){if(MS.spawned){MS.spawned=false;MS.waveT=10;MS.buyOK=!m.jugg;player.credits=Math.min(16000,player.credits+1200);
+      for(const s of [1,2]){const it=player.inv[s];if(it){const w=WEAPONS[it.id];it.reserve=m.jugg&&s===1?999:w.reserve;}}player.hp=Math.min(player.maxHp,player.hp+(m.jugg?120:35));
+      for(const a of MS.allies)if(a.alive)a.hp=Math.min(a.maxHp,a.hp+40);if(MS.vip)MS.vip.hp=Math.min(MS.vip.maxHp,MS.vip.hp+50);banner('WAVE '+MS.wave+' CLEARED','Next wave in 10 seconds'+(m.jugg?'':' · B to buy'),'win',2.2);}
+    MS.waveT-=dt;if(MS.waveT<=0){MS.wave++;MS.spawned=true;MS.buyOK=false;closeBuy(true);const n=diffCount(2+MS.wave+(m.jugg?4:0));const pts=expSpawnPts();
+      for(let i=0;i<n;i++){const p=randomCellNear(pts[i%pts.length],2);spawnHunter(p,'Hollow·'+sentryNames[i%sentryNames.length]+' '+MS.wave+'-'+(i+1),MS.wave>=3&&i===0?'shotgun':undefined,MS.wave>=4?storyDiff('hard'):undefined);}
+      expScan();buildAlives();banner('WAVE '+MS.wave+' / '+MS.waves,'Here they come','lose',1.8);const L=(m.waveRadio||[])[MS.wave-1];if(L)radio(L[0],L[1]);}}
+  if(MS.vip)for(const a of agents)if(a.hunter&&a.alive&&!a.target&&Math.random()<.004){a.investigate=MS.vip.pos.clone();a.investigateUntil=T+8;}
+  expHunters(dt);}
+// ---------- TAIL: follow a target without being seen ----------
+function tailStart(m){const P=player;P.inv={1:null,2:mkInst('glock'),3:mkInst('knife')};P.slot=2;P.armor=0;P.helmet=false;P.nadesN={he:0,flash:0};P.credits=0;equip(P,2,true);
+  const route=expRoute(m);P.pos.copy(nearestOpen(MAP.spawnC.atk));P.yaw=yawTo(route[0].x-P.pos.x,route[0].z-P.pos.z);
+  const c=makeAgent({name:m.target,team:'red',diff:'easy'});c.pos.copy(nearestOpen(route[0]));c.puppet={};setBotGun(c);agents.push(c);MS.tgt=c;
+  MS.route=route;MS.ri=1;MS.pause=2;MS.lookYaw=yawTo(route[1].x-c.pos.x,route[1].z-c.pos.z);MS.det=0;MS.listen=0;MS.arrived=false;MS.warnT=0;MS.looked=false;
+  if(m.meet){const b=makeAgent({name:m.meet,team:'red',diff:'easy'});const e=route[route.length-1];b.pos.copy(randomCellNear(e,1));b.puppet={look:c};setBotGun(b);agents.push(b);MS.meet=b;}
+  marksOf('g').slice(0,diffCount(4)).forEach((p,i)=>{const s=spawnSentry(p,'Hollow·Lookout '+(i+1),'mp5');s.lookout=true;});
+  MS.steps=[{obj:'Follow '+m.target,sub:'Stay out of his sight · don\'t fall behind',enter(){const L=m.tailLines&&m.tailLines.start;if(L)radio(L[0],L[1]);},
+    prog:()=>Math.round(c.pos.distanceTo(player.pos))+' m behind · max '+(m.tailMax||36)+' m',check:()=>MS.arrived},
+   {obj:'Get close and listen',sub:'Stay within 10 m, unseen',enter(){const L=m.tailLines&&m.tailLines.meet;if(L)radio(L[0],L[1]);},prog:()=>'Listening '+Math.min(100,Math.floor(MS.listen/6*100))+'%',check:()=>MS.listen>=6}];}
+function tailTick(dt){const m=MS.m,c=MS.tgt,P=player;if(!c.alive){msFail('The courier is dead');return;}
+  const d=Math.hypot(c.pos.x-P.pos.x,c.pos.z-P.pos.z),max=m.tailMax||36;if(MS.ri>1&&d>20)MS.extra.tailFar=true;
+  if(d>max){msFail('You lost him');return;}if(d>max-10&&T>MS.warnT){MS.warnT=T+9;const L=m.tailLines&&m.tailLines.far;if(L)radio(L[0],L[1]);}
+  if(!MS.arrived){if(MS.pause>0){MS.pause-=dt;c.puppet.path=null;c.puppet.face=MS.lookYaw;delete c.puppet.look;}
+    else{const tg=MS.route[MS.ri];if(!c.puppet.path||c.puppet.pi>=c.puppet.path.length||c.puppet.goal!==MS.ri){puppetGo(c,tg,2.5);c.puppet.goal=MS.ri;}
+      if(c.pos.distanceTo(tg)<1.8){MS.ri++;if(MS.ri<MS.route.length){MS.pause=rand(2.6,4.4);const pr=MS.route[MS.ri-2]||c.pos;MS.lookYaw=yawTo(pr.x-c.pos.x,pr.z-c.pos.z);
+          if(!MS.looked){MS.looked=true;const L=m.tailLines&&m.tailLines.look;if(L)radio(L[0],L[1]);}}
+        else{MS.arrived=true;c.puppet={look:MS.meet||player};}}}}
+  const looking=MS.pause>0||MS.arrived;const e=eyeOf(c),range=(P.crouch?13:21)*wxVision();const fw=fwdOf(c.yaw);const dot=((P.pos.x-c.pos.x)*fw.x+(P.pos.z-c.pos.z)*fw.z)/Math.max(d,.01);
+  const seen=P.alive&&d<range&&(looking?dot>.45:(dot>.75&&d<9))&&canSee(e,P);const heard=d<2.6&&!P.crouch&&Math.hypot(P.vel.x,P.vel.z)>3.2;
+  if(seen||heard)MS.det+=dt*(.45+1.3*(1-d/range))*(P.crouch?.6:1)*(heard?2:1);else MS.det=Math.max(0,MS.det-dt*.25);
+  if(MS.det>=1){msFail(c.name+' spotted you');return;}
+  sentryTick(dt);if(agents.some(g=>g.lookout&&g.alive&&g.guard&&g.guard.alerted)){msFail('A lookout raised the alarm');return;}
+  MS.extra.lookKills=agents.filter(g=>g.lookout&&!g.alive).length;
+  if(MS.i===1&&d<10&&MS.det<.35)MS.listen+=dt;
+  let gd=0;for(const g of agents)if(g.lookout&&g.alive&&g.guard)gd=Math.max(gd,g.guard.det||0);const mx=Math.max(MS.det,gd);const el=$('mdet');el.classList.remove('hidden');
+  setT('mdetL',mx>.6?'◉ ALMOST SPOTTED':mx>.05?'◉ SUSPICIOUS':'◉ HIDDEN');$('mdetF').style.width=Math.round(mx*100)+'%';el.className=mx>.6?'warn':'';
+  if(T>EXP.mkT){EXP.mkT=T+.25;setMarker(c.pos);}}
+// ---------- CHASE: bring a runner down before he escapes ----------
+function chaseStart(m){giveLoadout(m.loadout||['mp5','glock']);const route=expRoute(m);const P=player;P.pos.copy(nearestOpen(msMark(m.startMark||'e')));P.yaw=yawTo(route[0].x-P.pos.x,route[0].z-P.pos.z);
+  const hp=Math.round((m.runnerHp||240)*(CAMP.diff==='recruit'?.75:1));const r=makeAgent({name:m.runner,team:'red',diff:'easy',maxHp:hp,hp});r.nonLethal=true;r.pos.copy(nearestOpen(route[0]));r.puppet={};setBotGun(r);agents.push(r);
+  MS.runner=r;MS.route=route;MS.ri=1;MS.runDelay=1.2;let i=0;for(const p of marksOf('x').concat(marksOf('y')))spawnSentry(p,'Hollow·Bodyguard '+(++i),'mp5');
+  MS.steps=[{obj:'Bring down '+m.runner,sub:'Shoot him and he surrenders. Don\'t let him reach the pier',enter(){setMarker(r.pos);},
+    prog:()=>m.runner+' '+Math.max(0,Math.ceil(r.hp/r.maxHp*100))+'% · '+Math.round(r.pos.distanceTo(player.pos))+' m away · '+Math.max(0,MS.route.length-MS.ri)+' streets to the pier',check:()=>false}];}
+function chaseTick(dt){const m=MS.m,r=MS.runner;if(!r||r.surrendered)return;
+  if(MS.runDelay>0){MS.runDelay-=dt;return;}const d=r.pos.distanceTo(player.pos);const sp=(m.runSpeed||4.8)*(d>30?.75:1);const tg=MS.route[MS.ri];
+  if(!r.puppet.path||r.puppet.pi>=r.puppet.path.length||r.puppet.goal!==MS.ri){puppetGo(r,tg,sp);r.puppet.goal=MS.ri;}else r.puppet.speed=sp;
+  if(r.pos.distanceTo(tg)<1.8){MS.ri++;if(MS.ri>=MS.route.length){msFail(m.runner+' got away');return;}
+    if(MS.ri%2===0){const ahead=MS.route[Math.min(MS.ri+1,MS.route.length-1)];for(let j=0;j<diffCount(2);j++){const h=spawnHunter(randomCellNear(ahead,3),'Hollow·Bodyguard '+agents.length,'mp5');h.investigate=player.pos.clone();}buildAlives();}}
+  sentryTick(dt);expHunters(dt);if(T>EXP.mkT){EXP.mkT=T+.2;setMarker(r.pos);}}
+// ---------- SABOTAGE: plant charges, then get clear ----------
+function sabStart(m){teleportSquad(MAP.spawnC.atk);MS.allies=agents.filter(a=>a.team==='blue'&&!a.isPlayer);MS.extra.alliesTotal=MS.allies.length;
+  MS.plants=m.plants.map((k,i)=>{const base=MAP.siteC[k]||msMark(k);const p=randomCellNear(base,1);const mesh=new THREE.Mesh(new THREE.BoxGeometry(.5,.32,.4),new THREE.MeshStandardMaterial({color:0x3a3a30,emissive:0x302010,emissiveIntensity:.3}));mesh.position.set(p.x,.16,p.z);mesh.visible=false;expAdd(mesh);
+    return {k,pos:p,mesh,done:false,t:0,name:(m.plantNames||[])[i]||('target '+k)};});
+  let i=0;for(const pl of MS.plants)for(let j=0;j<diffCount(2);j++)spawnSentry(randomCellNear(pl.pos,3),'Hollow·Guard '+(++i));
+  for(const p of marksOf('g'))spawnSentry(p,'Hollow·Guard '+(++i));
+  MS.pT=12;MS.escT=0;MS.alarmed=false;const ex=msMark(m.exfil||'e');
+  MS.steps=[{obj:'Plant the charges',sub:'Hold F at each target',enter(){setMarker(MS.plants[0].pos);},prog:()=>MS.plants.filter(p=>!p.done).length+' charges left · next: '+((MS.plants.find(p=>!p.done)||{}).name||''),
+    check:dt=>{let nb=null;for(const pl of MS.plants)if(!pl.done&&near(pl.pos,1.9))nb=pl;
+      if(nb&&player.alive){MS.prompt='Hold <kbd>'+kbL('use')+'</kbd> to plant the charge';if(keys.KeyF){nb.t+=dt;MS.prog=nb.t/3;MS.progLbl='PLANTING';if(nb.t>=3){nb.done=true;nb.mesh.visible=true;sfx.plant&&sfx.plant();MS.prog=null;MS.prompt='';banner('CHARGE SET',nb.name,'win',1.4);
+          if(!MS.alarmed){MS.alarmed=true;for(const g of agents)if(g.guard&&g.alive)sentryAlert(g);}}}else MS.prog=nb.t>0?nb.t/3:null;}else{MS.prompt='';MS.prog=null;}
+      const nx=MS.plants.find(p=>!p.done);if(nx)setMarker(nx.pos);return !nx;}},
+   {obj:'Get to '+(m.exfilName||'the boat')+' before it blows',sub:'Run!',enter(){MS.escT=(m.escapeTime||60)*({recruit:1.3,veteran:1.1,elite:1,hardcore:.9})[CAMP.diff];setMarker(ex);banner('CHARGES ARMED','Get clear!','lose',2);siren&&siren(2);},
+    prog:()=>fmtTime(Math.max(0,MS.escT))+' to detonation',check:()=>near(ex,3.5)}];}
+function sabTick(dt){const m=MS.m;MS.extra.alliesAlive=(MS.allies||[]).filter(a=>a.alive).length;
+  for(const pl of MS.plants)if(pl.done)pl.mesh.material.emissive.setHex(Math.sin(T*12)>0?0xff2010:0x300808);
+  if(MS.escT>0){MS.escT-=dt;MS.extra.timeLeft=MS.escT;if(MS.escT<=0){for(const pl of MS.plants)explosionFx(pl.pos,'rocket');explosionFx(player.pos,'rocket');sfx.rocket(player.pos);shakeT=2.5;msFail('You were caught in the blast');return;}}
+  if(MS.alarmed){MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?14:10;if(agents.filter(a=>a.hunter&&a.alive).length<diffCount(3)){spawnHunter(randomCellNear(expFarPt(),2),'Hollow·Trooper '+agents.length);buildAlives();}}}
+  sentryTick(dt);expHunters(dt);}
+{const _c=msComplete;msComplete=function(){if(MS.m&&MS.m.type==='sabotage'&&MS.plants&&!MS.done){for(const pl of MS.plants)explosionFx(pl.pos,'rocket');sfx.rocket(player.pos);shakeT=1.6;}_c();};}
+// ---------- COUNTERSNIPE ----------
+function csnStart(m){const P=player;P.pos.copy(nearestOpen(MAP.spawnC.def));
+  MS.snipers=marksOf('g').map((p,i)=>{const s=spawnSentry(p,'Hollow·Sniper '+(i+1),'sniper');s.sniper=true;s.spot=p.clone();s.armor=0;s.helmet=false;
+    const g=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xfff4d0,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));g.scale.setScalar(1.6);g.visible=false;scene.add(g);EXP.glints.push({s:g,a:s});return s;});
+  MS.kills=0;MS.pT=14;
+  MS.steps=[{obj:'Take out the tower snipers',sub:'Watch for the glint of a scope',enter(){setMarker(null);},prog:()=>MS.snipers.filter(s=>s.alive).length+' snipers left',check:()=>!MS.snipers.some(s=>s.alive)}];}
+function csnTick(dt){const m=MS.m;for(const s of MS.snipers)if(s.alive&&s.spot){s.pos.x=s.spot.x;s.pos.z=s.spot.z;s.vel.x=s.vel.z=0;}
+  for(const g of EXP.glints){const a=g.a;const on=a.alive&&a.target===player&&T-a.lastSeen<.8;g.s.visible=on;if(on){g.s.position.set(a.pos.x,a.pos.y+1.62*a.scale,a.pos.z);g.s.scale.setScalar(1.1+Math.sin(T*9)*.5);}}
+  const k=MS.snipers.filter(s=>!s.alive).length;if(k>MS.kills){MS.kills=k;const L=(m.killLines||[])[k-1];if(L&&k<MS.snipers.length)radio(L[0],L[1]);}
+  MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?18:13;if(agents.filter(a=>a.hunter&&a.alive).length<diffCount(2)){spawnHunter(randomCellNear(expFarPt(),2),'Hollow·Gunman '+agents.length);buildAlives();}}
+  sentryTick(dt);expHunters(dt);}
+// ---------- CAPTURE: hold three switches ----------
+function capStart(m){teleportSquad(MAP.spawnC.atk);const R=4.2;
+  MS.zones=m.zones.map((k,i)=>{const pos=(MAP.siteC[k]||msMark(k)).clone();let ring=null;try{ring=new THREE.Mesh(new THREE.RingGeometry(R-.3,R,40),new THREE.MeshBasicMaterial({color:0xffd23a,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.set(pos.x,.06,pos.z);expAdd(ring);}catch(e){}
+    return {k,pos,p:0,done:false,ring,name:(m.zoneNames||[])[i]||('zone '+k)};});
+  let i=0;for(const z of MS.zones)for(let j=0;j<diffCount(2);j++)spawnSentry(randomCellNear(z.pos,3),'Hollow·Guard '+(++i));
+  MS.pT=10;MS.capR=R;
+  MS.steps=[{obj:'Capture the substations',sub:'Stand on each switch until it locks in · clear enemies first',enter(){setMarker(MS.zones[0].pos);},
+    prog:()=>{const z=MS.zones.find(z=>!z.done&&near(z.pos,MS.capR));return MS.zones.filter(z=>z.done).length+' / '+MS.zones.length+' captured'+(z?' · '+z.name+' '+Math.floor(z.p*100)+'%'+(z.cont?' · CONTESTED':''):'');},
+    check:()=>MS.zones.every(z=>z.done)}];}
+function capTick(dt){const m=MS.m,R=MS.capR;let next=null,best=1e9;
+  for(const z of MS.zones){if(z.done)continue;const inside=player.alive&&near(z.pos,R);z.cont=agents.some(a=>a.team==='red'&&a.alive&&!a.noTarget&&Math.hypot(a.pos.x-z.pos.x,a.pos.z-z.pos.z)<R+2.5);
+    if(z.p<1){if(inside&&!z.cont)z.p+=dt/(m.capTime||8);else if(!inside)z.p=Math.max(0,z.p-dt*.04);}
+    if(z.ring&&z.ring.material)z.ring.material.opacity=.35+z.p*.5;
+    if(z.p>=1){z.done=true;if(z.ring&&z.ring.material)z.ring.material.color.setHex(0x40ff70);sfx.defused&&sfx.defused();const n=MS.zones.filter(q=>q.done).length;banner('SUBSTATION ONLINE',z.name,'win',1.8);const L=(m.capLines||[])[n-1];if(L)radio(L[0],L[1]);continue;}
+    const d=z.pos.distanceTo(player.pos);if(d<best){best=d;next=z;}}
+  if(next&&T>EXP.mkT){EXP.mkT=T+.5;setMarker(next.pos);}
+  MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?13:9;const done=MS.zones.filter(z=>z.done).length;if(agents.filter(a=>a.hunter&&a.alive).length<diffCount(2)+done){spawnHunter(randomCellNear(expFarPt(),2),'Hollow·Trooper '+agents.length);buildAlives();}}
+  sentryTick(dt);expHunters(dt);}
+// ---------- RUN: checkpoints with chasers (flashback, blackout, wildfire) ----------
+function runStart(m){const route=expRoute(m);teleportSquad(route[0]);MS.route=route;MS.ci=1;MS.pT=6;
+  MS.escT=m.escapeTime?({recruit:1.3,veteran:1.1,elite:1,hardcore:.9})[CAMP.diff]*m.escapeTime:0;
+  MS.allies=agents.filter(a=>a.team==='blue'&&!a.isPlayer);MS.extra.alliesTotal=MS.allies.length;
+  MS.steps=[{obj:m.flashback?'Get your team to the LZ':'Reach every checkpoint',sub:m.dark?'Your flashlight lights the way, and gives you away':'Keep moving',enter(){setMarker(route[1]);},
+    prog:()=>'Checkpoint '+Math.min(MS.ci,route.length-1)+' / '+(route.length-1)+(MS.escT?' · '+fmtTime(Math.max(0,MS.escT))+' left':''),
+    check:()=>{if(near(MS.route[MS.ci],3.4)){MS.ci++;sfx.radio&&sfx.radio();const L=(m.cpRadio||[])[MS.ci-2+MS.cpOff];if(L)radio(L[0],L[1]);if(MS.ci<MS.route.length)setMarker(MS.route[MS.ci]);}return MS.ci>=MS.route.length;}}];
+  MS.cpOff=m.flashback?1:0;if(m.flashback&&m.cpRadio&&m.cpRadio[0]){const L=m.cpRadio[0];setTimeout(()=>{if(MS.on&&MS.m===m)radio(L[0],L[1]);},2500);}}
+function runTick(dt){const m=MS.m;MS.extra.alliesAlive=MS.allies.filter(a=>a.alive).length;MS.extra.fbAlive=MS.allies.filter(a=>a.alive&&a.name!=='Crane').length;
+  if(MS.escT){MS.escT-=dt;MS.extra.timeLeft=MS.escT;if(MS.escT<=0){for(let i=0;i<5;i++)explosionFx(randomCellNear(player.pos,4),'rocket');sfx.rocket(player.pos);shakeT=2.5;msFail(m.flashback?'The EMBER burn caught your team':'The fire caught you');return;}}
+  MS.pT-=dt;if(MS.pT<=0){MS.pT=CAMP.diff==='recruit'?11:7.5;if(agents.filter(a=>a.hunter&&a.alive).length<diffCount(m.chasers||3)){
+      const back=MS.route[Math.max(0,MS.ci-2)];const p=Math.random()<.5?randomCellNear(back,4):randomCellNear(expFarPt(),2);spawnHunter(p,(m.flashback?'EMBER·Unit ':'Hollow·Hunter ')+agents.length);expScan();buildAlives();}}
+  for(const a of MS.allies)if(a.alive&&!a.target&&a.pos.distanceTo(player.pos)>7){a.fT=(a.fT||0)-dt;if(a.fT<=0){a.fT=1.5;a.investigate=randomCellNear(player.pos,2);a.investigateUntil=T+4;}}
+  expHunters(dt);}
+// ---------- boss escape (Shrike at Pier 9) ----------
+function bossEscTick(){const m=MS.m,B=MS.boss;if(!B||!B.alive||MS.escaped||B.hp/B.maxHp>m.bossEscape)return;MS.escaped=true;B.noTarget=true;
+  for(let i=0;i<10;i++)puff(V3(B.pos.x+rand(-3,3),1,B.pos.z+rand(-3,3)),6,4,4);
+  const shots=expScene(m.escapeLines||[]);shots.push({d:1.6,from:player.pos.clone().add(V3(0,1.7,0)),look:V3(B.pos.x,1.5,B.pos.z),fov:55,start(){for(let i=0;i<10;i++)puff(V3(B.pos.x+rand(-3,3),1,B.pos.z+rand(-3,3)),6,4,4);},always(){B.alive=false;B.hp=0;B.mesh.visible=false;B.pos.set(-500,0,-500);for(const a of agents)if(a.team==='red'&&a.alive&&a!==B){a.alive=false;a.hp=0;if(a.mesh)a.mesh.visible=false;}}});
+  playCS(shots,()=>msComplete());}
+// ---------- map dressing for the new maps ----------
+function expDress(m){const key=MAP.key,grp=new THREE.Group();levelGroup.add(grp);
+  const glow=(col,x,y,z,s)=>{const g=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:col,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));g.position.set(x,y,z);g.scale.setScalar(s);grp.add(g);return g;};
+  const wallSpots=(n,seed)=>{const o=[];for(let r=1;r<MAP.H-1;r++)for(let c=1;c<MAP.W-1;c++){if(!walkable(c,r)||hash(c*seed,r*7)>.16)continue;for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])if(cellChar(c+dx,r+dz)==='#'){o.push({x:c*S+S/2+dx*1.45,z:r*S+S/2+dz*1.45,ry:Math.atan2(-dx,-dz)});break;}if(o.length>=n)return o;}return o;};
+  if(key==='neon'){const cols=[0xff2bd6,0x29e6ff,0xffe23a,0x7cff4a,0xff5a2a];wallSpots(34,3).forEach((p,i)=>{const col=cols[i%cols.length];const sg=new THREE.Mesh(new THREE.PlaneGeometry(rand(1.4,2.6),rand(.45,.8)),new THREE.MeshBasicMaterial({color:col}));sg.position.set(p.x,rand(2.8,4.6),p.z);sg.rotation.y=p.ry;grp.add(sg);if(i%3===0)glow(col,p.x,sg.position.y,p.z,2.2);});
+    if(m.code==='OP-37'){const lan=[];for(let i=0;i<46;i++){const c=randi(2,MAP.W-3),r=randi(2,MAP.H-3);if(!walkable(c,r))continue;lan.push(glow(i%4?0xff9a30:0xffd070,c*S+S/2,rand(4,7),r*S+S/2,rand(.8,1.3)));}MAP.anim.push(dt=>{for(const l of lan){l.position.y+=dt*.25;if(l.position.y>14)l.position.y=4;}});}}
+  if(key==='prison'){const tw=mm('towerC',{map:TEX.concrete,color:0x8a8780,roughness:.9}),hut=mm('towerH',{color:0x4a4d52,roughness:.6,metalness:.4});
+    for(const [x,z] of [[S*1,S*1],[S*(MAP.W-1),S*1],[S*1,S*(MAP.H-2)],[S*(MAP.W-1),S*(MAP.H-2)]]){dMesh(grp,new THREE.BoxGeometry(2,12,2),tw,x,6,z);dMesh(grp,new THREE.BoxGeometry(3.6,2.4,3.6),hut,x,13.2,z);glow(0xfff2c0,x,13.5,z,3);}
+    const wire=mm('wire',{color:0x2a2a2a,roughness:.5,metalness:.6});for(let i=0;i<MAP.W;i+=2){dMesh(grp,new THREE.CylinderGeometry(.03,.03,1.2,4),wire,i*S,6.6,1.5,0,false);dMesh(grp,new THREE.CylinderGeometry(.03,.03,1.2,4),wire,i*S,6.6,MAP.H*S-1.5,0,false);}}
+  if(key==='jungle'){const leaf=mm('bush',{color:0x2f5a24,roughness:1,flatShading:true}),leaf2=mm('bush2',{color:0x3f6e2c,roughness:1,flatShading:true});
+    for(let i=0;i<140;i++){const c=randi(1,MAP.W-2),r=randi(1,MAP.H-2);if(!walkable(c,r)||hash(c*5,r*3)<.5)continue;const b=dMesh(grp,new THREE.SphereGeometry(rand(.5,1),7,5),i%2?leaf:leaf2,c*S+rand(.3,2.7),.4,r*S+rand(.3,2.7),0,false);b.scale.y=.6;}
+    if(MAP.palm)for(let i=0;i<26;i++){const a=Math.random()*Math.PI*2,d=Math.max(MAP.W,MAP.H)*S*rand(.62,.95);MAP.palm(MAP.W*S/2+Math.cos(a)*d,MAP.H*S/2+Math.sin(a)*d,rand(7,11),rand(0,3));}
+    const k=msMark('k');const st=mm('mast',{color:0x6a6e74,roughness:.5,metalness:.6});dMesh(grp,new THREE.CylinderGeometry(.18,.3,14,8),st,k.x,7,k.z);const dish=dMesh(grp,new THREE.SphereGeometry(1.4,12,6,0,Math.PI*2,0,Math.PI/2),st,k.x,12,k.z);dish.rotation.x=1.2;glow(0xff4020,k.x,14.2,k.z,1.4);}
+  if(key==='metro'){const W=MAP.W*S,H=MAP.H*S;const ceil=new THREE.Mesh(new THREE.PlaneGeometry(W,H),mm('metroCeil',{map:TEX.concrete,color:0x5a5a58,roughness:1,side:THREE.DoubleSide}));ceil.rotation.x=Math.PI/2;ceil.position.set(W/2,4.6,H/2);grp.add(ceil);
+    if(!m.dark){const strip=new THREE.MeshBasicMaterial({color:0xeaf2ff});for(let r=2;r<MAP.H;r+=4)for(let c=2;c<MAP.W;c+=5)if(walkable(c,r))dMesh(grp,new THREE.BoxGeometry(2.2,.06,.25),strip,c*S+S/2,4.5,r*S+S/2,0,false);}
+    else{const em=new THREE.MeshBasicMaterial({color:0xff2a1a});for(let r=2;r<MAP.H;r+=5)for(let c=3;c<MAP.W;c+=9)if(walkable(c,r)){dMesh(grp,new THREE.BoxGeometry(.3,.12,.12),em,c*S+S/2,4.4,r*S+S/2,0,false);glow(0xff2a1a,c*S+S/2,4.3,r*S+S/2,1.4);}}
+    const sign=new THREE.MeshBasicMaterial({color:0x1d63c9});for(const [c,r] of [[3,3],[22,7],[40,15],[12,19]])dMesh(grp,new THREE.BoxGeometry(2.4,.6,.08),sign,c*S+S/2,3.4,r*S+.1,0,false);}
+  if(key==='rig'){const k=msMark('k');const steel=mm('derrick',{color:0x9a8a3a,roughness:.5,metalness:.6}),dark=mm('rigDark',{color:0x2e3236,roughness:.6,metalness:.5});
+    for(const [sx,sz] of [[1,1],[1,-1],[-1,1],[-1,-1]]){const leg=dMesh(grp,new THREE.BoxGeometry(.35,24,.35),steel,k.x+sx*2.4,12,k.z+sz*2.4);leg.rotation.z=-sx*.08;leg.rotation.x=sz*.08;}
+    for(let y=4;y<24;y+=4){const w=4.8-y*.15;dMesh(grp,new THREE.BoxGeometry(w,.2,.2),steel,k.x,y,k.z+w/2,0,false);dMesh(grp,new THREE.BoxGeometry(w,.2,.2),steel,k.x,y,k.z-w/2,0,false);dMesh(grp,new THREE.BoxGeometry(.2,.2,w),steel,k.x+w/2,y,k.z,0,false);dMesh(grp,new THREE.BoxGeometry(.2,.2,w),steel,k.x-w/2,y,k.z,0,false);}
+    dMesh(grp,new THREE.BoxGeometry(1.4,1.4,1.4),dark,k.x,24.6,k.z);
+    const bx=MAP.W*S+4,bz=MAP.H*S*.3;const boom=dMesh(grp,new THREE.BoxGeometry(16,.6,.6),steel,bx,10,bz);boom.rotation.z=.4;const fl=[];for(let i=0;i<4;i++)fl.push(glow(i%2?0xff7a1a:0xffc040,bx+7.4,13.6+i*.5,bz,2.5-i*.3));MAP.anim.push(()=>{for(const f of fl)f.scale.setScalar(1.8+Math.random()*1.4);});
+    const pad=new THREE.Mesh(new THREE.CylinderGeometry(5,5,.5,24),dark);pad.position.set(-6,7,MAP.H*S*.75);grp.add(pad);
+    if(m.code==='OP-60'||m.code==='OP-61'){const core=buildCore(k);core.position.set(k.x+3.2,0,k.z+3.2);levelGroup.remove(core);grp.add(core);if(m.code==='OP-61'){core.userData.core.material.color.setHex(0x3a4a5a);}}}}
+
 // =====================================================================
 //  RECORDED VOICE LINES (ElevenLabs clips in voice/), radio effect, fallback to TTS
 // =====================================================================
 const VOX_LINES=[["ROOK", "I'm sorry, kid. This is how it has to be.", "cell_rook_01.mp3"],["HOLLOW", "Get comfortable. Nobody's coming for you.", "cell_hollow_01.mp3"],["VEX", "Don't worry. I'll tell them you died a hero.", "cell_vex_01.mp3"],["SABLE", "Breathe while you can.", "cell_sable_01.mp3"],["HAYES", "Make yourself at home. You'll be here a very long time.", "cell_hayes_01.mp3"],["REYES", "When EMBER goes live, remember \u2014 you could have stopped it.", "cell_reyes_01.mp3"],["ROOK", "Bang. You're dead, rookie. Again.", "cap_rook_01.mp3"],["ROOK", "In the real world that's a body bag. Reset and go again.", "cap_rook_02.mp3"],["HOLLOW", "Look what crawled in. SIGMA's finest, face down in the dust.", "cap_hollow_01.mp3"],["HOLLOW", "Bag them. The boss wants them breathing.", "cap_hollow_02.mp3"],["VEX", "Oh, Kestrel. You never did see it coming.", "cap_vex_01.mp3"],["VEX", "Tie them up. I want them to watch the evidence burn.", "cap_vex_02.mp3"],["SABLE", "Lights out, soldier.", "cap_sable_01.mp3"],["SABLE", "Hayes will want this one alive. Take them.", "cap_sable_02.mp3"],["HAYES", "Meridian thanks you for your service. Take them.", "cap_hayes_01.mp3"],["HAYES", "Such a waste of good training. Put them with the others.", "cap_hayes_02.mp3"],["ROOK", "Sorry, kid. I told you to walk away.", "cap_rook_03.mp3"],["REYES", "You should have stayed loyal, Sergeant. Take them away.", "cap_reyes_01.mp3"],["REYES", "EMBER goes live tonight. And you get to watch.", "cap_reyes_02.mp3"],["JUNO", "No, no, no \u2014 get off me! Kestrel!", "cap_juno_01.mp3"],["ROOK", "Kid... stay with me. Stay awake.", "cap_rookp_01.mp3"],["MARA", "...Damn it. Don't you dare close your eyes.", "cap_mara_01.mp3"],["ATLAS", "You're gonna need a lot more guys than that.", "cap_atlas_01.mp3"],["VEX", "Hands off. I can walk on my own.", "cap_vexp_01.mp3"],["JUNO", "Wait \u2014 I saw movement up ahead. Get ready!", "juno_amb_01.mp3"],["MARA", "Contact! Multiple hostiles ahead!", "mara_ct_01.mp3"],["MARA", "Contact ahead! Two of them.", "mara_ct_02.mp3"],["ANNOUNCER", "Tactical nuke incoming!", "announcer_01.mp3"], ["ANNOUNCER", "Three!", "announcer_02.mp3"], ["ANNOUNCER", "Two!", "announcer_03.mp3"], ["ANNOUNCER", "One!", "announcer_04.mp3"], ["ANNOUNCER", "Tactical nuke ready. Press N.", "announcer_05.mp3"], ["ANNOUNCER", "Warning! Hacker detected in lobby!", "announcer_06.mp3"], ["ANNOUNCER", "Open fire!", "announcer_07.mp3"], ["ANNOUNCER", "Hacker eliminated.", "announcer_08.mp3"], ["ANNOUNCER", "Double kill!", "announcer_09.mp3"], ["ANNOUNCER", "Triple kill!", "announcer_10.mp3"], ["ANNOUNCER", "Quad kill!", "announcer_11.mp3"], ["ANNOUNCER", "Rampage!", "announcer_12.mp3"], ["ANNOUNCER", "The bomb has been planted.", "announcer_13.mp3"], ["ANNOUNCER", "The bomb has been defused.", "announcer_14.mp3"], ["ANNOUNCER", "Round won.", "announcer_15.mp3"], ["ANNOUNCER", "Round lost.", "announcer_16.mp3"], ["ANNOUNCER", "Alarm! Intruder in the armory!", "announcer_17.mp3"], ["ROOK", "Morning, rookie. I'm Rook. Today you learn how not to die.", "rook_01.mp3"], ["ROOK", "Walk to the marker. WASD to move, mouse to look.", "rook_02.mp3"], ["ROOK", "Press B to open the buy menu. Grab a rifle — the AK or the MP5.", "rook_03.mp3"], ["ROOK", "Good. Now through the door to the range.", "rook_04.mp3"], ["ROOK", "Three targets. Stand still when you shoot — moving ruins your aim. Right-click to aim down the sights.", "rook_05.mp3"], ["ROOK", "Next room's full of targets. I gave you a frag. Press G to throw it in.", "rook_06.mp3"], ["ROOK", "Now clean up what's left.", "rook_07.mp3"], ["ROOK", "Crouch to move quietly — hold C or Ctrl. Sneak down to the marker.", "rook_08.mp3"], ["ROOK", "Timed run. Last three rooms. Clock starts now. Go!", "rook_09.mp3"], ["ROOK", "Not bad, rookie. Not bad at all.", "rook_10.mp3"], ["ROOK", "My grandmother clears it faster. Head for the exit.", "rook_11.mp3"], ["OVERWATCH", "Hollow cell is moving through the market. Hold both sites.", "overwatch_01.mp3"], ["OVERWATCH", "Press B to buy. Grab armor, a gun and a flashbang.", "overwatch_02.mp3"], ["ROOK", "Stop moving before you shoot. Running ruins your aim.", "rook_12.mp3"], ["OVERWATCH", "One more. Finish it clean.", "overwatch_03.mp3"], ["VEX", "Vex, Internal Affairs. I'm here to find your leak. Tonight I hold the line with you.", "vex_01.mp3"], ["VEX", "They'll hit one site hard. Don't over-rotate.", "vex_02.mp3"], ["OVERWATCH", "Hollow comms are spiking. Second wave inbound.", "overwatch_04.mp3"], ["ROOK", "Last push. Hold your angles.", "rook_13.mp3"], ["VEX", "The office is in the old fuel store. Get in, pull the logs, get out. Nobody can know we were there.", "vex_03.mp3"], ["VEX", "Got them. Now get out of there.", "vex_04.mp3"], ["VEX", "They know you're there. Grab the logs and fight your way out!", "vex_05.mp3"], ["OVERWATCH", "Bomb is already armed on the relay. Clear it, defuse it, keep Vex's trace alive.", "overwatch_05.mp3"], ["VEX", "Trace is warming up. Keep them busy.", "vex_06.mp3"], ["ROOK", "Clean so far. Too clean.", "rook_14.mp3"], ["ROOK", "Quiet out here. Vex — that trace done yet?", "rook_15.mp3"], ["VEX", "It's done, Rook. It points at me.", "vex_07.mp3"], ["VEX", "Sorry, Kestrel. Nothing personal — the Syndicate simply pays better.", "vex_08.mp3"], ["JUNO", "Kestrel. Name's Juno. I'm pulling Vex's logs while you hold. Buy me time.", "juno_01.mp3"], ["JUNO", "Pulling the logs. Don't let them near the barges.", "juno_02.mp3"], ["JUNO", "Halfway there. Keep going.", "juno_03.mp3"], ["JUNO", "Got enough. One more round!", "juno_04.mp3"], ["ROOK", "Five of us. Flash in, trade kills, nobody plays hero.", "rook_16.mp3"], ["OVERWATCH", "Charges are live. Finish this.", "overwatch_06.mp3"], ["JUNO", "Last round. Make it count.", "juno_05.mp3"], ["VEX", "You should have stayed in the Harbor, rookie.", "vex_09.mp3"], ["VEX", "Boys! Get in here!", "vex_10.mp3"], ["VEX", "Fine. Let's finish this ourselves.", "vex_11.mp3"], ["VEX", "You think I was the top of this? I was the delivery girl.", "vex_12.mp3"], ["VEX", "Ask your director about EMBER. Ask him before—", "vex_13.mp3"], ["JUNO", "I hate field work. Just keep them off me and I'll walk.", "juno_06.mp3"], ["JUNO", "Movement ahead! They're waiting for us!", "juno_07.mp3"], ["ROOK", "Three hostages, a building full of contractors. When it kicks off, it kicks off fast.", "rook_17.mp3"], ["ROOK", "Clear! Get them moving to the gate.", "rook_18.mp3"], ["HOSTAGE", "Thank god. We're right behind you.", "hostage_01.mp3"], ["MARA", "Mara, sniper. I'll cover the cars. You hold the line.", "mara_01.mp3"], ["JUNO", "Server room is at the far end. I can't loop their cameras for long.", "juno_08.mp3"], ["JUNO", "Got it. Now get out of there.", "juno_09.mp3"], ["ATLAS", "Atlas. I carry the big gun. Two bombs, one clock — let's move.", "atlas_01.mp3"], ["ROOK", "Can't see a thing in this smoke. Stay close and listen for her.", "rook_19.mp3"], ["SABLE", "You smell that, soldier? That's the end of your road.", "sable_01.mp3"], ["SABLE", "Boys! Get in here!", "sable_02.mp3"], ["SABLE", "Fine. Let's finish this ourselves.", "sable_03.mp3"], ["OVERWATCH", "Hayes arrives in ten minutes. Hold the house.", "overwatch_07.mp3"], ["JUNO", "Helicopter is two minutes out. Get to the extraction point!", "juno_10.mp3"], ["ROOK", "No Overwatch on this one. Comms stay off. We go in, we get Hayes.", "rook_20.mp3"], ["ROOK", "His office is up top, west side. Move!", "rook_21.mp3"], ["JUNO", "Hayes is gone. But his laptop's still open. Give me a second.", "juno_11.mp3"], ["OVERWATCH", "You were never supposed to get this far, Kestrel.", "overwatch_08.mp3"], ["JUNO", "That voice... that's Overwatch. That's Director Reyes.", "juno_12.mp3"], ["REYES", "And as of thirty seconds ago, you are a rogue agent who murdered an ambassador. Run, Kestrel.", "reyes_01.mp3"], ["JUNO", "SIGMA tactical is on the stairs. You have to run. And Kestrel — they're still our people.", "juno_13.mp3"], ["SIGMA", "Target is moving! Box them in!", "sigma_01.mp3"], ["JUNO", "Meridian found us. You've got a knife and a pistol — there are weapon caches in the shacks.", "juno_14.mp3"], ["MARA", "Truck's here! South side, go!", "mara_02.mp3"], ["MARA", "I'm going in on foot. You're my eyes. Anything moves near me, you drop it.", "mara_03.mp3"], ["MARA", "Contacts ahead of me. Take them!", "mara_04.mp3"], ["ROOK", "Kestrel! Come out. Let's do this the hard way.", "rook_22.mp3"], ["ROOK", "I taught you everything, rookie. Including how this ends.", "rook_23.mp3"], ["ROOK", "Boys! Get in here!", "rook_24.mp3"], ["ROOK", "Fine. Let's finish this ourselves.", "rook_25.mp3"], ["ROOK", "Enough... Enough. You could have killed me.", "rook_26.mp3"], ["ROOK", "Reyes said you shot the ambassador. Tell me he's lying.", "rook_27.mp3"], ["ROOK", "...Show me the proof, rookie. I'm listening.", "rook_28.mp3"], ["JUNO", "The storm covers you. It covers them too. Go slow.", "juno_15.mp3"], ["JUNO", "Uplink is live. Get clear before they notice.", "juno_16.mp3"], ["JUNO", "Download running. Stay near the terminal or it stalls. Here they come.", "juno_17.mp3"], ["MARA", "Charges are set to blow the whole mountain. Move, move, move!", "mara_05.mp3"], ["MARA", "The whole mountain's coming down!", "mara_06.mp3"], ["MARA", "Juno's gone, Kestrel. They took her.", "mara_07.mp3"], ["MARA", "Meridian grabbed Atlas and two of our techs. We get them back, we have a crew again.", "mara_08.mp3"], ["ATLAS", "Two crates, both rigged. Bomb squad's not coming. That's us.", "atlas_02.mp3"], ["ROOK", "I've got the cores. You've got me. Let's walk.", "rook_29.mp3"], ["ROOK", "Movement ahead! They're waiting for us!", "rook_30.mp3"], ["MARA", "Rain's covering your approach. Get aboard, get the ship's logs, get off.", "mara_09.mp3"], ["MARA", "Got it. Juno was moved before you boarded — but now we know where.", "mara_10.mp3"], ["MARA", "They've spotted you. Grab what you came for and fight your way out!", "mara_11.mp3"], ["ATLAS", "Lightning's our friend. Every flash, you see her.", "atlas_03.mp3"], ["SABLE", "Last time you got lucky. Out here, there's nowhere to run.", "sable_04.mp3"], ["ATLAS", "If that charge goes off, the whole valley floods. No pressure.", "atlas_04.mp3"], ["MARA", "Two sites, one charge. Find it, clear it.", "mara_12.mp3"], ["ATLAS", "One more and the valley stays dry.", "atlas_05.mp3"], ["ROOK", "Couldn't let you have all the fun. Five waves. We hold.", "rook_31.mp3"], ["ATLAS", "That's the last of them. We did it, boss.", "atlas_06.mp3"], ["ATLAS", "Go... get Juno back. Tell her... big guy says hi.", "atlas_07.mp3"], ["ROOK", "For Atlas. We get her out, whatever it takes.", "rook_32.mp3"], ["JUNO", "Kestrel... I have to tell you something. Before anyone else dies for this.", "juno_18.mp3"], ["JUNO", "EMBER is mine. I built it eight years ago, for SIGMA. It was supposed to be a shield.", "juno_19.mp3"], ["JUNO", "Reyes turned it into a weapon. And I'm the only one who can shut it down — from inside SIGMA headquarters.", "juno_20.mp3"], ["HALE", "Sergeant. I'm Commander Hale. I've read Juno's files. Run now — we talk at the end of the street.", "hale_01.mp3"], ["SIGMA", "Rogue agent spotted in Old Town! All units converge!", "sigma_02.mp3"], ["ROOK", "Your own HQ. You know every hallway. So do they. Go quiet.", "rook_33.mp3"], ["JUNO", "Backdoor is open. I'm in.", "juno_21.mp3"], ["JUNO", "They've spotted you. Grab what you came for and fight your way out!", "juno_22.mp3"], ["JUNO", "I'm in, but every loyalist in the building is coming for this room. Keep them off me!", "juno_23.mp3"], ["MARA", "Big armor, small brain. Aim for the head.", "mara_13.mp3"], ["HAYES", "Do you know what EMBER is worth, soldier? More than your whole unit.", "hayes_01.mp3"], ["HAYES", "Boys! Get in here!", "hayes_02.mp3"], ["HAYES", "Fine. Let's finish this ourselves.", "hayes_03.mp3"], ["JUNO", "Three uplinks. If any of them finishes its countdown, EMBER goes live. Kill all three!", "juno_24.mp3"], ["ROOK", "This is it, rookie. Everything comes down to this.", "rook_34.mp3"], ["REYES", "I built SIGMA, Kestrel. EMBER is just the next step. You should be thanking me.", "reyes_02.mp3"], ["REYES", "Boys! Get in here!", "reyes_03.mp3"], ["REYES", "Fine. Let's finish this ourselves.", "reyes_04.mp3"], ["JUNO", "The core is exposed. Kestrel — listen to me. I can upload a kill code. It'll take a minute.", "juno_25.mp3"], ["ROOK", "Or you put a charge on that thing and end it right now. Your call, rookie.", "rook_35.mp3"], ["JUNO", "Kestrel, no — there has to be another way!", "juno_26.mp3"], ["ROOK", "Kestrel, get clear! KESTREL!", "rook_36.mp3"], ["JUNO", "Uploading the kill code. Sixty seconds. Don't let anything near me.", "juno_27.mp3"], ["ROOK", "Then we give her sixty seconds.", "rook_37.mp3"], ["JUNO", "It's done. EMBER is gone. For good this time.", "juno_28.mp3"], ["HALE", "Sergeant Kestrel. SIGMA needs a new director. I think \"Director Kestrel\" has a nice ring to it.", "hale_02.mp3"], ["JUNO", "The kill code is uploading — but the core is going critical anyway!", "juno_29.mp3"], ["ROOK", "Then you do both! Charge on the core — GO!", "rook_38.mp3"], ["JUNO", "Kestrel...? Kestrel! You're alive!", "juno_30.mp3"]];
+VOX_LINES.push(...EXP_VOX.map(v=>[v[0],v[1],v[2]]));
 /*VOXHAVE*/const VOX_HAVE=new Set(["announcer_01.mp3", "announcer_02.mp3", "announcer_03.mp3", "announcer_04.mp3", "announcer_05.mp3", "announcer_06.mp3", "announcer_07.mp3", "announcer_08.mp3", "announcer_09.mp3", "announcer_10.mp3", "announcer_11.mp3", "announcer_12.mp3", "announcer_13.mp3", "announcer_14.mp3", "announcer_15.mp3", "announcer_16.mp3", "announcer_17.mp3", "atlas_01.mp3", "atlas_02.mp3", "atlas_03.mp3", "atlas_04.mp3", "atlas_05.mp3", "atlas_06.mp3", "atlas_07.mp3", "cap_atlas_01.mp3", "cap_hayes_01.mp3", "cap_hayes_02.mp3", "cap_hollow_01.mp3", "cap_hollow_02.mp3", "cap_juno_01.mp3", "cap_mara_01.mp3", "cap_reyes_01.mp3", "cap_reyes_02.mp3", "cap_rook_01.mp3", "cap_rook_02.mp3", "cap_rook_03.mp3", "cap_rookp_01.mp3", "cap_sable_01.mp3", "cap_sable_02.mp3", "cap_vex_01.mp3", "cap_vex_02.mp3", "cap_vexp_01.mp3", "cell_hayes_01.mp3", "cell_hollow_01.mp3", "cell_reyes_01.mp3", "cell_rook_01.mp3", "cell_sable_01.mp3", "cell_vex_01.mp3", "hale_01.mp3", "hale_02.mp3", "hayes_01.mp3", "hayes_02.mp3", "hayes_03.mp3", "hostage_01.mp3", "juno_01.mp3", "juno_02.mp3", "juno_03.mp3", "juno_04.mp3", "juno_05.mp3", "juno_06.mp3", "juno_07.mp3", "juno_08.mp3", "juno_09.mp3", "juno_10.mp3", "juno_11.mp3", "juno_12.mp3", "juno_13.mp3", "juno_14.mp3", "juno_15.mp3", "juno_16.mp3", "juno_17.mp3", "juno_18.mp3", "juno_19.mp3", "juno_20.mp3", "juno_21.mp3", "juno_22.mp3", "juno_23.mp3", "juno_24.mp3", "juno_25.mp3", "juno_26.mp3", "juno_27.mp3", "juno_28.mp3", "juno_29.mp3", "juno_30.mp3", "juno_amb_01.mp3", "mara_01.mp3", "mara_02.mp3", "mara_03.mp3", "mara_04.mp3", "mara_05.mp3", "mara_06.mp3", "mara_07.mp3", "mara_08.mp3", "mara_09.mp3", "mara_10.mp3", "mara_11.mp3", "mara_12.mp3", "mara_13.mp3", "mara_ct_01.mp3", "mara_ct_02.mp3", "overwatch_01.mp3", "overwatch_02.mp3", "overwatch_03.mp3", "overwatch_04.mp3", "overwatch_05.mp3", "overwatch_06.mp3", "overwatch_07.mp3", "overwatch_08.mp3", "reyes_01.mp3", "reyes_02.mp3", "reyes_03.mp3", "reyes_04.mp3", "rook_01.mp3", "rook_02.mp3", "rook_03.mp3", "rook_04.mp3", "rook_05.mp3", "rook_06.mp3", "rook_07.mp3", "rook_08.mp3", "rook_09.mp3", "rook_10.mp3", "rook_11.mp3", "rook_12.mp3", "rook_13.mp3", "rook_14.mp3", "rook_15.mp3", "rook_16.mp3", "rook_17.mp3", "rook_18.mp3", "rook_19.mp3", "rook_20.mp3", "rook_21.mp3", "rook_22.mp3", "rook_23.mp3", "rook_24.mp3", "rook_25.mp3", "rook_26.mp3", "rook_27.mp3", "rook_28.mp3", "rook_29.mp3", "rook_30.mp3", "rook_31.mp3", "rook_32.mp3", "rook_33.mp3", "rook_34.mp3", "rook_35.mp3", "rook_36.mp3", "rook_37.mp3", "rook_38.mp3", "sable_01.mp3", "sable_02.mp3", "sable_03.mp3", "sable_04.mp3", "sigma_01.mp3", "sigma_02.mp3", "vex_01.mp3", "vex_02.mp3", "vex_03.mp3", "vex_04.mp3", "vex_05.mp3", "vex_06.mp3", "vex_07.mp3", "vex_08.mp3", "vex_09.mp3", "vex_10.mp3", "vex_11.mp3", "vex_12.mp3", "vex_13.mp3"]);/*ENDVOXHAVE*/
 const normT=t=>String(t).toLowerCase().replace(/<[^>]*>/g,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
 const VOXMAP={},VOXTXT={},VOXCAST=new Set();for(const [w,t,f] of VOX_LINES){VOXMAP[w+'|'+normT(t)]=f;VOXCAST.add(w);if(!VOXTXT[normT(t)])VOXTXT[normT(t)]=f;}
