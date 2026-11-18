@@ -37,20 +37,50 @@ function cellChar(m, x, z) { const c = Math.floor(x / S), r = Math.floor(z / S);
 const W = {
   knife: { dmg: 180, cost: 0, slot: 3, pen: .85, rate: 2.2 },
   glock: { dmg: 30, head: 4, pen: .47, rate: 6.5, cost: 0, slot: 2 },
-  mpistol: { dmg: 22, head: 4, pen: .5, rate: 15, cost: 500, slot: 2 },
-  deagle: { dmg: 63, head: 3.9, pen: .93, rate: 3.2, cost: 700, slot: 2 },
-  mp5: { dmg: 27, head: 4, pen: .62, rate: 13.3, cost: 1500, slot: 1 },
-  shotgun: { dmg: 20, head: 2.5, pen: .5, rate: 1.15, cost: 1200, slot: 1, pellets: 9 },
+  mpistol: { dmg: 22, head: 4, pen: .5, rate: 16, cost: 500, slot: 2 },
+  deagle: { dmg: 70, head: 3.9, pen: .93, rate: 2.8, cost: 700, slot: 2 },
+  mp5: { dmg: 27, head: 4, pen: .62, rate: 13.3, cost: 1400, slot: 1 },
+  shotgun: { dmg: 20, head: 2.5, pen: .5, rate: 1.15, cost: 1200, slot: 1, pellets: 10 },
   ak: { dmg: 36, head: 4, pen: .78, rate: 10, cost: 2700, slot: 1 },
-  sniper: { dmg: 115, head: 4, pen: .98, rate: .68, cost: 4750, slot: 1 },
+  sniper: { dmg: 120, head: 4, pen: .98, rate: .68, cost: 4750, slot: 1 },
   he: { dmg: 100, pen: .57 },
   rpg: { dmg: 230, pen: .9, rate: .9, cost: 3500, slot: 1, chaos: 1, multi: 5 },
   minigun: { dmg: 15, head: 2.5, pen: .6, rate: 24, cost: 3000, slot: 1, chaos: 1 },
   railgun: { dmg: 95, head: 1.6, pen: 1, rate: .85, cost: 3200, slot: 1, chaos: 1, multi: 4 },
   plasma: { dmg: 44, pen: .8, rate: 7, cost: 2500, slot: 1, chaos: 1, multi: 3 },
   katana: { dmg: 180, pen: .9, rate: 2, cost: 1500, slot: 2 },
+  // v46 arsenal (generated from the game's ARSENAL table)
+  p250: {dmg: 34, head: 4, pen: 0.64, rate: 6, cost: 300, slot: 2},
+  fiveseven: {dmg: 32, head: 4, pen: 0.8, rate: 6.5, cost: 500, slot: 2},
+  tec9: {dmg: 33, head: 4, pen: 0.5, rate: 8.5, cost: 500, slot: 2},
+  cz75: {dmg: 31, head: 4, pen: 0.5, rate: 12, cost: 500, slot: 2},
+  revolver: {dmg: 86, head: 3.6, pen: 0.93, rate: 1.6, cost: 600, slot: 2},
+  mac10: {dmg: 25, head: 4, pen: 0.62, rate: 16, cost: 1050, slot: 1},
+  uzi: {dmg: 24, head: 4, pen: 0.62, rate: 15, cost: 1100, slot: 1},
+  ump: {dmg: 33, head: 4, pen: 0.65, rate: 10, cost: 1300, slot: 1},
+  bizon: {dmg: 23, head: 4, pen: 0.57, rate: 12.5, cost: 1400, slot: 1},
+  vector: {dmg: 25, head: 4, pen: 0.62, rate: 18, cost: 2000, slot: 1},
+  p90: {dmg: 26, head: 4, pen: 0.69, rate: 14.3, cost: 2350, slot: 1},
+  nova: {dmg: 22, head: 2.5, pen: 0.5, rate: 1.1, cost: 1050, slot: 1, pellets: 9},
+  sawedoff: {dmg: 24, head: 2.5, pen: 0.5, rate: 1.2, cost: 1100, slot: 1, pellets: 10},
+  autoshotgun: {dmg: 15, head: 2.5, pen: 0.5, rate: 3.3, cost: 2000, slot: 1, pellets: 8},
+  galil: {dmg: 30, head: 4, pen: 0.78, rate: 11, cost: 1800, slot: 1},
+  famas: {dmg: 30, head: 4, pen: 0.78, rate: 11.5, cost: 2050, slot: 1},
+  m1: {dmg: 58, head: 3.6, pen: 0.88, rate: 4.2, cost: 2500, slot: 1},
+  g36: {dmg: 32, head: 4, pen: 0.78, rate: 10.5, cost: 2900, slot: 1},
+  m4: {dmg: 33, head: 4, pen: 0.7, rate: 11, cost: 3100, slot: 1},
+  aug: {dmg: 31, head: 4, pen: 0.78, rate: 10.5, cost: 3300, slot: 1},
+  scar: {dmg: 46, head: 3.6, pen: 0.85, rate: 7, cost: 3300, slot: 1},
+  scout: {dmg: 88, head: 4, pen: 0.98, rate: 0.95, cost: 1700, slot: 1},
+  dmr: {dmg: 62, head: 4, pen: 0.98, rate: 3, cost: 3200, slot: 1},
+  autosniper: {dmg: 78, head: 4, pen: 0.98, rate: 4, cost: 5000, slot: 1},
+  awp: {dmg: 150, head: 4, pen: 0.98, rate: 0.5, cost: 5500, slot: 1},
+  lmg: {dmg: 32, head: 4, pen: 0.78, rate: 12, cost: 5200, slot: 1},
+  negev: {dmg: 30, head: 4, pen: 0.78, rate: 15, cost: 4000, slot: 1},
+  gl: {dmg: 150, head: 1, pen: 0.9, rate: 1.4, cost: 3500, slot: 1, multi: 4},
+
 };
-const ITEMS = { wall: { cost: 800, max: 1 }, medkit: { cost: 600, max: 2 }, stim: { cost: 400, max: 1, any: 1 }, dash: { cost: 500, max: 2, any: 1 }, boots: { cost: 350, max: 1, any: 1 } };
+const ITEMS = { wall: { cost: 800, max: 1 }, medkit: { cost: 600, max: 2, any: 1 }, stim: { cost: 400, max: 1, any: 1 }, dash: { cost: 500, max: 2, any: 1 }, boots: { cost: 350, max: 1, any: 1 } };
 const resp = r => r.mode !== 'bomb' && r.mode !== 'duel';
 const OWNER_NAME = 'Ducky'; // Ducky and admins (Pirate Token) can use AUTO-NUKE online
 const NUKE_KS = process.env.NUKE_KS !== undefined ? +process.env.NUKE_KS : 7;
@@ -164,7 +194,9 @@ function bcast(r, msg, except) { const s = JSON.stringify(msg); for (const p of 
 function pubP(p) { return { i: p.id, n: p.name, tm: p.team, bot: p.bot, al: p.alive, hp: p.hp, x: r1(p.pos[0]), z: r1(p.pos[2]), yaw: r1(p.yaw), w: p.inv[1] || p.inv[2], out: p.outfit, adm: p.admin ? 1 : 0, k: p.kills, d: p.deaths }; }
 function buyTok(r, p) { return r.mode === 'bomb' ? 'r' + r.round : 'l' + (p.buyUntil || 0); }
 function sellable(p) { const r = p.room; const out = []; if (!r || !p.bought) return out; const t = buyTok(r, p); for (const s of [1, 2]) if (p.bought[s] && p.bought[s].tok === t && p.bought[s].id === p.inv[s]) out.push(s); return out; }
-function meData(p) { return { sb: sellable(p), money: p.money, inv: p.inv, nades: p.nades, ar: p.armor, hl: p.helmet, items: p.items, os: Math.round(p.oshield) }; }
+const ATTS = { sup: 400, dot: 300, ext: 350, grip: 300, laser: 250 };
+function attOf(p) { const o = {}; for (const s of [1, 2]) { const a = p.att && p.att[s]; if (a && a.id === p.inv[s]) o[s] = a; } return o; }
+function meData(p) { return { att: attOf(p), sb: sellable(p), money: p.money, inv: p.inv, nades: p.nades, ar: p.armor, hl: p.helmet, items: p.items, os: Math.round(p.oshield) }; }
 
 function newPlayer(o) {
   return { id: o.id, name: o.name, conn: o.conn || null, bot: !!o.bot, team: o.team, outfit: o.outfit || null, hp: 100, armor: 0, helmet: false, alive: false,
@@ -440,7 +472,8 @@ function handle(c, msg) {
         const tok = buyTok(r, p); p.bought = p.bought || {};
         const refund = (p.bought[w.slot] && p.bought[w.slot].tok === tok && p.bought[w.slot].id === p.inv[w.slot] && W[p.inv[w.slot]]) ? W[p.inv[w.slot]].cost : 0;
         if (p.money + refund < w.cost) break; p.money += refund - w.cost; p.inv[w.slot] = it; p.bought[w.slot] = { id: it, tok };
-      } else if (it === 'vest') { if (p.armor >= 100 || p.money < 650) break; p.money -= 650; p.armor = 100; }
+      } else if (typeof it === 'string' && it.startsWith('att:')) { const [, k, sl] = it.split(':'); const s = +sl; const gun = p.inv[s]; if (!ATTS[k] || (s !== 1 && s !== 2) || !gun || !W[gun] || W[gun].chaos) break; p.att = p.att || {}; if (!p.att[s] || p.att[s].id !== gun) p.att[s] = { id: gun }; if (p.att[s][k] || p.money < ATTS[k]) break; p.money -= ATTS[k]; p.att[s][k] = 1; }
+      else if (it === 'vest') { if (p.armor >= 100 || p.money < 650) break; p.money -= 650; p.armor = 100; }
       else if (it === 'helmet') { if (p.armor >= 100 && p.helmet) break; const cst = p.armor >= 100 ? 350 : 1000; if (p.money < cst) break; p.money -= cst; p.armor = 100; p.helmet = true; }
       else if (ITEMS[it]) { if ((r.mode !== 'chaos' && !ITEMS[it].any) || (p.items[it] | 0) >= ITEMS[it].max || p.money < ITEMS[it].cost) break; p.money -= ITEMS[it].cost; p.items[it] = (p.items[it] | 0) + 1; }
       else if (it === 'oshield') { if (r.mode !== 'chaos' || p.oshield >= 50 || p.money < 1200) break; p.money -= 1200; p.oshield = 100; }
@@ -449,6 +482,11 @@ function handle(c, msg) {
       c.send({ t: 'inv', ...meData(p) });
       bcast(r, { t: 'lo', i: p.id, w: p.inv[1] || p.inv[2] }, p);
       break;
+    }
+    case 'pk': { // picked a gun up from a body: keep the server's inventory (what others see, what can be sold) in sync
+      const w = W[m.w], s = +m.s; if (!p.alive || !w || w.slot !== s || (w.chaos && r.mode !== 'chaos') || w.admin || r.mode === 'duel') break;
+      p.inv[s] = m.w; if (p.bought) delete p.bought[s]; if (p.att) delete p.att[s];
+      c.send({ t: 'inv', ...meData(p) }); bcast(r, { t: 'lo', i: p.id, w: p.inv[1] || p.inv[2] }, p); break;
     }
     case 'admin': { if (isAdminCode(m.code)) { p.admin = true; c.admin = true; } break; }
     case 'pt': { // /piratetoken: giant chest crushes everyone, round is a draw (once per round, duels only)
@@ -505,7 +543,7 @@ function handle(c, msg) {
     }
     case 'pr': { const a = actor(r, p, m.as); if (a && a.alive && r.mode === 'chaos') bcast(r, { t: 'pr', i: a.id, k: m.k === 'rocket' ? 'rocket' : 'plasma', w: m.w, p: m.p, v: m.v }, p); break; }
     case 'wall': { const a = actor(r, p, m.as); if (!a || !a.alive || r.mode !== 'chaos') break; if (!a.bot) { if (a.items.wall <= 0) break; a.items.wall--; } bcast(r, { t: 'w', i: a.id, p: m.p, y: +m.y || 0 }, p); break; }
-    case 'heal': { const a = actor(r, p, m.as); if (!a || !a.alive || r.mode !== 'chaos') break; if (!a.bot) { if (a.items.medkit <= 0) break; a.items.medkit--; } a.hp = Math.min(100, a.hp + 60); bcast(r, { t: 'd', v: a.id, hp: Math.round(a.hp), ar: Math.round(a.armor), os: Math.round(a.oshield), a: a.id, h: false }); break; }
+    case 'heal': { const a = actor(r, p, m.as); if (!a || !a.alive || r.mode === 'duel') break; if (!a.bot) { if (a.items.medkit <= 0) break; a.items.medkit--; } a.hp = Math.min(100, a.hp + 60); bcast(r, { t: 'd', v: a.id, hp: Math.round(a.hp), ar: Math.round(a.armor), os: Math.round(a.oshield), a: a.id, h: false }); break; }
     case 'item': { const a = actor(r, p, m.as); if (a && !a.bot && (m.k === 'stim' || m.k === 'dash') && a.items[m.k] > 0) a.items[m.k]--; break; }
     case 'ready': if (r.phase === 'lobby') { p.ready = !!m.on; sendLobby(r); } break;
     case 'start': pickOwner(r); if (r.phase === 'lobby' && r.owner === p.id && canStart(r)) { r.forced = true; r.cdAt = Date.now() + 5000; sendLobby(r); } break;
@@ -568,9 +606,12 @@ const hashPass = (pass, salt) => crypto.scryptSync(pass, salt, 32).toString('hex
 const loginHits = new Map();
 function rateOk(ip) { const now = Date.now(); const h = (loginHits.get(ip) || []).filter(t => now - t < 60000); h.push(now); loginHits.set(ip, h); return h.length <= 12; }
 function readBody(req, max) { return new Promise((res, rej) => { let b = '', n = 0; req.on('data', c => { n += c.length; if (n > max) { rej(new Error('too big')); req.destroy(); } else b += c; }); req.on('end', () => { try { res(b ? JSON.parse(b) : {}); } catch (e) { rej(new Error('bad json')); } }); req.on('error', rej); }); }
-function jsonRes(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); }
+// Accounts use bearer tokens (no cookies), so any site may call the API: the game hosted elsewhere (e.g. inside Claude) logs in cross-origin.
+const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Max-Age': '86400' };
+function jsonRes(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...CORS }); res.end(JSON.stringify(obj)); }
 async function authUser(req) { const t = (req.headers.authorization || '').replace(/^Bearer\s+/, ''); if (!/^[a-f0-9]{48}$/.test(t)) return null; const u = await kvGet('tok:' + t); if (!u) return null; const a = await kvGet('acct:' + u); return a ? { a, t } : null; }
 async function handleApi(req, res, url) {
+  if (req.method === 'OPTIONS') { res.writeHead(204, CORS); res.end(); return; }
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
   try {
     if (url === '/api/register' || url === '/api/login') {
