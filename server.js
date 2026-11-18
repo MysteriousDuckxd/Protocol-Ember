@@ -453,7 +453,7 @@ function handle(c, msg) {
     case 'admin': { if (isAdminCode(m.code)) { p.admin = true; c.admin = true; } break; }
     case 'pt': { // /piratetoken: giant chest crushes everyone, round is a draw (once per round, duels only)
       if (r.mode !== 'duel' || r.phase !== 'live' || r.ptRound === r.round) break;
-      r.ptRound = r.round; r.phase = 'end'; r.timer = 14;
+      r.ptRound = r.round; r.phase = 'end'; r.timer = 14; r.nuke = null; // the chest wins over a pending nuke
       bcast(r, { t: 'pt', n: p.name });
       setTimeout(() => { for (const q of [...r.players.values()]) if (q.alive) killPlayer(r, q, null, 'chest', false); bcast(r, { t: 'e', w: null, r: 'Crushed by the Pirate Token chest!', sc: r.score }); bcast(r, { t: 'ph', ph: 'end', tm: r.timer }); }, 2200);
       break;
