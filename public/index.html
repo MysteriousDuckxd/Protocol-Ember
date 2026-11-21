@@ -80,7 +80,7 @@ body.touch #trPanel{top:118px;width:180px;font-size:12px}
 #gameVer{position:fixed;right:14px;bottom:10px;font:600 13px Rajdhani,sans-serif;letter-spacing:2px;color:rgba(236,232,225,.55);pointer-events:none;z-index:5}
 #coopWait{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(6,9,12,.78);z-index:60;pointer-events:auto}#coopWait.hidden{display:none}#coopWait .cwBox{max-width:520px;text-align:center;padding:26px 30px;border:1px solid rgba(236,232,225,.2);background:rgba(14,18,22,.92)}#coopWait small{letter-spacing:4px;color:var(--gold)}#coopWaitT{font:700 22px Rajdhani,sans-serif;margin:10px 0 18px}#coopWait .btn{display:inline-block;min-width:0}
 #adsDot{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:#ff2a2a;box-shadow:0 0 6px #ff2a2a}
-#hitmark{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;opacity:0}
+#hitmark{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;opacity:0;transform-origin:50% 50%}
 #hitmark:before,#hitmark:after{content:'';position:absolute;left:12px;top:-2px;width:2px;height:30px;background:#fff;transform:rotate(45deg);clip-path:polygon(0 0,100% 0,100% 35%,0 35%,0 65%,100% 65%,100% 100%,0 100%)}
 #hitmark:after{transform:rotate(-45deg)}
 #hitmark.kill:before,#hitmark.kill:after{background:var(--red)}
@@ -318,6 +318,34 @@ body.touch #deathcam{bottom:70px;padding:6px 24px}body.touch #deathcam b{font-si
 body.touch #chatBox{width:240px;bottom:150px;font-size:12px;max-height:110px}
 #chatIn{position:absolute;left:16px;bottom:150px;width:360px;pointer-events:auto;background:rgba(10,14,18,.85);border:1px solid var(--t);color:var(--paper);font:600 16px Rajdhani;padding:6px 10px}
 </style>
+<style id="uiDepth">
+/* v48 UI depth (video-notes/the-easy-way-to-fix-boring-uis): layered shades instead of borders,
+   two-part shadows (light highlight on top + soft dark shadow below), raised selections, recessed tracks */
+:root{--l0:#0b0f14;--l1:#151b22;--l2:#1d252e;--l3:#2a3440;
+ --sh-s:inset 0 1px 0 rgba(255,255,255,.09),0 1px 2px rgba(0,0,0,.5),0 2px 5px rgba(0,0,0,.28);
+ --sh-m:inset 0 1px 0 rgba(255,255,255,.11),0 2px 4px rgba(0,0,0,.5),0 6px 14px rgba(0,0,0,.32);
+ --sh-l:inset 0 1px 0 rgba(255,255,255,.13),0 4px 8px rgba(0,0,0,.5),0 12px 28px rgba(0,0,0,.38);
+ --sh-in:inset 0 2px 3px rgba(0,0,0,.65),inset 0 -1px 0 rgba(255,255,255,.07)}
+.seg{display:inline-flex;flex-wrap:wrap;gap:3px;padding:3px;border-radius:7px;background:var(--l0);box-shadow:var(--sh-in)}
+.seg button{border:1px solid transparent;border-radius:5px;transition:background .12s,box-shadow .12s,transform .12s}
+.seg button:hover{background:rgba(255,255,255,.05)}
+.seg button.on{background:linear-gradient(180deg,#3a4655,#2a3440);color:#fff;border-color:rgba(255,201,77,.55);box-shadow:var(--sh-s)}
+.btn{border-radius:6px;box-shadow:var(--sh-s);transition:transform .12s,box-shadow .12s,border-color .12s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--sh-m)}
+.btn:active{transform:translateY(0);box-shadow:var(--sh-in)}
+.btn.primary{background:linear-gradient(180deg,#f3c873,#d99c38);border-color:#e5ad4d;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 4px rgba(0,0,0,.5),0 6px 14px rgba(0,0,0,.3)}
+.item{border-radius:6px;background:linear-gradient(180deg,var(--l2),var(--l1));box-shadow:var(--sh-s);transition:transform .12s,box-shadow .12s,border-color .12s}
+.item:hover{transform:translateY(-2px);box-shadow:var(--sh-m)}
+.item.owned{background:linear-gradient(180deg,rgba(127,224,138,.2),rgba(127,224,138,.08));box-shadow:var(--sh-m)}
+.item.poor{opacity:.55;box-shadow:none}
+.buycol h5{border-bottom:none;padding-bottom:6px}
+.mcard{border-radius:8px;border-color:transparent;background:linear-gradient(180deg,var(--l2),var(--l1));box-shadow:var(--sh-s)}
+.mcard:hover{box-shadow:var(--sh-l);border-color:rgba(227,177,84,.6)}
+.mcard.locked{background:var(--l1);box-shadow:var(--sh-in)}
+.panel{border-radius:8px;border-color:transparent;background:linear-gradient(180deg,rgba(29,37,46,.92),rgba(21,27,34,.92));box-shadow:var(--sh-m)}
+#hpBar{height:7px;border-radius:4px;background:var(--l0);box-shadow:var(--sh-in);overflow:hidden}
+#hpFill{border-radius:4px;background:linear-gradient(180deg,#fff,#cfcac2);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+</style>
 </head>
 <body>
 <canvas id="cv"></canvas>
@@ -477,6 +505,7 @@ setTimeout(function(){var l=document.getElementById('loading');if(l&&!l.classLis
       <label>SUBTITLES</label><div class="seg" id="sSubs"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
       <label>CHARACTER VOICES (story, radio, cutscenes)</label><div class="seg" id="sCharVoice"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
       <label>ANNOUNCER VOICE (kills, bomb, nuke)</label><div class="seg" id="sVoice"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
+      <label>CAMERA MOTION (head bob, landing dip, shot shake)</label><div class="seg" id="sCamFx"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
       <label>FULLSCREEN + KEY LOCK (off = stay windowed)</label><div class="seg" id="sFs"><button data-v="1">ON</button><button data-v="0">OFF</button></div>
       <label>TOUCH CONTROLS</label><div class="seg" id="sTouch"><button data-v="auto">AUTO</button><button data-v="on">ON</button><button data-v="off">OFF</button></div>
       <label>TOUCH LOOK SPEED</label><div><input type="range" id="sTsens" min="0.3" max="3" step="0.05"><span id="sTsensV"></span></div>
@@ -596,8 +625,8 @@ function yawTo(dx,dz){return Math.atan2(-dx,-dz);}
 const V3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function hash(a,b){let h=(a*374761393+b*668265263)|0;h=(h^(h>>>13))*1274126177|0;return ((h^(h>>>16))>>>0)/4294967295;}
 
-const GAME_VERSION='v46';const GAME_BUILD='Nov 18 2026';
-const settings={perf:'auto',fpsCap:0,voxVol:1,annVol:1,charVoice:1,sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',voice:1,subs:1,fs:0,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
+const GAME_VERSION='v51';const GAME_BUILD='Nov 18 2026';
+const settings={camFx:1,perf:'auto',fpsCap:0,voxVol:1,annVol:1,charVoice:1,sens:1,fov:74,vol:.6,xhair:'#5fff8a',story:1,inv:0,q:1,crouchKey:'both',voice:1,subs:1,fs:0,fps:0,rs:'auto',touch:'auto',tsens:1,assist:1};
 let firstRun=true;try{const sv=localStorage.getItem('pe2_settings');if(sv)firstRun=false;Object.assign(settings,JSON.parse(sv||'{}'));if(!localStorage.getItem('pe2_fsoff')){settings.fs=0;localStorage.setItem('pe2_fsoff','1');localStorage.setItem('pe2_settings',JSON.stringify(settings));}}catch(e){}
 const isTouchDevice=()=>(window.matchMedia&&matchMedia('(pointer: coarse)').matches)||((navigator.maxTouchPoints||0)>1&&!(window.matchMedia&&matchMedia('(pointer: fine)').matches));
 if(firstRun&&isTouchDevice())settings.q=0;
@@ -650,7 +679,7 @@ const WEAPONS={
   sniper: {name:'Sniper Rifle',short:'SNIPER',slot:1,cls:'rifle',dmg:115,headMul:4,pen:.98,rate:.68,mag:5,reserve:30,reload:3.6,spread:.09,scopedSpread:.0003,moveSpread:.14,sprayGrow:0,auto:false,recoil:.08,cost:4750,scope:true,zoom:4,desc:'Bolt-action. Kills with any upper-body hit. Hold right-click to scope.'},
 };
 const GEAR={vest:{name:'Kevlar Vest',cost:650,desc:'100 armor. Halves most body damage.'},helmet:{name:'Kevlar + Helmet',cost:1000,desc:'100 armor and head protection.'},
-  he:{name:'Frag Grenade',cost:300,desc:'Explodes after 1.8s. Up to 98 damage. Max 1.'},wall:{name:'Shield Wall',cost:800,desc:'Key 5: drop an energy wall that blocks bullets for 8s.'},oshield:{name:'Overshield',cost:1200,desc:'+100 shield that soaks all damage, fades over 20s.'},medkit:{name:'Medkit',cost:600,desc:'Key 6: heal 60 HP. Carry 2.'},stim:{name:'Speed Stim',cost:400,desc:'Key 7: run faster for a few seconds. 1 per round.'},dash:{name:'Dash Pack',cost:500,desc:'Key V: burst in your move direction. 2 charges, 3s apart.'},boots:{name:'Jump Boots',cost:350,desc:'Press jump in mid-air to double-jump. 5s cooldown.'},
+  he:{name:'Frag Grenade',cost:300,desc:'Explodes after 1.8s. Up to 98 damage. Max 1.'},wall:{name:'Shield Wall',cost:800,desc:'Key 5: drop an energy wall that blocks bullets for 8s.'},oshield:{name:'Overshield',cost:1200,desc:'+100 shield that soaks all damage, fades over 20s.'},medkit:{name:'Medkit',cost:600,desc:'Key 6: patch up for 60 HP (1.5s, you slow down; getting shot or firing cancels it). Carry 2.'},stim:{name:'Speed Stim',cost:400,desc:'Key 7: run faster for a few seconds. 1 per round.'},dash:{name:'Dash Pack',cost:500,desc:'Key V: burst in your move direction. 2 charges, 3s apart.'},boots:{name:'Jump Boots',cost:350,desc:'Press jump in mid-air to double-jump. 5s cooldown.'},
   flash:{name:'Flashbang',cost:200,desc:'Blinds anyone looking at it. Max 2.'}};
 const DIFF={
   easy:  {react:1.0,acc:.15,head:.03,turn:4,fov:100,rateMul:.55,nade:.25},
@@ -3398,7 +3427,7 @@ function updatePlayer(dt){
   const acc=a.onGround?(wl>0?11:16):2;
   a.vel.x=lerp(a.vel.x,wx*speed,1-Math.exp(-acc*dt));a.vel.z=lerp(a.vel.z,wz*speed,1-Math.exp(-acc*dt));
   if(T<(a.dashUntil||0)){a.vel.x=a.dashDir.x*a.dashSpd;a.vel.z=a.dashDir.z*a.dashSpd;for(const e of agents)if(e.alive&&e.team!==a.team&&Math.hypot(e.pos.x-a.pos.x,e.pos.z-a.pos.z)<1.6){a.dashUntil=0;a.vel.x*=.2;a.vel.z*=.2;}}
-  speed*=(HACK.speed?2:1)*(T<(a.stimUntil||0)?(state.cfg.chaos?1.6:1.4):1)*(w.heavy||1)*(w.katana?1.1:1);
+  speed*=(HACK.speed?2:1)*(T<(a.stimUntil||0)?(state.cfg.chaos?1.6:1.4):1)*(w.heavy||1)*(w.katana?1.1:1)*(a.healing?.5:1);
   const spaceTap=keys.Space&&!a.prevSpace;a.prevSpace=!!keys.Space;if(a.onGround)a.usedDJ=false;
   if(spaceTap&&!a.onGround&&!frozen&&!HACK.fly&&a.items&&a.items.boots>0&&!a.usedDJ&&T>=(a.djCd||0)&&a.vel.y<4){a.vel.y=7.2;a.usedDJ=true;a.djCd=T+(state.cfg.chaos?1.5:5);sNoise({dur:.18,vol:.25,f:500,fEnd:1800,type:'bandpass',q:1});burst(V3(a.pos.x,a.pos.y+.1,a.pos.z),0x80f0ff,6,2,.3);}
   if(keys.Space&&a.onGround&&!frozen&&!a.crouch&&!HACK.fly){a.vel.y=HACK.jump?13:6.9;a.onGround=false;}
@@ -3711,7 +3740,7 @@ function updateCamera(dt){if(PT.on){ptCam(dt);return;}if(CAP.on){captureCam(dt);
       camera.position.lerp(V3(e.x+back.x*2.2,e.y+.5,e.z+back.z*2.2),1-Math.exp(-8*dt));camera.rotation.set(-.12,s.yaw,0);camYaw=s.yaw;
       $('spectate').classList.remove('hidden');setT('spectate','SPECTATING  '+s.name.toUpperCase()+'   ·   click to switch');}
     else{const tg=V3(player.pos.x+Math.sin(player.yaw)*2.8,player.pos.y+1.9,player.pos.z+Math.cos(player.yaw)*2.8);camera.position.lerp(tg,1-Math.exp(-3*dt));camera.lookAt(player.pos.x,player.pos.y+.3,player.pos.z);camYaw=camera.rotation.y;if(T>spectateT)$('spectate').classList.add('hidden');}}
-  if(shakeT>0){shakeT-=dt;camera.rotation.x+=rand(-1,1)*shakeT*.04;camera.rotation.y+=rand(-1,1)*shakeT*.04;}
+  if(shakeT>0){shakeT-=dt;const sk=shakeT*(settings.camFx===0?.35:1);camera.rotation.x+=fnoise(T*19,1.3)*sk*.045;camera.rotation.y+=fnoise(T*17,7.1)*sk*.045;camera.rotation.z+=fnoise(T*13,3.7)*sk*.03;}
   const w=player.alive?weaponOf(player):null;
   let zoom=1;if(w&&player.alive){if(w.scope)zoom=isScoped()?w.zoom:1;else if(w.adsZoom)zoom=lerp(1,w.adsZoom,player.ads);}
   const wantFov=settings.fov/zoom;
@@ -3954,14 +3983,14 @@ $('quickStart').onclick=()=>{if(quick.mode==='duel'){const es=quick.side==='atk'
   const n=+quick.size,es=quick.side==='atk'?'def':'atk';
   setupMatch({map:quick.map,theme:quick.theme,side:quick.side,retake:quick.mode==='retake',chaos:quick.mode==='chaos',killLimit:({3:20,5:30,8:45,13:70})[quick.toWin]||30,allies:ALLY_NAMES[quick.side].slice(0,n-1),allyDiff:quick.diff==='hard'?'hard':'normal',enemies:n,enemyNames:ENEMY_NAMES[es].slice().sort(()=>Math.random()-.5),diff:quick.diff,toWin:+quick.toWin,credits:quick.mode==='chaos'?10000:quick.mode==='retake'?3500:800,swap:quick.mode!=='chaos'&&quick.swap==='1'&&+quick.toWin>2});};
 function syncSettings(){{const vv=settings.voxVol??1;$('sVoxVol').value=vv;$('sVoxVolV').textContent=' '+Math.round(vv*100)+'%';const av=settings.annVol??1;$('sAnnVol').value=av;$('sAnnVolV').textContent=' '+Math.round(av*100)+'%';}$('sTsens').value=settings.tsens;$('sTsensV').textContent=' '+(+settings.tsens).toFixed(2);$('sSens').value=settings.sens;$('sSensV').textContent=' '+(+settings.sens).toFixed(2);$('sFov').value=settings.fov;$('sFovV').textContent=' '+settings.fov+'°';$('sVol').value=settings.vol;$('sVolV').textContent=' '+Math.round(settings.vol*100)+'%';
-  [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sVoice','voice',Number],['sCharVoice','charVoice',Number],['sSubs','subs',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number],['sPerf','perf',v=>v],['sCap','fpsCap',Number]].forEach(([id,k,f])=>document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',f(b.dataset.v)===settings[k])));}
+  [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sVoice','voice',Number],['sCharVoice','charVoice',Number],['sCamFx','camFx',Number],['sSubs','subs',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number],['sPerf','perf',v=>v],['sCap','fpsCap',Number]].forEach(([id,k,f])=>document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',f(b.dataset.v)===settings[k])));}
 $('sTsens').oninput=e=>{settings.tsens=+e.target.value;saveSettings();syncSettings();};
 $('sSens').oninput=e=>{settings.sens=+e.target.value;saveSettings();syncSettings();};
 $('sFov').oninput=e=>{settings.fov=+e.target.value;camera.fov=settings.fov;camera.updateProjectionMatrix();saveSettings();syncSettings();};
 $('sVoxVol').oninput=e=>{settings.voxVol=+e.target.value;saveSettings();syncSettings();clearTimeout(window._vvT);window._vvT=setTimeout(()=>{initAudio();VC.lastText='';say('Not bad, rookie. Not bad at all.',{who:'ROOK',sub:false,prio:1});},250);};
 $('sAnnVol').oninput=e=>{settings.annVol=+e.target.value;saveSettings();syncSettings();clearTimeout(window._avT);window._avT=setTimeout(()=>{initAudio();VC.lastText='';say('Round won.',{who:'ANNOUNCER',sub:false,prio:1});},250);};
 $('sVol').oninput=e=>{settings.vol=+e.target.value;if(AU.master)AU.master.gain.value=settings.vol;saveSettings();syncSettings();};
-for(const [id,k,f] of [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sVoice','voice',Number],['sCharVoice','charVoice',Number],['sSubs','subs',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number],['sPerf','perf',v=>v],['sCap','fpsCap',Number]])$(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;settings[k]=f(b.dataset.v);if(k==='xhair')applyCrosshair();if(k==='q'||k==='rs'){resScale=1;applyPR();}if(k==='perf'&&b.dataset.v==='off'){PERF.lvl=0;perfApply(true);}if(k==='touch')applyTouchMode();if(k==='fps'&&!settings.fps)$('fpsBox').textContent='';saveSettings();syncSettings();};
+for(const [id,k,f] of [['sX','xhair',v=>v],['sStory','story',Number],['sInv','inv',Number],['sGfx','q',Number],['sCrouch','crouchKey',v=>v],['sFs','fs',Number],['sVoice','voice',Number],['sCharVoice','charVoice',Number],['sCamFx','camFx',Number],['sSubs','subs',Number],['sFps','fps',Number],['sRs','rs',v=>v==='auto'?v:Number(v)],['sTouch','touch',v=>v],['sAssist','assist',Number],['sPerf','perf',v=>v],['sCap','fpsCap',Number]])$(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;settings[k]=f(b.dataset.v);if(k==='xhair')applyCrosshair();if(k==='q'||k==='rs'){resScale=1;applyPR();}if(k==='perf'&&b.dataset.v==='off'){PERF.lvl=0;perfApply(true);}if(k==='touch')applyTouchMode();if(k==='fps'&&!settings.fps)$('fpsBox').textContent='';saveSettings();syncSettings();};
 // ----- profile & loadout -----
 document.getElementById('gameVer').textContent='PROTOCOL: EMBER '+GAME_VERSION+' · '+GAME_BUILD;
 function renderWho(){$('who').innerHTML=`OPERATOR <b>${profile.name.toUpperCase()}</b> · ◈ <b>${profile.coins}</b> COINS`;}
@@ -6041,7 +6070,7 @@ function renderBuyArsenal(card,wc){const p=player,it=p.inv[p.slot===1||p.slot===
   const atts=it?Object.keys(ATTS).filter(k=>attOK(it.id,k)).map(k=>card('att_'+k,ATTS[k].name,ATTS[k].cost,ATTS[k].desc,!!(it.att&&it.att[k]))).join(''):'';
   $('buyList').innerHTML=`<div class="buycols ars">${['P','S','Q','R','N','H'].map(col).join('')}
    <div class="buycol"><h5>ATTACHMENTS</h5><div class="d" style="font-size:12px;color:var(--dim);margin-bottom:6px">for your ${it?WEAPONS[it.id].name:'gun'}</div>${atts||'<div class="d">Hold a gun to fit attachments.</div>'}</div>
-   <div class="buycol"><h5>ARMOR & HEALING</h5>${card('vest',GEAR.vest.name,GEAR.vest.cost,GEAR.vest.desc,p.armor>=100)}${card('helmet',GEAR.helmet.name,p.armor>=100&&!p.helmet?350:GEAR.helmet.cost,GEAR.helmet.desc,p.armor>=100&&p.helmet)}${card('medkit',GEAR.medkit.name+((p.items||{}).medkit?' ×'+p.items.medkit:''),GEAR.medkit.cost,'Key '+kbL('medkit')+': heal 60 HP. Carry 2.',((p.items||{}).medkit|0)>=2)}</div>
+   <div class="buycol"><h5>ARMOR & HEALING</h5>${card('vest',GEAR.vest.name,GEAR.vest.cost,GEAR.vest.desc,p.armor>=100)}${card('helmet',GEAR.helmet.name,p.armor>=100&&!p.helmet?350:GEAR.helmet.cost,GEAR.helmet.desc,p.armor>=100&&p.helmet)}${card('medkit',GEAR.medkit.name+((p.items||{}).medkit?' ×'+p.items.medkit:''),GEAR.medkit.cost,'Key '+kbL('medkit')+': patch up for 60 HP (1.5s, you slow down; getting shot or firing cancels it). Carry 2.',((p.items||{}).medkit|0)>=2)}</div>
    <div class="buycol"><h5>MOBILITY</h5>${wc('katana')}${mobCards(card)}</div>
    <div class="buycol"><h5>GRENADES</h5>${card('he',GEAR.he.name+(p.nadesN.he?' ×'+p.nadesN.he:''),GEAR.he.cost,GEAR.he.desc,p.nadesN.he>=1)}${card('flash',GEAR.flash.name+(p.nadesN.flash?' ×'+p.nadesN.flash:''),GEAR.flash.cost,GEAR.flash.desc,p.nadesN.flash>=2)}</div></div>`;}
 // ---------- dropped guns + health packs ----------
@@ -6075,6 +6104,136 @@ function pickupTick(){const P=player;if(!P||!state.running){dropTip.style.displa
     if(state.mp)send({t:'pk',s:slot,w:best.inst.id});equip(P,slot,true);if(attKey(P.inv[slot]))arsRebuildVM(P.inv[slot].id);sfx.swap&&sfx.swap();dropTip.style.display='none';}}
 {const _up=updatePlayer;updatePlayer=function(dt){_up(dt);try{pickupTick();}catch(e){console.warn(e);}};}
 
+
+// =====================================================================
+//  GAME FEEL (v47) — ideas from video-notes/how-i-made-my-fps-game-feel-better-to-play
+//  smooth noise shake, shot kick, landing dip, run bob + strafe tilt,
+//  dynamic crosshair, popping hit markers, fixed-size target marker on dropped guns
+// =====================================================================
+const FEEL={shot:0,land:0,wasGround:true,prevVy:0,bob:0,roll:0,xk:0,hm:0,hmKill:false,gap:-1};
+// smooth pseudo-noise in -1..1 (layered sines): random-looking but never jerky, like sampling Perlin noise
+function fnoise(t,s){return Math.sin(t+s)*.5+Math.sin(t*1.93+s*2.1)*.3+Math.sin(t*3.71+s*3.3)*.2;}
+const camFxOn=()=>settings.camFx!==0;
+{const _uc=updateCamera;updateCamera=function(dt){_uc(dt);const P=player;
+  if(!P||!P.alive||CS.on||PT.on||CAP.on||!state.running||(KC&&KC.on)){FEEL.wasGround=true;return;}
+  if(P.onGround&&!FEEL.wasGround&&FEEL.prevVy<-4)FEEL.land=Math.max(FEEL.land,clamp(-FEEL.prevVy/16,.15,1));
+  FEEL.wasGround=P.onGround;FEEL.prevVy=P.vel.y;
+  const ads=P.ads||0,hs=Math.hypot(P.vel.x,P.vel.z);
+  if(camFxOn()){
+    // landing dip: quick drop then spring back
+    if(FEEL.land>.002){camera.position.y-=FEEL.land*.15;camera.rotation.x-=FEEL.land*.035;FEEL.land*=Math.exp(-7*dt);}
+    // run bob + strafe tilt (calmer while aiming)
+    const k=P.onGround&&!P.crouch?Math.min(1,hs/6.5)*(1-.75*ads):0;FEEL.bob+=dt*hs*1.7;
+    camera.position.y+=Math.sin(FEEL.bob*2)*.022*k;camera.rotation.z+=Math.sin(FEEL.bob)*.0045*k;
+    const strafe=P.vel.x*Math.cos(P.yaw)-P.vel.z*Math.sin(P.yaw);FEEL.roll=lerp(FEEL.roll,-strafe*.0032,1-Math.exp(-8*dt));camera.rotation.z+=FEEL.roll;
+    // shot shake: tiny, smooth, decays fast
+    if(FEEL.shot>.001){const a=FEEL.shot*(1-.6*ads);camera.rotation.x+=fnoise(T*34,1.7)*.0035*a;camera.rotation.y+=fnoise(T*31,5.3)*.0035*a;camera.rotation.z+=fnoise(T*27,9.1)*.006*a;}
+  }
+  FEEL.shot*=Math.exp(-11*dt);
+  // dynamic crosshair: gap follows the real spread, kicks on each shot
+  FEEL.xk*=Math.exp(-14*dt);const w=weaponOf(P);let sp=.004;try{sp=w.melee?.004:playerSpread(w);}catch(e){}
+  const gap=Math.round(Math.min(40,3+sp*520+FEEL.xk*7));if(gap!==FEEL.gap){FEEL.gap=gap;const g=gap-6;
+    $('xu').style.transform=`translateY(${-g}px)`;$('xd').style.transform=`translateY(${g}px)`;$('xl').style.transform=`translateX(${-g}px)`;$('xr').style.transform=`translateX(${g}px)`;}
+  // hit marker pop
+  if(FEEL.hm>0){FEEL.hm=Math.max(0,FEEL.hm-dt);const s=1+(FEEL.hm/.14)*(FEEL.hmKill?.9:.5);$('hitmark').style.transform=`scale(${s.toFixed(3)})`;}
+  dropMarkTick();};}
+// smooth (noise-based) explosion shake instead of random jitter is patched into updateCamera directly
+{const _pf=playerFire;playerFire=function(){const it=instOf(player),m0=it&&it.mag;const r=_pf.apply(this,arguments);
+  if(it&&it.mag<m0){const w=weaponOf(player);FEEL.shot=Math.min(1.3,FEEL.shot+.35+Math.min(.8,(w.dmg*(w.pellets||1))/160));FEEL.xk=1;}return r;};}
+{const _hm=hitmark;hitmark=function(cls){_hm(cls);FEEL.hm=.14;FEEL.hmKill=cls==='kill';};}
+{const _pt=playerThrow;playerThrow=function(){const r=_pt.apply(this,arguments);FEEL.shot=Math.min(1.3,FEEL.shot+.6);return r;};}
+// fixed-size target marker over the dropped gun you're looking at (readable at any distance)
+const dropMark=(()=>{const d=document.createElement('div');d.id='dropMark';d.style.cssText='position:fixed;width:34px;height:34px;margin:-17px 0 0 -17px;pointer-events:none;z-index:5;display:none;border:2px solid transparent;'+
+  'background:linear-gradient(#ffd23a,#ffd23a) 0 0/9px 2px no-repeat,linear-gradient(#ffd23a,#ffd23a) 0 0/2px 9px no-repeat,linear-gradient(#ffd23a,#ffd23a) 100% 0/9px 2px no-repeat,linear-gradient(#ffd23a,#ffd23a) 100% 0/2px 9px no-repeat,linear-gradient(#ffd23a,#ffd23a) 0 100%/9px 2px no-repeat,linear-gradient(#ffd23a,#ffd23a) 0 100%/2px 9px no-repeat,linear-gradient(#ffd23a,#ffd23a) 100% 100%/9px 2px no-repeat,linear-gradient(#ffd23a,#ffd23a) 100% 100%/2px 9px no-repeat';
+  const l=document.createElement('span');l.style.cssText='position:absolute;left:50%;top:38px;transform:translateX(-50%);white-space:nowrap;font:700 12px Rajdhani,system-ui,sans-serif;letter-spacing:1px;color:#ffd23a;text-shadow:0 0 3px #000';d.appendChild(l);document.body.appendChild(d);d._l=l;return d;})();
+function dropMarkTick(){const P=player;if(!P||!P.alive||!DROPS.length||buyOpen){dropMark.style.display='none';return;}
+  const f=camForward();let best=null,bs=-1;for(const d of DROPS){const dx=d.mesh.position.x-P.pos.x,dz=d.mesh.position.z-P.pos.z,dist=Math.hypot(dx,dz);if(dist>16||dist<.3)continue;
+    const dot=(dx*f.x+dz*f.z)/(dist*Math.hypot(f.x,f.z)||1);if(dot<.93)continue;const sc=dot-dist*.002;if(sc>bs){bs=sc;best=d;}}
+  if(!best){dropMark.style.display='none';return;}const v=best.mesh.position.clone();v.y=.25;if(typeof v.project!=='function'){dropMark.style.display='none';return;}camera.updateMatrixWorld();v.project(camera);
+  if(!(v.z<1)||!isFinite(v.x)||!isFinite(v.y)||!innerWidth){dropMark.style.display='none';return;}dropMark.style.display='block';dropMark.style.left=((v.x*.5+.5)*innerWidth)+'px';dropMark.style.top=((-v.y*.5+.5)*innerHeight)+'px';
+  const nm=WEAPONS[best.inst.id].name+' · '+Math.round(Math.hypot(best.mesh.position.x-P.pos.x,best.mesh.position.z-P.pos.z))+'m';if(dropMark._l.textContent!==nm)dropMark._l.textContent=nm;}
+
+const _ORIG_USEITEM=useItem;
+// =====================================================================
+//  TENSE HEALING (v49) — idea from video-notes/how-to-think-like-a-game-designer
+//  (MDA: Alien: Isolation made saving slow so it became tense). A medkit is no longer an
+//  instant button: you patch up for 1.5s at half speed, and getting hit, firing or switching
+//  weapons cancels it (the medkit is kept). Heal is sent / applied only when it finishes.
+// =====================================================================
+const HEAL={on:false,t:0,dur:1.5,hp:0,slot:0};
+const healUI=(()=>{const d=document.createElement('div');d.id='healRing';d.style.cssText='position:fixed;left:50%;top:50%;width:54px;height:54px;margin:34px 0 0 -27px;border-radius:50%;pointer-events:none;z-index:6;display:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 6px rgba(0,0,0,.5)';
+  const r=document.createElement('div');r.style.cssText='position:absolute;inset:0;border-radius:50%';d.appendChild(r);d._r=r;d.style.boxShadow='none';
+  const l=document.createElement('div');l.style.cssText='position:absolute;left:50%;top:60px;transform:translateX(-50%);white-space:nowrap;font:700 12px Rajdhani,system-ui,sans-serif;letter-spacing:2px;color:#7fe08a;text-shadow:0 0 3px #000';l.textContent='PATCHING UP';d.appendChild(l);document.body.appendChild(d);return d;})();
+function healStop(msg){if(!HEAL.on)return;HEAL.on=false;if(player)player.healing=false;healUI.style.display='none';if(msg&&typeof banner==='function')banner(msg,'Medkit kept','neutral',.9);}
+{const _ui=useItem;useItem=function(a,k){
+  if(k!=='medkit'||!a||!a.isPlayer)return _ui.apply(this,arguments);
+  if(HEAL.on)return;
+  if(!a.alive||!a.items||!(a.items.medkit>0)||a.hp>=a.maxHp||!state.running||state.phase==='buy'||state.phase==='lobby')return _ui.apply(this,arguments);
+  HEAL.on=true;HEAL.t=0;HEAL.dur=state.cfg&&state.cfg.chaos?.8:1.5;HEAL.hp=a.hp;HEAL.slot=a.slot;a.healing=true;healUI.style.display='block';};}
+{const _uc=updateCamera;updateCamera=function(dt){_uc(dt);if(!HEAL.on)return;const p=player;
+  if(!p||!p.alive||!state.running){healStop();return;}
+  if(p.hp<HEAL.hp-.01){healStop('INTERRUPTED');return;}
+  if(p.slot!==HEAL.slot){healStop('CANCELLED');return;}
+  HEAL.hp=p.hp;HEAL.t+=dt;const f=Math.min(1,HEAL.t/HEAL.dur);
+  healUI._r.style.background='radial-gradient(circle,transparent 58%,rgba(0,0,0,0) 59%),conic-gradient(#7fe08a '+(f*360).toFixed(1)+'deg,rgba(11,15,20,.55) 0)';
+  healUI._r.style.webkitMaskImage=healUI._r.style.maskImage='radial-gradient(circle,transparent 19px,#000 20px)';
+  if(f>=1){HEAL.on=false;p.healing=false;healUI.style.display='none';_healDo(p);}};}
+function _healDo(p){const g=useItem;HEAL.go=true;try{g(p,'__medkit_now');}finally{HEAL.go=false;}}
+{const _ui2=useItem;useItem=function(a,k){if(k==='__medkit_now')return _ORIG_USEITEM(a,'medkit');return _ui2.apply(this,arguments);};}
+{const _pf=playerFire;playerFire=function(){if(HEAL.on){const it=instOf(player),m0=it&&it.mag;const r=_pf.apply(this,arguments);if(it&&it.mag<m0)healStop('CANCELLED');return r;}return _pf.apply(this,arguments);};}
+{const _sr=startRound;startRound=function(){healStop();return _sr.apply(this,arguments);};}
+
+// =====================================================================
+//  BREAKABLES (v50) — idea from video-notes/how-do-game-designers-make-their-games-fun
+//  ("make stuff breakable"). Cosmetic props (cardboard boxes, bottles, clay pots / paint
+//  buckets) placed the same way on every client (hashed from the map key). They shatter
+//  when shot, caught in an explosion or run into, and come back every round. No collision,
+//  no server sync, never block bullets.
+// =====================================================================
+const BK={props:[],chunks:[],geo:null,mat:null};
+function bkAssets(){if(BK.geo)return;BK.geo={box:new THREE.BoxGeometry(.56,.42,.46),bottle:new THREE.CylinderGeometry(.035,.055,.32,7),pot:new THREE.CylinderGeometry(.17,.12,.4,9),chunk:new THREE.BoxGeometry(.1,.07,.08)};
+  BK.mat={box:new THREE.MeshLambertMaterial({color:0xb08a55}),bottle:new THREE.MeshLambertMaterial({color:0x3f8f5a,transparent:true,opacity:.78}),bottle2:new THREE.MeshLambertMaterial({color:0x7a4a22,transparent:true,opacity:.8}),
+    pot:new THREE.MeshLambertMaterial({color:0xb5653a}),bucket:new THREE.MeshLambertMaterial({color:0x5c7fa8})};}
+function bkBuild(){BK.props.length=0;for(const c of BK.chunks)scene.remove(c.m);BK.chunks.length=0;if(!MAP||typeof levelGroup==='undefined'||!levelGroup)return;bkAssets();
+  const seed=[...String(MAP.key)].reduce((a,ch)=>a*31+ch.charCodeAt(0)|0,7),want=Q()===0?16:32,desert=MAP.style==='desert';const cand=[];
+  for(let r=1;r<MAP.H-1;r++)for(let c=1;c<MAP.W-1;c++){const ch=MAP.grid[r][c];if(!walkable(c,r)||'adAB~'.includes(ch))continue;
+    const nb=[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dz])=>'#cCKHR'.includes(cellChar(c+dx,r+dz)));if(!nb.length)continue;cand.push([hash(c+seed,r-seed),c,r,nb]);}
+  cand.sort((a,b)=>a[0]-b[0]);
+  for(const [h,c,r,nb] of cand.slice(0,want)){const [dx,dz]=nb[Math.floor(h*977)%nb.length],side=(hash(r,c+seed)-.5)*1.6;
+    const x=c*S+S/2+dx*(S/2-.42)+(dz?side:0),z=r*S+S/2+dz*(S/2-.42)+(dx?side:0),k=hash(c*3+seed,r*7);
+    const kind=k<.42?'box':k<.72?'bottle':'pot';const add=(geo,mat,ox,oy,oz,ry)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x+ox,oy,z+oz);m.rotation.y=ry;levelGroup.add(m);return m;};const ms=[];
+    if(kind==='box'){ms.push(add(BK.geo.box,BK.mat.box,0,.21,0,k*9));if(k<.18)ms.push(add(BK.geo.box,BK.mat.box,.04,.63,-.03,k*13));}
+    else if(kind==='bottle'){const mt=k<.6?BK.mat.bottle:BK.mat.bottle2;ms.push(add(BK.geo.bottle,mt,0,.16,0,0));ms.push(add(BK.geo.bottle,mt,.13,.16,.06,0));if(k>.66)ms.push(add(BK.geo.bottle,mt,-.07,.16,.12,0));}
+    else ms.push(add(BK.geo.pot,desert?BK.mat.pot:BK.mat.bucket,0,.2,0,0));
+    const hgt=kind==='box'?(ms.length>1?.84:.42):kind==='bottle'?.32:.4;
+    BK.props.push({ms,kind,c:V3(x,hgt/2,z),r:kind==='box'?.36:.24,col:kind==='box'?0xb08a55:kind==='bottle'?0x9fe0b0:(desert?0xb5653a:0x5c7fa8),broken:false});}}
+function bkSound(p,kind){if(typeof sNoise!=='function'||!player)return;const d=p.distanceTo(player.pos),v=clamp(1-d/45,0,1);if(v<=0)return;
+  if(kind==='bottle'){sNoise({dur:.22,vol:.35*v,f:5200,type:'highpass'});sNoise({dur:.12,vol:.22*v,f:7000,type:'highpass',delay:.07});}
+  else if(kind==='box')sNoise({dur:.2,vol:.4*v,f:650});else sNoise({dur:.25,vol:.42*v,f:1600,type:'bandpass',q:1.2});}
+function bkBreak(p,push){if(p.broken)return;p.broken=true;for(const m of p.ms)m.visible=false;
+  burst(p.c,p.col,p.kind==='bottle'?14:9,3.2,.6);if(p.kind!=='bottle')puff(p.c,1,.45,.6);bkSound(p.c,p.kind);
+  const n=Q()===0?2:p.kind==='box'?6:4,mat=p.ms[0].material;
+  for(let i=0;i<n;i++){const m=new THREE.Mesh(BK.geo.chunk,mat);m.position.copy(p.c).add(V3(rand(-.15,.15),rand(0,.2),rand(-.15,.15)));m.scale.setScalar(p.kind==='box'?1.8:1);scene.add(m);
+    const v=V3(rand(-2,2),rand(2,4.5),rand(-2,2));if(push)v.addScaledVector(push,3);BK.chunks.push({m,v,spin:V3(rand(-9,9),rand(-9,9),rand(-9,9)),t:0});}}
+function bkReset(){for(const p of BK.props){p.broken=false;for(const m of p.ms)m.visible=true;}for(const c of BK.chunks)scene.remove(c.m);BK.chunks.length=0;}
+function bkTick(dt){if(!BK.props.length&&!BK.chunks.length)return;
+  for(let i=BK.chunks.length-1;i>=0;i--){const c=BK.chunks[i];c.t+=dt;c.v.y-=12*dt;c.m.position.addScaledVector(c.v,dt);
+    if(c.m.position.y<.04){c.m.position.y=.04;c.v.y*=-.3;c.v.x*=.6;c.v.z*=.6;c.spin.multiplyScalar(.6);}
+    c.m.rotation.x+=c.spin.x*dt;c.m.rotation.y+=c.spin.y*dt;c.m.rotation.z+=c.spin.z*dt;if(c.t>2.6){scene.remove(c.m);BK.chunks.splice(i,1);}}
+  // run into a prop to kick it over (anyone, at speed)
+  for(const a of agents){if(!a.alive||!a.pos)continue;const q=a._bkp||(a._bkp={x:a.pos.x,z:a.pos.z});const mx=a.pos.x-q.x,mz=a.pos.z-q.z;q.x=a.pos.x;q.z=a.pos.z;const sp=Math.hypot(mx,mz)/Math.max(dt,1e-3);if(sp<2.5||sp>40)continue;
+    for(const p of BK.props)if(!p.broken&&Math.abs(p.c.x-a.pos.x)<.6&&Math.abs(p.c.z-a.pos.z)<.6&&a.pos.y<1)bkBreak(p,V3(mx/(sp*dt),.3,mz/(sp*dt)));}}
+{const _bl=buildLevel;buildLevel=function(){const r=_bl.apply(this,arguments);try{bkBuild();}catch(e){console.warn('breakables',e);}return r;};}
+{const _hr=hitscanRay;hitscanRay=function(sh,o,d){const o0=o.clone();const r=_hr.apply(this,arguments);
+  if(BK.props.length&&lastShotEnd){const best=o0.distanceTo(lastShotEnd)+.1;for(const p of BK.props){if(p.broken)continue;const t=raySphere(o0,d,p.c,p.r);if(t!==null&&t<best)bkBreak(p,d);}}return r;};}
+{const _ex=explosionFx;explosionFx=function(p,big){const r=_ex.apply(this,arguments);try{const R=big===true?10:6;for(const q of BK.props)if(!q.broken&&q.c.distanceTo(p)<R){const dir=q.c.clone().sub(p);dir.y=.4;bkBreak(q,dir.normalize());}}catch(e){}return r;};}
+{const _sr=startRound;startRound=function(){const r=_sr.apply(this,arguments);bkReset();return r;};}
+{const _uc=updateCamera;updateCamera=function(dt){_uc(dt);try{bkTick(dt);}catch(e){}};}
+
+// BALANCE SHEET:BEGIN  (generated by scripts/balance.mjs import from balance/weapons.csv: do not edit by hand)
+const BALANCE_SHEET={};
+const BAL_DEF={};for(const [k,o] of Object.entries(BALANCE_SHEET))if(WEAPONS[k]){BAL_DEF[k]={};for(const f in o){BAL_DEF[k][f]=WEAPONS[k][f];WEAPONS[k][f]=o[f];}}
+// BALANCE SHEET:END
 // =====================================================================
 //  RECORDED VOICE LINES (ElevenLabs clips in voice/), radio effect, fallback to TTS
 // =====================================================================
